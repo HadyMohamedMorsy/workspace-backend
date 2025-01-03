@@ -40,10 +40,10 @@ specifiers:
   supertest: ^7.0.0
   ts-jest: ^29.1.0
   ts-loader: ^9.4.3
-  ts-node: ^10.9.1
+  ts-node: ^10.9.2
   tsconfig-paths: ^4.2.0
   typeorm: ^0.3.20
-  typescript: ^5.1.3
+  typescript: ^5.7.2
 
 dependencies:
   '@nestjs-modules/mailer': 2.0.2_5u4hn6whjn5aawl2edmluzh4i4
