@@ -7,7 +7,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { join } from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { AuthModule } from "./auth/auth.module";
+// import { AuthModule } from "./auth/auth.module";
 import jwtConfig from "./auth/config/jwt.config";
 import { CompanyModule } from "./companies/company.module";
 import { IndividualModule } from "./individual/individual.module";
@@ -28,7 +28,7 @@ const ENV = process.env.NODE_ENV;
     IndividualModule,
     StudentActivityModule,
     FilterDateModule,
-    AuthModule,
+    // AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       //envFilePath: ['.env.development', '.env'],
