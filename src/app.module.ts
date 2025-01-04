@@ -1,14 +1,16 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { join } from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-// import { AuthModule } from "./auth/auth.module";
+import { AuthModule } from "./auth/auth.module";
 import jwtConfig from "./auth/config/jwt.config";
+import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard";
+import { AuthenticationGuard } from "./auth/guards/authentication/authentication.guard";
 import { CompanyModule } from "./companies/company.module";
 import { IndividualModule } from "./individual/individual.module";
 import appConfig from "./shared/config/app.config";
@@ -19,6 +21,7 @@ import { TransformInterceptor } from "./shared/interceptor/transform-response.in
 import { SearchModule } from "./shared/search-list/search-list.module";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
+import { UsersModule } from "./users/users.module";
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -28,7 +31,8 @@ const ENV = process.env.NODE_ENV;
     IndividualModule,
     StudentActivityModule,
     FilterDateModule,
-    // AuthModule,
+    UsersModule,
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       //envFilePath: ['.env.development', '.env'],
@@ -50,8 +54,6 @@ const ENV = process.env.NODE_ENV;
         database: configService.get("database.name"),
         username: configService.get("database.user"),
         password: configService.get("database.password"),
-        // entities: ["dist/**/*.entity{.ts,.js}"],
-        // migrations: ["dist/migrations/*{.ts,.js}"],
         autoLoadEntities: true,
         synchronize: true,
       }),
@@ -63,11 +65,11 @@ const ENV = process.env.NODE_ENV;
   providers: [
     APIFeaturesService,
     AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthenticationGuard,
-    // },
-    // AccessTokenGuard,
+    {
+      provide: APP_GUARD,
+      useClass: AuthenticationGuard,
+    },
+    AccessTokenGuard,
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,

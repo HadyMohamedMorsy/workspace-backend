@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, RequestTimeoutException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -16,8 +16,17 @@ export class StudentActivityService {
 
   // Create a new record
   async create(createStudentActivityDto: CreateStudentActivityDto): Promise<StudentActivity> {
-    const studentActivity = this.studentActivityRepository.create(createStudentActivityDto);
-    return await this.studentActivityRepository.save(studentActivity);
+    try {
+      const studentActivity = this.studentActivityRepository.create(createStudentActivityDto);
+      return await this.studentActivityRepository.save(studentActivity);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        "Unable to process your request at the moment please try later",
+        {
+          description: `Error connecting to the the datbase ${error}`,
+        },
+      );
+    }
   }
 
   // Get all records
@@ -35,7 +44,24 @@ export class StudentActivityService {
 
   // Get record by ID
   async findOne(id: number): Promise<StudentActivity> {
-    return this.studentActivityRepository.findOne({ where: { id } });
+    let studentActivity: StudentActivity | undefined = undefined;
+
+    try {
+      studentActivity = await this.studentActivityRepository.findOne({ where: { id } });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        "Unable to process your request at the moment please try later",
+        {
+          description: `Error connecting to the the datbase ${error}`,
+        },
+      );
+    }
+
+    if (!studentActivity) {
+      throw new BadRequestException("User does not exists");
+    }
+
+    return studentActivity;
   }
 
   // Update a record
