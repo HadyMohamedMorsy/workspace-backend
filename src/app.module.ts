@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
@@ -18,6 +18,8 @@ import databaseConfig from "./shared/config/database.config";
 import { FilterDateModule } from "./shared/filters/filter-date.module";
 import { APIFeaturesService } from "./shared/filters/filter.service";
 import { TransformInterceptor } from "./shared/interceptor/transform-response.interceptor";
+import { listModule } from "./shared/list/list.module";
+import { LanMiddleware } from "./shared/middleware/lang.middleware";
 import { SearchModule } from "./shared/search-list/search-list.module";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
@@ -27,6 +29,7 @@ const ENV = process.env.NODE_ENV;
 @Module({
   imports: [
     CompanyModule,
+    listModule,
     SearchModule,
     IndividualModule,
     StudentActivityModule,
@@ -76,4 +79,8 @@ const ENV = process.env.NODE_ENV;
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LanMiddleware).forRoutes("*");
+  }
+}

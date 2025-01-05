@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UnauthorizedException,
+} from "@nestjs/common";
 
 import { Auth } from "./decorators/auth.decorator";
 import { RefreshTokenDto } from "./dtos/refresh-token.dto";
@@ -27,5 +35,14 @@ export class AuthController {
   @Post("refresh-tokens")
   refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(refreshTokenDto);
+  }
+
+  @Post("logout")
+  logout(@Req() req: any) {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) throw new UnauthorizedException("Invalid Token");
+    return {
+      data: true,
+    };
   }
 }
