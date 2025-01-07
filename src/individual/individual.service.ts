@@ -37,11 +37,13 @@ export class IndividualService {
     const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
-    return {
+    const results = {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
     };
+
+    return results;
   }
 
   async findOne(id: number): Promise<Individual> {

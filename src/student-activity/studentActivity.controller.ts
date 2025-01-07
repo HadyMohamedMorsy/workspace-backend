@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, HttpCode, Post } from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import { Permissions } from "src/auth/decorators/permissions.decorator";
+import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
+import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { Permission } from "src/users/enum/permissions-enum";
 import { CreateStudentActivityDto } from "./dto/create-StudentActivity.dto";
 import { UpdateStudentActivityDto } from "./dto/update-StudentActivity.dto";
 import { StudentActivityService } from "./studentActivity.service";
-import { Permissions } from "src/auth/decorators/permissions.decorator";
-import { Permission } from "src/users/enum/permissions-enum";
 @Controller("studentActivity")
 export class StudentActivityController {
   constructor(private readonly studentActivityService: StudentActivityService) {}
@@ -16,11 +18,13 @@ export class StudentActivityController {
     },
   ])
   @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
   async findAll(@Body() filterQueryDto: any) {
     return this.studentActivityService.findAll(filterQueryDto);
   }
 
   @Post("/store")
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: "studentActivity",
@@ -32,6 +36,7 @@ export class StudentActivityController {
   }
 
   @Post("/update")
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: "studentActivity",
@@ -43,6 +48,7 @@ export class StudentActivityController {
   }
 
   @Delete("/delete")
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: "studentActivity",

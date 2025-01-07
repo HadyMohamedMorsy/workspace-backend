@@ -1,6 +1,16 @@
-import { Body, Controller, Delete, HttpCode, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Permissions } from "src/auth/decorators/permissions.decorator";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
+import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { PatchUserDto } from "./dtos/patch-user.dto";
@@ -13,6 +23,7 @@ export class UserController {
 
   @Post("/index")
   @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: "user",
@@ -24,6 +35,7 @@ export class UserController {
   }
 
   @Post("/store")
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: "user",
@@ -35,6 +47,7 @@ export class UserController {
   }
 
   @Post("/update")
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: "user",
@@ -46,6 +59,7 @@ export class UserController {
   }
 
   @Delete("/delete")
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: "user",

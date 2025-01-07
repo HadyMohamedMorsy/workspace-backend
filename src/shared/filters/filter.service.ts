@@ -4,6 +4,7 @@ import { DataSource, EntityTarget, Like, Repository } from "typeorm";
 @Injectable()
 export class APIFeaturesService {
   #repository: Repository<any>;
+  cacheFilters = new Map<string, Set<string>>();
 
   constructor(private readonly dataSource: DataSource) {}
 
@@ -62,7 +63,6 @@ export class APIFeaturesService {
     if (!this.#repository) {
       throw new Error("Repository is not set for the entity");
     }
-
     const queryOptions = this.#queryBuilder(filterData);
     return await this.#repository.find(queryOptions);
   }

@@ -1,3 +1,4 @@
+import { CacheModule } from "@nestjs/cache-manager";
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
@@ -36,6 +37,11 @@ const ENV = process.env.NODE_ENV;
     FilterDateModule,
     UsersModule,
     AuthModule,
+    CacheModule.register({
+      ttl: 5000,
+      max: 10,
+      isGlobal: true,
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       //envFilePath: ['.env.development', '.env'],
