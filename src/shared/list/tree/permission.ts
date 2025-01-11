@@ -42,4 +42,14 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
       Permission.INDEX,
     ],
   },
+  {
+    resource: "product",
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
 ];

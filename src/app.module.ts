@@ -14,6 +14,7 @@ import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard"
 import { AuthenticationGuard } from "./auth/guards/authentication/authentication.guard";
 import { CompanyModule } from "./companies/company.module";
 import { IndividualModule } from "./individual/individual.module";
+import { ProductsModule } from "./products/products.module";
 import appConfig from "./shared/config/app.config";
 import databaseConfig from "./shared/config/database.config";
 import { FilterDateModule } from "./shared/filters/filter-date.module";
@@ -33,6 +34,7 @@ const ENV = process.env.NODE_ENV;
     listModule,
     SearchModule,
     IndividualModule,
+    ProductsModule,
     StudentActivityModule,
     FilterDateModule,
     UsersModule,
