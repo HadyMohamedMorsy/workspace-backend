@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource, EntityTarget, Like, Repository } from "typeorm";
+import { DataSource, EntityTarget, In, Like, Repository } from "typeorm";
 
 @Injectable()
 export class APIFeaturesService {
@@ -17,7 +17,7 @@ export class APIFeaturesService {
     let whereConditions: Record<string, any> = {};
 
     if (filterData.columns && filterData.columns.length) {
-      queryOptions.select = [...filterData.columns.map(col => col.name), "id"];
+      queryOptions.select = [...filterData.columns.map(col => col.name), "id", "created_at"];
     }
 
     if (filterData.customFilters) {
@@ -59,12 +59,44 @@ export class APIFeaturesService {
     return queryOptions;
   }
 
-  async getFilteredData(filterData: any): Promise<any[]> {
+  async getFilteredData(
+    filterData: any,
+    options?: {
+      relations?: string[];
+      findRelated?: { moduleName: string; id: number };
+      findRelations?: { moduleName: string; ids: number[] };
+    },
+  ): Promise<any[]> {
     if (!this.#repository) {
       throw new Error("Repository is not set for the entity");
     }
-    const queryOptions = this.#queryBuilder(filterData);
-    return await this.#repository.find(queryOptions);
+    const queryOptions: any = {
+      ...this.#queryBuilder(filterData),
+    };
+
+    if (options && options.relations.length > 0) {
+      queryOptions.relations = options.relations;
+    }
+
+    if (options?.findRelated) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        [options.findRelated.moduleName]: { id: options.findRelated.id },
+      };
+    } else if (options?.findRelations) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        [options.findRelations.moduleName]: { id: In(options.findRelations.ids) },
+      };
+    }
+
+    try {
+      // Execute the query with relations
+      return await this.#repository.find(queryOptions);
+    } catch (error) {
+      console.error("Error during query execution:", error);
+      throw error;
+    }
   }
 
   async getTotalDocs(): Promise<number> {

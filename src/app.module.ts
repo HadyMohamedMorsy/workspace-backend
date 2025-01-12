@@ -12,17 +12,20 @@ import { AuthModule } from "./auth/auth.module";
 import jwtConfig from "./auth/config/jwt.config";
 import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard";
 import { AuthenticationGuard } from "./auth/guards/authentication/authentication.guard";
+import { CategoryModule } from "./categories/category.module";
 import { CompanyModule } from "./companies/company.module";
 import { IndividualModule } from "./individual/individual.module";
 import { ProductsModule } from "./products/products.module";
+import { PurchasesModule } from "./purchases/purchases.module";
 import appConfig from "./shared/config/app.config";
 import databaseConfig from "./shared/config/database.config";
 import { FilterDateModule } from "./shared/filters/filter-date.module";
 import { APIFeaturesService } from "./shared/filters/filter.service";
+import { listModule } from "./shared/global-api/list/list.module";
+import { SearchModule } from "./shared/global-api/search-list/search-list.module";
+import { UploadsModule } from "./shared/global-api/uploads/uploads.module";
 import { TransformInterceptor } from "./shared/interceptor/transform-response.interceptor";
-import { listModule } from "./shared/list/list.module";
 import { LanMiddleware } from "./shared/middleware/lang.middleware";
-import { SearchModule } from "./shared/search-list/search-list.module";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
 import { UsersModule } from "./users/users.module";
@@ -30,15 +33,22 @@ import { UsersModule } from "./users/users.module";
 const ENV = process.env.NODE_ENV;
 @Module({
   imports: [
+    UploadsModule,
     CompanyModule,
     listModule,
     SearchModule,
     IndividualModule,
+    CategoryModule,
+    PurchasesModule,
     ProductsModule,
     StudentActivityModule,
     FilterDateModule,
     UsersModule,
     AuthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, "..", "uploads"),
+      serveRoot: "/uploads",
+    }),
     CacheModule.register({
       ttl: 5000,
       max: 10,
