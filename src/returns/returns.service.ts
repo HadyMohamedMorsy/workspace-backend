@@ -3,23 +3,23 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ProductService } from "src/products/products.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
-import { CreatePurchasDto } from "./dto/create-purchases.dto";
-import { UpdatePurchasDto } from "./dto/update-purchases.dto";
-import { Purchases } from "./purchases.entity";
+import { CreateReturnsDto } from "./dto/create-returns.dto";
+import { UpdateReturnsDto } from "./dto/update-returns.dto";
+import { Returns } from "./returns.entity";
 
 @Injectable()
-export class PurchasesService {
+export class ReturnsService {
   constructor(
-    @InjectRepository(Purchases)
-    private purchasesRepository: Repository<Purchases>,
+    @InjectRepository(Returns)
+    private purchasesRepository: Repository<Returns>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly productService: ProductService,
   ) {}
 
   // Create a new record
-  async create(createPurchasDto: CreatePurchasDto): Promise<Purchases> {
-    const purchases = this.purchasesRepository.create(createPurchasDto);
-    return await this.purchasesRepository.save(purchases);
+  async create(createReturnsDto: CreateReturnsDto): Promise<Returns> {
+    const returns = this.purchasesRepository.create(createReturnsDto);
+    return await this.purchasesRepository.save(returns);
   }
 
   // Get all records
@@ -31,7 +31,7 @@ export class PurchasesService {
       }
     }
 
-    this.apiFeaturesService.setRepository(Purchases);
+    this.apiFeaturesService.setRepository(Returns);
     const filteredRecord = filterData.id
       ? await this.apiFeaturesService.getFilteredData(filterData, {
           relations: ["product"],
@@ -50,14 +50,14 @@ export class PurchasesService {
   }
 
   // Get record by ID
-  async findOne(id: number): Promise<Purchases> {
+  async findOne(id: number): Promise<Returns> {
     return this.purchasesRepository.findOne({ where: { id } });
   }
 
   // Update a record
-  async update(updatePurchasDto: UpdatePurchasDto) {
-    await this.purchasesRepository.update(updatePurchasDto.id, updatePurchasDto);
-    return this.purchasesRepository.findOne({ where: { id: updatePurchasDto.id } });
+  async update(updateReturnsDto: UpdateReturnsDto) {
+    await this.purchasesRepository.update(updateReturnsDto.id, updateReturnsDto);
+    return this.purchasesRepository.findOne({ where: { id: updateReturnsDto.id } });
   }
 
   // Delete a record
