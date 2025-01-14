@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ProductService } from "src/products/products.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -18,14 +18,27 @@ export class PurchasesService {
 
   // Create a new record
   async create(createPurchasDto: CreatePurchasDto): Promise<Purchases> {
-    const purchases = this.purchasesRepository.create(createPurchasDto);
-    return await this.purchasesRepository.save(purchases);
+    const product = await this.productService.findOne(createPurchasDto.product_id);
+    if (!product) {
+      throw new NotFoundException("Product not found");
+    }
+
+    const newStore = (product.store || 0) + createPurchasDto.purchase_qty;
+    product.store = newStore;
+    await this.productService.update({ id: product.id, store: newStore });
+
+    const purchase = this.purchasesRepository.create({
+      ...createPurchasDto,
+      product,
+    });
+
+    return await this.purchasesRepository.save(purchase);
   }
 
   // Get all records
   async findAll(filterData) {
-    if (filterData.id) {
-      const product = await this.productService.findOne(filterData.id);
+    if (filterData.product_id) {
+      const product = await this.productService.findOne(filterData.product_id);
       if (!product) {
         throw new NotFoundException("Product not found");
       }
@@ -35,7 +48,7 @@ export class PurchasesService {
     const filteredRecord = filterData.id
       ? await this.apiFeaturesService.getFilteredData(filterData, {
           relations: ["product"],
-          findRelated: { moduleName: "product", id: filterData.id },
+          findRelated: { moduleName: "product", id: filterData.product_id },
         })
       : await this.apiFeaturesService.getFilteredData(filterData, {
           relations: ["product"],
@@ -56,7 +69,27 @@ export class PurchasesService {
 
   // Update a record
   async update(updatePurchasDto: UpdatePurchasDto) {
-    await this.purchasesRepository.update(updatePurchasDto.id, updatePurchasDto);
+    const product = await this.productService.findOne(updatePurchasDto.product_id);
+
+    if (!product) {
+      throw new NotFoundException("Product not found");
+    }
+
+    if (product.store <= 0) {
+      throw new BadRequestException("Cannot process return. Product stock is 0 or insufficient.");
+    }
+    if (updatePurchasDto.purchase_qty > product.store) {
+      throw new BadRequestException("Return quantity exceeds available stock.");
+    }
+
+    const newStore = (product.store || 0) + updatePurchasDto.purchase_qty;
+    product.store = newStore;
+    await this.productService.update({ id: product.id, store: newStore });
+
+    await this.purchasesRepository.update(updatePurchasDto.id, {
+      ...updatePurchasDto,
+      product,
+    });
     return this.purchasesRepository.findOne({ where: { id: updatePurchasDto.id } });
   }
 

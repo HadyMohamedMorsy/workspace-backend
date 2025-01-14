@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -47,7 +47,18 @@ export class IndividualService {
   }
 
   async findOne(id: number): Promise<Individual> {
-    return this.individualRepository.findOne({ where: { id } });
+    try {
+      const individual = await this.individualRepository.findOne({ where: { id } });
+
+      if (!individual) {
+        // If the product is not found, throw a NotFoundException
+        throw new NotFoundException(`individual with id ${id} not found`);
+      }
+
+      return individual;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async update(updateIndividualDto: UpdateIndividualDto) {

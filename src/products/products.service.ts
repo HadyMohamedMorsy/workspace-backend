@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -37,7 +37,19 @@ export class ProductService {
 
   // Get product by ID
   async findOne(id: number): Promise<Product> {
-    return this.productRepository.findOne({ where: { id } });
+    try {
+      // Try to find the product with the given id
+      const product = await this.productRepository.findOne({ where: { id } });
+
+      if (!product) {
+        // If the product is not found, throw a NotFoundException
+        throw new NotFoundException(`Product with id ${id} not found`);
+      }
+
+      return product;
+    } catch (error) {
+      throw error;
+    }
   }
 
   // Update a product

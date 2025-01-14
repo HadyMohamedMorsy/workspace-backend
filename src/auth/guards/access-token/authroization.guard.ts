@@ -7,8 +7,8 @@ import {
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { REQUEST_USER_KEY } from "src/auth/constants/auth.constants";
-import { PERMISSIONS_KEY } from "src/auth/decorators/permissions.decorator";
 import { AuthService } from "src/auth/providers/auth.service";
+import { PERMISSIONS_KEY } from "src/shared/decorators/permissions.decorator";
 import { PermissionsUser } from "src/users/user.entity";
 
 @Injectable()

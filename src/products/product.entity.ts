@@ -1,5 +1,6 @@
 import { Category } from "src/categories/category.entity";
 import { Purchases } from "src/purchases/purchases.entity";
+import { Returns } from "src/returns/returns.entity";
 import {
   Column,
   Entity,
@@ -46,4 +47,9 @@ export class Product {
     cascade: true,
   })
   purchases: Purchases[];
+
+  @OneToMany(() => Returns, returns => returns.product, {
+    cascade: true,
+  })
+  returns: Purchases[];
 }

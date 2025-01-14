@@ -8,7 +8,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 
-import { Auth } from "./decorators/auth.decorator";
+import { Auth } from "src/shared/decorators/auth.decorator";
 import { RefreshTokenDto } from "./dtos/refresh-token.dto";
 import { SignInDto } from "./dtos/signin.dto";
 import { AuthType } from "./enums/auth-type.enum";

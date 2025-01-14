@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
-import { Permissions } from "src/auth/decorators/permissions.decorator";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
+import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateIndividualDto } from "./dto/create-individual.dto";
 import { UpdateIndividualDto } from "./dto/update-individual.dto";
 import { IndividualService } from "./individual.service";

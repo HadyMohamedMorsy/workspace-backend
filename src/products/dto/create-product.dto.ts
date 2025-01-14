@@ -52,9 +52,9 @@ class Categories {
   @IsInt()
   @Type(() => Number)
   @IsNotEmpty()
-  id: number;
+  label: number;
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  value: number;
 }

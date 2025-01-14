@@ -7,11 +7,11 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { Permissions } from "src/auth/decorators/permissions.decorator";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
+import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { PatchUserDto } from "./dtos/patch-user.dto";
 import { UserService } from "./user.service";

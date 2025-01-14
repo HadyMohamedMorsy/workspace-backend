@@ -12,13 +12,13 @@ export class Returns {
   @Column("decimal", { precision: 10, scale: 2 })
   return_price: number;
 
-  @Column()
+  @Column({ nullable: true })
   weight_kg: number;
 
-  @Column()
+  @Column({ nullable: true })
   weight_g: number;
 
-  @Column()
+  @Column({ nullable: true })
   weight_product: number;
 
   @Column()
