@@ -45,13 +45,6 @@ export class ReturnsService {
 
   // Get all records
   async findAll(filterData) {
-    if (filterData.product_id) {
-      const product = await this.productService.findOne(filterData.product_id);
-      if (!product) {
-        throw new NotFoundException("Product not found");
-      }
-    }
-
     this.apiFeaturesService.setRepository(Returns);
     const filteredRecord = filterData.product_id
       ? await this.apiFeaturesService.getFilteredData(filterData, {
@@ -72,7 +65,11 @@ export class ReturnsService {
 
   // Get record by ID
   async findOne(id: number): Promise<Returns> {
-    return this.returnRepository.findOne({ where: { id } });
+    const returns = await this.returnRepository.findOne({ where: { id } });
+    if (!returns) {
+      throw new NotFoundException(`${returns} with id ${id} not found`);
+    }
+    return returns;
   }
 
   // Update a record
@@ -80,7 +77,7 @@ export class ReturnsService {
     const product = await this.productService.findOne(updateReturnsDto.product_id);
 
     if (!product) {
-      throw new NotFoundException("Product not found");
+      throw new NotFoundException(`${product} with id ${updateReturnsDto.product_id} not found`);
     }
 
     if (product.store <= 0) {

@@ -1,8 +1,11 @@
 import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
-import { Permissions } from "../shared/decorators/permissions.decorator";
+import { Resource } from "src/auth/enums/auth-type.enum";
+import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
+import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateStudentActivityDto } from "./dto/create-StudentActivity.dto";
 import { UpdateStudentActivityDto } from "./dto/update-StudentActivity.dto";
 import { StudentActivityService } from "./studentActivity.service";
@@ -13,7 +16,7 @@ export class StudentActivityController {
   @Post("/index")
   @Permissions([
     {
-      resource: "studentActivity",
+      resource: Resource.StudentActivity,
       actions: [Permission.INDEX],
     },
   ])
@@ -27,7 +30,7 @@ export class StudentActivityController {
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
-      resource: "studentActivity",
+      resource: Resource.StudentActivity,
       actions: [Permission.CREATE],
     },
   ])
@@ -36,10 +39,11 @@ export class StudentActivityController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @EntityName("studentActivity")
+  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: "studentActivity",
+      resource: Resource.StudentActivity,
       actions: [Permission.UPDATE],
     },
   ])
@@ -48,10 +52,11 @@ export class StudentActivityController {
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @EntityName("studentActivity")
+  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: "studentActivity",
+      resource: Resource.StudentActivity,
       actions: [Permission.DELETE],
     },
   ])

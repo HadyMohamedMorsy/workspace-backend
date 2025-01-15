@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -16,19 +16,8 @@ export class IndividualService {
 
   // Create a new record
   async create(createIndividualDto: CreateIndividualDto): Promise<Individual> {
-    try {
-      const individual = this.individualRepository.create(createIndividualDto);
-      return await this.individualRepository.save(individual);
-    } catch (error) {
-      if (error.code === "23505") {
-        if (error.constraint === "UQ_6236cfa94a940a14729b69d4e64") {
-          throw new ConflictException("The phone number is already taken.");
-        } else if (error.constraint === "UQ_589d633a38525c92dd87f1ee93b") {
-          throw new ConflictException("The WhatsApp number is already registered.");
-        }
-      }
-      throw error;
-    }
+    const individual = this.individualRepository.create(createIndividualDto);
+    return await this.individualRepository.save(individual);
   }
 
   // Get all records
@@ -47,18 +36,11 @@ export class IndividualService {
   }
 
   async findOne(id: number): Promise<Individual> {
-    try {
-      const individual = await this.individualRepository.findOne({ where: { id } });
-
-      if (!individual) {
-        // If the product is not found, throw a NotFoundException
-        throw new NotFoundException(`individual with id ${id} not found`);
-      }
-
-      return individual;
-    } catch (error) {
-      throw error;
+    const individual = await this.individualRepository.findOne({ where: { id } });
+    if (!individual) {
+      throw new NotFoundException(`${individual} with id ${id} not found`);
     }
+    return individual;
   }
 
   async update(updateIndividualDto: UpdateIndividualDto) {

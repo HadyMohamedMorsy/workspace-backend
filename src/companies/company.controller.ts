@@ -1,8 +1,11 @@
 // controllers/product.controller.ts
 
 import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import { Resource } from "src/auth/enums/auth-type.enum";
+import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CompanyService } from "./company.service";
@@ -17,7 +20,7 @@ export class CompanyController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: "company",
+      resource: Resource.Company,
       actions: [Permission.INDEX],
     },
   ])
@@ -29,7 +32,7 @@ export class CompanyController {
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
-      resource: "company",
+      resource: Resource.Company,
       actions: [Permission.CREATE],
     },
   ])
@@ -38,10 +41,11 @@ export class CompanyController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @EntityName("company")
+  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: "company",
+      resource: Resource.Company,
       actions: [Permission.UPDATE],
     },
   ])
@@ -50,10 +54,11 @@ export class CompanyController {
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @EntityName("company")
+  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: "company",
+      resource: Resource.Company,
       actions: [Permission.DELETE],
     },
   ])

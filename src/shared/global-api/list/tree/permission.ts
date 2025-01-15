@@ -1,9 +1,10 @@
+import { Resource } from "src/auth/enums/auth-type.enum";
 import { Permission } from "src/users/enum/permissions-enum";
 import { PermissionsUser } from "src/users/user.entity";
 
 export const PERMISSIONS_TREE: PermissionsUser[] = [
   {
-    resource: "individual",
+    resource: Resource.Individual,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -13,7 +14,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
     ],
   },
   {
-    resource: "studentActivity",
+    resource: Resource.StudentActivity,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -23,7 +24,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
     ],
   },
   {
-    resource: "company",
+    resource: Resource.Company,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -33,7 +34,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
     ],
   },
   {
-    resource: "user",
+    resource: Resource.User,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -43,7 +44,67 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
     ],
   },
   {
-    resource: "product",
+    resource: Resource.ExpensesPlace,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.ExpensesSalaries,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Product,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Category,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Purchases,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Returns,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Order,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,

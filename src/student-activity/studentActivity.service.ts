@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, RequestTimeoutException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -16,17 +16,8 @@ export class StudentActivityService {
 
   // Create a new record
   async create(createStudentActivityDto: CreateStudentActivityDto): Promise<StudentActivity> {
-    try {
-      const studentActivity = this.studentActivityRepository.create(createStudentActivityDto);
-      return await this.studentActivityRepository.save(studentActivity);
-    } catch (error) {
-      throw new RequestTimeoutException(
-        "Unable to process your request at the moment please try later",
-        {
-          description: `Error connecting to the the datbase ${error}`,
-        },
-      );
-    }
+    const studentActivity = this.studentActivityRepository.create(createStudentActivityDto);
+    return await this.studentActivityRepository.save(studentActivity);
   }
 
   // Get all records
@@ -44,23 +35,10 @@ export class StudentActivityService {
 
   // Get record by ID
   async findOne(id: number): Promise<StudentActivity> {
-    let studentActivity: StudentActivity | undefined = undefined;
-
-    try {
-      studentActivity = await this.studentActivityRepository.findOne({ where: { id } });
-    } catch (error) {
-      throw new RequestTimeoutException(
-        "Unable to process your request at the moment please try later",
-        {
-          description: `Error connecting to the the datbase ${error}`,
-        },
-      );
-    }
-
+    const studentActivity = await this.studentActivityRepository.findOne({ where: { id } });
     if (!studentActivity) {
-      throw new BadRequestException("User does not exists");
+      throw new NotFoundException(`${studentActivity} with id ${id} not found`);
     }
-
     return studentActivity;
   }
 
@@ -74,7 +52,7 @@ export class StudentActivityService {
   }
 
   // Delete a record
-  async remove(id: number) {
-    await this.studentActivityRepository.delete(id);
+  async remove(studentActivityId: number) {
+    await this.studentActivityRepository.delete(studentActivityId);
   }
 }

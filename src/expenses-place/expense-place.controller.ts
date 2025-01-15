@@ -6,62 +6,62 @@ import { CachingInterceptor } from "src/shared/interceptor/caching-response.inte
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
-import { CreateIndividualDto } from "./dto/create-individual.dto";
-import { UpdateIndividualDto } from "./dto/update-individual.dto";
-import { IndividualService } from "./individual.service";
+import { CreateExpensePlaceDto } from "./dto/create-expense-place.dto";
+import { UpdateExpensePlaceDto } from "./dto/update-expense-place.dto";
+import { ExpensesPlaceService } from "./expense-place.service";
 
-@Controller("individual")
-export class IndividualController {
-  constructor(private readonly individualService: IndividualService) {}
+@Controller("expenses-place")
+export class ExpensesPlaceController {
+  constructor(private readonly expensesPlaceService: ExpensesPlaceService) {}
 
   @Post("/index")
   @HttpCode(200)
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.Individual,
+      resource: Resource.ExpensesPlace,
       actions: [Permission.INDEX],
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.individualService.findAll(filterQueryDto);
+    return this.expensesPlaceService.findAll(filterQueryDto);
   }
 
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
-      resource: Resource.Individual,
+      resource: Resource.ExpensesPlace,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateIndividualDto) {
-    return await this.individualService.create(createProductDto);
+  async create(@Body() createProductDto: CreateExpensePlaceDto) {
+    return await this.expensesPlaceService.create(createProductDto);
   }
 
   @Post("/update")
-  @EntityName("individual")
+  @EntityName("ExpensePlace")
   @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: Resource.Individual,
+      resource: Resource.ExpensesPlace,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateIndividualDto) {
-    return await this.individualService.update(updateProductDto);
+  async update(@Body() updateProductDto: UpdateExpensePlaceDto) {
+    return await this.expensesPlaceService.update(updateProductDto);
   }
 
   @Delete("/delete")
-  @EntityName("individual")
+  @EntityName("ExpensePlace")
   @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: Resource.Individual,
+      resource: Resource.ExpensesPlace,
       actions: [Permission.DELETE],
     },
   ])
   async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.individualService.remove(bodyDelete.id);
+    return this.expensesPlaceService.remove(bodyDelete.id);
   }
 }

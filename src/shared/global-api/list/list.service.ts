@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
 import { LISTS_ROLES_AR, LISTS_ROLES_EN } from "./lists/roles/roles";
 import { LISTS_TYPE_COMPANY_AR, LISTS_TYPE_COMPANY_EN } from "./lists/type-company/type-company";
@@ -6,6 +7,7 @@ import { LIST_TYOE_WORK_AR, LIST_TYOE_WORK_EN } from "./lists/type-wrok/type-wor
 
 @Injectable()
 export class ListService {
+  constructor(private readonly usersService: UserService) {}
   #lists = {
     roles: {
       en: LISTS_ROLES_EN,
@@ -32,6 +34,10 @@ export class ListService {
       }
       return result;
     }, {});
+  }
+
+  async getEntityList(module: string) {
+    if (module === "user") return await this.usersService.findList();
   }
 
   async getPermissionTree(permissions: { resource: string; actions: string[] }[]) {

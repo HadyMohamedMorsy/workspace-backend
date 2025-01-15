@@ -1,7 +1,9 @@
+import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -57,6 +59,9 @@ export class User {
     nullable: true,
   })
   password: string;
+
+  @OneToMany(() => ExpenseSalaries, salary => salary.user)
+  salaries: User[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

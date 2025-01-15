@@ -1,14 +1,12 @@
 import { Type } from "class-transformer";
 import {
   IsArray,
-  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
-  ValidateNested,
 } from "class-validator";
 
 export class CreateProductDto {
@@ -37,24 +35,12 @@ export class CreateProductDto {
   @Type(() => Number)
   selling_price: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  purshase_price: number;
+
   @IsArray()
   @Type(() => Number)
-  @IsOptional()
   category_ids: number[];
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => Categories)
-  categories: Categories[];
-}
-
-class Categories {
-  @IsInt()
-  @Type(() => Number)
-  @IsNotEmpty()
-  label: number;
-
-  @IsString()
-  @IsNotEmpty()
-  value: number;
 }

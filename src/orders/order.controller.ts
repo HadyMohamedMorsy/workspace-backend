@@ -1,3 +1,5 @@
+// controllers/product.controller.ts
+
 import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
@@ -6,62 +8,48 @@ import { CachingInterceptor } from "src/shared/interceptor/caching-response.inte
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
-import { CreateIndividualDto } from "./dto/create-individual.dto";
-import { UpdateIndividualDto } from "./dto/update-individual.dto";
-import { IndividualService } from "./individual.service";
+import { CreateOrderDto } from "./dto/create-order.dto";
+import { OrdersService } from "./orders.service";
 
-@Controller("individual")
-export class IndividualController {
-  constructor(private readonly individualService: IndividualService) {}
+@Controller("orders")
+export class OrderController {
+  constructor(private readonly ordersService: OrdersService) {}
 
   @Post("/index")
   @HttpCode(200)
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.Individual,
+      resource: Resource.Order,
       actions: [Permission.INDEX],
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.individualService.findAll(filterQueryDto);
+    return this.ordersService.findAll(filterQueryDto);
   }
 
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
-      resource: Resource.Individual,
+      resource: Resource.Order,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateIndividualDto) {
-    return await this.individualService.create(createProductDto);
-  }
-
-  @Post("/update")
-  @EntityName("individual")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Individual,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async update(@Body() updateProductDto: UpdateIndividualDto) {
-    return await this.individualService.update(updateProductDto);
+  async create(@Body() createOrderDto: CreateOrderDto) {
+    return await this.ordersService.create(createOrderDto);
   }
 
   @Delete("/delete")
-  @EntityName("individual")
+  @EntityName("Order")
   @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: Resource.Individual,
+      resource: Resource.Order,
       actions: [Permission.DELETE],
     },
   ])
   async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.individualService.remove(bodyDelete.id);
+    return this.ordersService.remove(bodyDelete.id);
   }
 }

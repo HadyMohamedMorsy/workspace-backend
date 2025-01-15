@@ -7,9 +7,14 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
+import { Resource } from "src/auth/enums/auth-type.enum";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { ClearCacheAnotherModule } from "src/shared/decorators/clear-cache.decorator";
+import { EntityName } from "src/shared/decorators/entity-name.decorator";
+import { ClearCacheAnotherModuleInterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateUserDto } from "./dtos/create-user.dto";
@@ -26,7 +31,7 @@ export class UserController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: "user",
+      resource: Resource.User,
       actions: [Permission.INDEX],
     },
   ])
@@ -38,7 +43,7 @@ export class UserController {
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
-      resource: "user",
+      resource: Resource.User,
       actions: [Permission.CREATE],
     },
   ])
@@ -47,10 +52,16 @@ export class UserController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModule("/api/v1/lists")
+  @EntityName("user")
+  @UseInterceptors(
+    DeleteCacheInterceptor,
+    EntityIsExistInterceptor,
+    ClearCacheAnotherModuleInterceptor,
+  )
   @Permissions([
     {
-      resource: "user",
+      resource: Resource.User,
       actions: [Permission.UPDATE],
     },
   ])
@@ -59,10 +70,16 @@ export class UserController {
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModule("/api/v1/lists")
+  @EntityName("user")
+  @UseInterceptors(
+    DeleteCacheInterceptor,
+    EntityIsExistInterceptor,
+    ClearCacheAnotherModuleInterceptor,
+  )
   @Permissions([
     {
-      resource: "user",
+      resource: Resource.User,
       actions: [Permission.DELETE],
     },
   ])

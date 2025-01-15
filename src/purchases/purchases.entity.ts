@@ -27,7 +27,9 @@ export class Purchases {
   @Column()
   total: number;
 
-  @ManyToOne(() => Product, product => product.purchases)
+  @ManyToOne(() => Product, product => product.purchases, {
+    onDelete: "CASCADE",
+  })
   product: Product;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })

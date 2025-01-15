@@ -1,6 +1,9 @@
 import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import { Resource } from "src/auth/enums/auth-type.enum";
+import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateProductDto } from "./dto/create-product.dto";
@@ -16,7 +19,7 @@ export class ProductController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: "product",
+      resource: Resource.Product,
       actions: [Permission.INDEX],
     },
   ])
@@ -28,7 +31,7 @@ export class ProductController {
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
-      resource: "product",
+      resource: Resource.Product,
       actions: [Permission.CREATE],
     },
   ])
@@ -37,22 +40,24 @@ export class ProductController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @EntityName("product")
+  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: "product",
+      resource: Resource.Product,
       actions: [Permission.UPDATE],
     },
   ])
   async update(@Body() updateProductDto: UpdateProductDto) {
-    return await this.productService.update(updateProductDto);
+    return await this.productService.updateWithManyRelation(updateProductDto);
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @EntityName("product")
+  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
   @Permissions([
     {
-      resource: "product",
+      resource: Resource.Product,
       actions: [Permission.DELETE],
     },
   ])

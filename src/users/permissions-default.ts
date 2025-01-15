@@ -1,9 +1,10 @@
+import { Resource } from "src/auth/enums/auth-type.enum";
 import { Permission } from "./enum/permissions-enum";
 import { PermissionsUser } from "./user.entity";
 
 export const GENERALMANGER: PermissionsUser[] = [
   {
-    resource: "individual",
+    resource: Resource.Individual,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -13,7 +14,7 @@ export const GENERALMANGER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "studentActivity",
+    resource: Resource.StudentActivity,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -23,7 +24,7 @@ export const GENERALMANGER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "company",
+    resource: Resource.Company,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -33,12 +34,72 @@ export const GENERALMANGER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "user",
+    resource: Resource.User,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
       Permission.DELETE,
       Permission.VIEW,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.ExpensesPlace,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.ExpensesSalaries,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Product,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Category,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Purchases,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Returns,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
       Permission.INDEX,
     ],
   },
@@ -46,7 +107,7 @@ export const GENERALMANGER: PermissionsUser[] = [
 
 export const OPERATIONMANGER: PermissionsUser[] = [
   {
-    resource: "individual",
+    resource: Resource.Individual,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -56,7 +117,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "studentActivity",
+    resource: Resource.StudentActivity,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -66,7 +127,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "company",
+    resource: Resource.Company,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -76,7 +137,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "user",
+    resource: Resource.User,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -89,7 +150,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
 
 export const COMMUNITY_OFFICER: PermissionsUser[] = [
   {
-    resource: "individual",
+    resource: Resource.Individual,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -99,7 +160,7 @@ export const COMMUNITY_OFFICER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "studentActivity",
+    resource: Resource.StudentActivity,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -109,7 +170,7 @@ export const COMMUNITY_OFFICER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "company",
+    resource: Resource.Company,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -119,7 +180,7 @@ export const COMMUNITY_OFFICER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "user",
+    resource: Resource.User,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -132,7 +193,7 @@ export const COMMUNITY_OFFICER: PermissionsUser[] = [
 
 export const ACCOUNTANT: PermissionsUser[] = [
   {
-    resource: "individual",
+    resource: Resource.Individual,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -142,7 +203,7 @@ export const ACCOUNTANT: PermissionsUser[] = [
     ],
   },
   {
-    resource: "studentActivity",
+    resource: Resource.StudentActivity,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -152,7 +213,7 @@ export const ACCOUNTANT: PermissionsUser[] = [
     ],
   },
   {
-    resource: "company",
+    resource: Resource.Company,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -162,7 +223,7 @@ export const ACCOUNTANT: PermissionsUser[] = [
     ],
   },
   {
-    resource: "user",
+    resource: Resource.User,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -175,7 +236,7 @@ export const ACCOUNTANT: PermissionsUser[] = [
 
 export const FOUNDER: PermissionsUser[] = [
   {
-    resource: "individual",
+    resource: Resource.Individual,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -185,7 +246,7 @@ export const FOUNDER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "studentActivity",
+    resource: Resource.StudentActivity,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -195,7 +256,7 @@ export const FOUNDER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "company",
+    resource: Resource.Company,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -205,7 +266,7 @@ export const FOUNDER: PermissionsUser[] = [
     ],
   },
   {
-    resource: "user",
+    resource: Resource.User,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -218,7 +279,7 @@ export const FOUNDER: PermissionsUser[] = [
 
 export const SALES: PermissionsUser[] = [
   {
-    resource: "individual",
+    resource: Resource.Individual,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -228,7 +289,7 @@ export const SALES: PermissionsUser[] = [
     ],
   },
   {
-    resource: "studentActivity",
+    resource: Resource.StudentActivity,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -238,7 +299,7 @@ export const SALES: PermissionsUser[] = [
     ],
   },
   {
-    resource: "company",
+    resource: Resource.Company,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,
@@ -248,7 +309,7 @@ export const SALES: PermissionsUser[] = [
     ],
   },
   {
-    resource: "user",
+    resource: Resource.User,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,

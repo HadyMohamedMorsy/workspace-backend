@@ -25,6 +25,9 @@ export class Product {
   @Column("decimal", { precision: 10, scale: 2 })
   selling_price: number;
 
+  @Column("decimal", { precision: 10, scale: 2 })
+  purshase_price: number;
+
   @Column()
   store: number;
 
@@ -37,19 +40,13 @@ export class Product {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @ManyToMany(() => Category, category => category.products, {
-    cascade: true,
-  })
+  @ManyToMany(() => Category, category => category.products)
   @JoinTable()
   categories: Category[];
 
-  @OneToMany(() => Purchases, purchase => purchase.product, {
-    cascade: true,
-  })
+  @OneToMany(() => Purchases, purchase => purchase.product)
   purchases: Purchases[];
 
-  @OneToMany(() => Returns, returns => returns.product, {
-    cascade: true,
-  })
+  @OneToMany(() => Returns, returns => returns.product)
   returns: Purchases[];
 }

@@ -14,7 +14,10 @@ import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard"
 import { AuthenticationGuard } from "./auth/guards/authentication/authentication.guard";
 import { CategoryModule } from "./categories/category.module";
 import { CompanyModule } from "./companies/company.module";
+import { ExpensesPlaceModule } from "./expenses-place/expense-place.module";
+import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.module";
 import { IndividualModule } from "./individual/individual.module";
+import { OrdersModule } from "./orders/orders.module";
 import { ProductsModule } from "./products/products.module";
 import { PurchasesModule } from "./purchases/purchases.module";
 import { ReturnsModule } from "./returns/returns.module";
@@ -39,10 +42,13 @@ const ENV = process.env.NODE_ENV;
     listModule,
     SearchModule,
     IndividualModule,
+    ExpensesSalariesModule,
+    ExpensesPlaceModule,
     CategoryModule,
     ReturnsModule,
     PurchasesModule,
     ProductsModule,
+    OrdersModule,
     StudentActivityModule,
     FilterDateModule,
     UsersModule,

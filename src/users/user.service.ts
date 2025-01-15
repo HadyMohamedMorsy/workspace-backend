@@ -1,10 +1,8 @@
 import {
-  BadRequestException,
-  ConflictException,
   forwardRef,
   Inject,
   Injectable,
-  RequestTimeoutException,
+  NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -45,45 +43,26 @@ export class UserService {
     };
   }
 
+  public async findList() {
+    const users = await this.repository.find({});
+    return {
+      data: users,
+    };
+  }
+
   public async findOneById(id: number): Promise<User> {
-    let user = undefined;
-
-    try {
-      user = await this.repository.findOneBy({
-        id,
-      });
-    } catch (err) {
-      throw new RequestTimeoutException(
-        "Unable to process your request at the moment please try later",
-        {
-          description: `Error connecting to the the datbase ${err}`,
-        },
-      );
-    }
-
+    const user = await this.repository.findOne({ where: { id } });
     if (!user) {
-      throw new BadRequestException("The user id does not exist");
+      throw new NotFoundException(`${user} with id ${id} not found`);
     }
-
     return user;
   }
 
   public async findOneByEmail(email: string) {
-    let user: User | undefined = undefined;
-    try {
-      user = await this.repository.findOne({
-        where: { email },
-      });
-    } catch (error) {
-      throw new RequestTimeoutException(error, {
-        description: "Could not fetch the user",
-      });
-    }
-
+    const user = await this.repository.findOne({ where: { email } });
     if (!user) {
-      throw new UnauthorizedException("User does not exists");
+      throw new UnauthorizedException(`${user} with  ${email} not found`);
     }
-
     return user;
   }
 
@@ -100,25 +79,11 @@ export class UserService {
     };
 
     createUserDto.permission = rolePermissionsMap[createUserDto.role] || null;
-    try {
-      createUserDto.password = await this.hashingProvider.hashPassword(createUserDto.password);
-      const newUser = this.repository.create(createUserDto);
-      const user = await this.repository.save(newUser);
-      delete user.password;
-      return user;
-    } catch (error) {
-      if (error.code === "23505") {
-        if (error.constraint === "UQ_8e1f623798118e629b46a9e6299") {
-          throw new ConflictException("The phone number is already taken.");
-        }
-      }
-      throw new RequestTimeoutException(
-        "Unable to process your request at the moment please try later",
-        {
-          description: `Error connecting to the the datbase ${error}`,
-        },
-      );
-    }
+    createUserDto.password = await this.hashingProvider.hashPassword(createUserDto.password);
+    const newUser = this.repository.create(createUserDto);
+    const user = await this.repository.save(newUser);
+    delete user.password;
+    return user;
   }
 
   async updateUser(patch: PatchUserDto) {
@@ -127,23 +92,14 @@ export class UserService {
       delete patch.password_confirmation;
     }
 
-    try {
-      await this.repository.update(patch.id, patch);
-      const user = await this.repository.findOne({ where: { id: patch.id } });
-      delete user.password;
-      return user;
-    } catch (error) {
-      throw new RequestTimeoutException(
-        "Unable to process your request at the moment please try later",
-        {
-          description: `Error connecting to the the datbase ${error}`,
-        },
-      );
-    }
+    await this.repository.update(patch.id, patch);
+    const user = await this.repository.findOne({ where: { id: patch.id } });
+    delete user.password;
+    return user;
   }
 
-  public async delete(id: number) {
-    await this.repository.delete(id);
-    return { deleted: true, id };
+  public async delete(userId: number) {
+    await this.repository.delete(userId);
+    return { deleted: true, userId };
   }
 }

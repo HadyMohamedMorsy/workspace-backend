@@ -19,12 +19,10 @@ export class PurchasesService {
   // Create a new record
   async create(createPurchasDto: CreatePurchasDto): Promise<Purchases> {
     const product = await this.productService.findOne(createPurchasDto.product_id);
-    if (!product) {
-      throw new NotFoundException("Product not found");
-    }
 
     const newStore = (product.store || 0) + createPurchasDto.purchase_qty;
     product.store = newStore;
+    product.purshase_price = createPurchasDto.purchase_price;
     await this.productService.update({ id: product.id, store: newStore });
 
     const purchase = this.purchasesRepository.create({
@@ -37,15 +35,9 @@ export class PurchasesService {
 
   // Get all records
   async findAll(filterData) {
-    if (filterData.product_id) {
-      const product = await this.productService.findOne(filterData.product_id);
-      if (!product) {
-        throw new NotFoundException("Product not found");
-      }
-    }
-
     this.apiFeaturesService.setRepository(Purchases);
-    const filteredRecord = filterData.id
+
+    const filteredRecord = filterData.product_id
       ? await this.apiFeaturesService.getFilteredData(filterData, {
           relations: ["product"],
           findRelated: { moduleName: "product", id: filterData.product_id },
@@ -64,7 +56,11 @@ export class PurchasesService {
 
   // Get record by ID
   async findOne(id: number): Promise<Purchases> {
-    return this.purchasesRepository.findOne({ where: { id } });
+    const purshase = await this.purchasesRepository.findOne({ where: { id } });
+    if (!purshase) {
+      throw new NotFoundException(`${purshase} with id ${id} not found`);
+    }
+    return purshase;
   }
 
   // Update a record
@@ -72,7 +68,7 @@ export class PurchasesService {
     const product = await this.productService.findOne(updatePurchasDto.product_id);
 
     if (!product) {
-      throw new NotFoundException("Product not found");
+      throw new NotFoundException(`${product} with id ${updatePurchasDto.product_id} not found`);
     }
 
     if (product.store <= 0) {
@@ -84,6 +80,7 @@ export class PurchasesService {
 
     const newStore = (product.store || 0) + updatePurchasDto.purchase_qty;
     product.store = newStore;
+    product.purshase_price = updatePurchasDto.purchase_price;
     await this.productService.update({ id: product.id, store: newStore });
 
     await this.purchasesRepository.update(updatePurchasDto.id, {
