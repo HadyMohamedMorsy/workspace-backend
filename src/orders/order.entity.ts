@@ -12,6 +12,9 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  order_number: string;
+
   @Column({
     type: "enum",
     enum: TypeOrder,
@@ -23,6 +26,9 @@ export class Order {
     enum: TypeUser,
   })
   type_user: TypeUser;
+
+  @Column({ nullable: true })
+  order_price: number;
 
   @Column({ nullable: true })
   total_order: number;

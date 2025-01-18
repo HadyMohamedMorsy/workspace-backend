@@ -5,10 +5,10 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
   ValidateIf,
   ValidateNested,
 } from "class-validator";
-import { CreateProductDto } from "src/products/dto/create-product.dto";
 import { TypeOrder, TypeUser } from "../enum/type.enum";
 
 export class CreateOrderDto {
@@ -22,6 +22,10 @@ export class CreateOrderDto {
       "type order must be one of the following: individual or company or studentActivity or User",
   })
   type_user: TypeUser;
+
+  @IsString()
+  @IsNotEmpty()
+  order_number: string;
 
   @ValidateIf(obj => obj.type_user === "employed")
   @IsNumber()
@@ -55,8 +59,6 @@ export class CreateOrderDto {
 }
 
 export class OrderItemDto {
-  @ValidateNested()
-  @Type(() => CreateProductDto)
   product: any;
 
   @IsNumber()

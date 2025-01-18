@@ -24,20 +24,18 @@ export class OrdersService {
 
   // Create a new record
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    let totalOrder = 0;
+    const totalOrder = createOrderDto.order_items.reduce((total, item) => {
+      return total + this.getOrderItemTotalPrice(item, createOrderDto.type_order);
+    }, 0);
 
-    const isPaidOrHoldOrder = ["PAID", "HOLD"].includes(createOrderDto.type_order);
+    const orderPrice = createOrderDto.order_items.reduce((total, item) => {
+      return total + this.getOrderItemTotalPrice(item, "PAID");
+    }, 0);
 
-    const priceType = createOrderDto.type_user === "employed" ? "purshase_price" : "selling_price";
-
-    if (isPaidOrHoldOrder) {
-      totalOrder = createOrderDto.order_items.reduce((total, item) => {
-        return total + this.getOrderItemTotalPrice(item, priceType);
-      }, 0);
-    }
     const payload = {
       ...createOrderDto,
       total_order: totalOrder,
+      order_price: orderPrice,
       order_items: createOrderDto.order_items.map(item => {
         return {
           product: item.product.id,
@@ -45,16 +43,22 @@ export class OrdersService {
         };
       }),
     };
-
     const order = this.orderRepository.create(payload);
     const orderSaved = await this.orderRepository.save(order);
 
     if (orderSaved) {
-      createOrderDto.order_items.forEach(async order => {
-        await this.productService.update(order.product);
+      const updateProducts = createOrderDto.order_items.map(item => {
+        const { quantity, product } = item;
+        const { store, ...otherItem } = product;
+        return {
+          store: store - quantity,
+          ...otherItem,
+        };
+      });
+      updateProducts.forEach(async product => {
+        await this.productService.update(product);
       });
     }
-
     return orderSaved;
   }
 
@@ -94,20 +98,18 @@ export class OrdersService {
 
   // Update a record
   async update(updateOrderDto: UpdateOrderDto) {
-    let totalOrder = 0;
+    const totalOrder = updateOrderDto.order_items.reduce((total, item) => {
+      return total + this.getOrderItemTotalPrice(item, updateOrderDto.type_order);
+    }, 0);
 
-    const isPaidOrHoldOrder = ["PAID", "HOLD"].includes(updateOrderDto.type_order);
+    const orderPrice = updateOrderDto.order_items.reduce((total, item) => {
+      return total + this.getOrderItemTotalPrice(item, "PAID");
+    }, 0);
 
-    const priceType = updateOrderDto.type_user === "employed" ? "purshase_price" : "selling_price";
-
-    if (isPaidOrHoldOrder) {
-      totalOrder = updateOrderDto.order_items.reduce((total, item) => {
-        return total + this.getOrderItemTotalPrice(item, priceType);
-      }, 0);
-    }
     const payload = {
       ...updateOrderDto,
       total_order: totalOrder,
+      order_price: orderPrice,
       order_items: updateOrderDto.order_items.map(item => {
         return {
           product: item.product.id,
@@ -133,6 +135,28 @@ export class OrdersService {
   }
 
   getOrderItemTotalPrice(item: any, key: string): number {
-    return item.product[key] * item.quantity;
+    let quantity = 0;
+    let accesKey = "";
+
+    switch (key) {
+      case "PAID":
+      case "HOLD":
+        quantity = item.quantity;
+        accesKey = "selling_price";
+        break;
+      case "COST":
+        quantity = item.quantity;
+        accesKey = "purshase_price";
+        break;
+      case "FREE":
+        quantity = 0;
+        accesKey = "selling_price";
+        break;
+      default:
+        quantity = item.quantity;
+        accesKey = "selling_price";
+        break;
+    }
+    return item.product[accesKey] * quantity;
   }
 }

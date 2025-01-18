@@ -29,14 +29,12 @@ export class ClearCacheAnotherModulesIsnterceptor implements NestInterceptor {
   private async clearCache(url: string): Promise<void> {
     const cacheFilters = this.apiFeaturesService.cacheFilters;
     const keys = cacheFilters.get(url);
-    console.log(cacheFilters);
     if (keys) {
       // Loop over all keys related to the URL and delete them from the cache
       for (const key of keys) {
         await this.cacheManager.del(key); // Delete the cache
       }
       cacheFilters.delete(url); // Remove the URL entry from cacheFilters
-      console.log(`Cache cleared for URL: ${url}`);
     }
   }
 }
