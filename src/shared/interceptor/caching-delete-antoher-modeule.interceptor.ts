@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 import { APIFeaturesService } from "../filters/filter.service";
 
 @Injectable()
-export class ClearCacheAnotherModuleInterceptor implements NestInterceptor {
+export class ClearCacheAnotherModulesIsnterceptor implements NestInterceptor {
   constructor(
     private readonly apiFeaturesService: APIFeaturesService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
@@ -15,12 +15,12 @@ export class ClearCacheAnotherModuleInterceptor implements NestInterceptor {
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
     // Get the URL from metadata (set by @ClearCache decorator)
-    const url = this.reflector.get<string>("clear_cache_url", context.getHandler());
-    if (url) {
-      // If the URL is passed via metadata, clear the cache for that URL
-      await this.clearCache(url);
+    const urls = this.reflector.get<string[]>("clear_cache_url", context.getHandler());
+    if (urls && urls.length) {
+      for (const url of urls) {
+        await this.clearCache(url);
+      }
     }
-
     // Continue with the request handler
     return next.handle();
   }
@@ -29,6 +29,7 @@ export class ClearCacheAnotherModuleInterceptor implements NestInterceptor {
   private async clearCache(url: string): Promise<void> {
     const cacheFilters = this.apiFeaturesService.cacheFilters;
     const keys = cacheFilters.get(url);
+    console.log(cacheFilters);
     if (keys) {
       // Loop over all keys related to the URL and delete them from the cache
       for (const key of keys) {

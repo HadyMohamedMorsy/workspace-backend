@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ProductService } from "src/products/products.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { In, Repository } from "typeorm";
 import { Category } from "./category.entity";
@@ -12,6 +13,9 @@ export class CategoryService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
     protected readonly apiFeaturesService: APIFeaturesService,
+
+    @Inject(forwardRef(() => ProductService))
+    private readonly productService: ProductService,
   ) {}
 
   // Create a new record
@@ -33,13 +37,23 @@ export class CategoryService {
     };
   }
 
+  async findlist() {
+    const categories = await this.categoryRepository.find();
+    return {
+      data: categories,
+    };
+  }
+
   // Get record by ID
-  async findOne(id: number): Promise<Category> {
-    const category = await this.categoryRepository.findOne({ where: { id } });
+  async findOne(filterData: any) {
+    const category = await this.categoryRepository.findOne({
+      where: { id: filterData.category_id },
+    });
+
     if (!category) {
-      throw new NotFoundException(`${category} with id ${id} not found`);
+      throw new NotFoundException(`category not exist`);
     }
-    return category;
+    return await this.productService.getProductsRelatedCategory(filterData);
   }
 
   async findMany(ids: number[]): Promise<Category[]> {

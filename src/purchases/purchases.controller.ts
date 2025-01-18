@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
-import { ClearCacheAnotherModule } from "src/shared/decorators/clear-cache.decorator";
+import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
-import { ClearCacheAnotherModuleInterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
+import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
@@ -30,11 +30,11 @@ export class PurchasesController {
   }
 
   @Post("/store")
-  @ClearCacheAnotherModule("/api/v1/product")
+  @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category"])
   @EntityName("product", "product_id")
   @UseInterceptors(
     DeleteCacheInterceptor,
-    ClearCacheAnotherModuleInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
     EntityIsExistInterceptor,
   )
   @Permissions([
@@ -48,11 +48,11 @@ export class PurchasesController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModule("/api/v1/product")
+  @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category"])
   @EntityName("Purchases")
   @UseInterceptors(
     DeleteCacheInterceptor,
-    ClearCacheAnotherModuleInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
     EntityIsExistInterceptor,
   )
   @Permissions([
@@ -66,7 +66,7 @@ export class PurchasesController {
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModule("/api/v1/product")
+  @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category"])
   @EntityName("Purchases")
   @Permissions([
     {
@@ -76,7 +76,7 @@ export class PurchasesController {
   ])
   @UseInterceptors(
     DeleteCacheInterceptor,
-    ClearCacheAnotherModuleInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
     EntityIsExistInterceptor,
   )
   async remove(@Body() bodyDelete: { id: number }): Promise<void> {

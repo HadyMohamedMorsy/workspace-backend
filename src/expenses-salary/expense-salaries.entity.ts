@@ -13,7 +13,7 @@ export class ExpenseSalaries {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ nullable: true })
   cost: number;
 
   @ManyToOne(() => User, user => user.salaries)

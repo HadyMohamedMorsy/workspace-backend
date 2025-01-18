@@ -14,7 +14,7 @@ export class ExpensePlace {
   @Column()
   name: string;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ nullable: true })
   cost: number;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })

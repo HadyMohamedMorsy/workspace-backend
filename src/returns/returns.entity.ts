@@ -9,7 +9,7 @@ export class Returns {
   @Column({ default: "item" })
   type_store: string;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ nullable: true })
   return_price: number;
 
   @Column({ nullable: true })

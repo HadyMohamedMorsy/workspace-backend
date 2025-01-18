@@ -4,6 +4,7 @@ import { Category } from "src/categories/category.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 
 @Injectable()
@@ -17,6 +18,8 @@ export class SearchService {
     private readonly individualRepository: Repository<Individual>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async search(module: string, query: string) {
@@ -32,6 +35,8 @@ export class SearchService {
         return await this.searchStudentActivity(query);
       case "individual":
         return await this.searchIndividual(query);
+      case "user":
+        return await this.searchUser(query);
       case "category":
         return await this.searchCategory(query);
 
@@ -86,6 +91,25 @@ export class SearchService {
         label: individual.name,
         value: individual.id,
         ...individual,
+      })),
+    };
+  }
+  private async searchUser(query: string) {
+    const results = await this.userRepository
+      .createQueryBuilder("user")
+      .where("user.firstName ILIKE :query", { query: `%${query}%` })
+      .orWhere("user.lastName ILIKE :query", { query: `%${query}%` })
+      .orWhere("user.username ILIKE :query", { query: `%${query}%` })
+      .orWhere("user.email ILIKE :query", { query: `%${query}%` })
+      .orWhere("user.phone ILIKE :query", { query: `%${query}%` })
+      .getMany();
+
+    // Map results to the required format
+    return {
+      data: results.map(user => ({
+        label: user.firstName + " " + user.lastName,
+        value: user.id,
+        ...user,
       })),
     };
   }

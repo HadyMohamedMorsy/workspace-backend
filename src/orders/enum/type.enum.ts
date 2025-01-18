@@ -1,5 +1,6 @@
 export enum TypeOrder {
   HOLD = "HOLD",
+  COST = "COST",
   FREE = "FREE",
   PAID = "PAID",
 }

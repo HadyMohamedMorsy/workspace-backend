@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Post, UseInterceptors } from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
@@ -25,6 +25,25 @@ export class CategoryController {
   ])
   async findAll(@Body() filterQueryDto: any) {
     return this.categoryService.findAll(filterQueryDto);
+  }
+
+  @Get("/list-categories")
+  @UseInterceptors(CachingInterceptor)
+  async findList() {
+    return this.categoryService.findlist();
+  }
+
+  @Post("/show")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Category,
+      actions: [Permission.VIEW],
+    },
+  ])
+  async findRelList(@Body() filterQueryDto: any) {
+    return this.categoryService.findOne(filterQueryDto);
   }
 
   @Post("/store")

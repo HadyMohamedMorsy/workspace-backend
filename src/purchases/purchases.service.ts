@@ -20,10 +20,15 @@ export class PurchasesService {
   async create(createPurchasDto: CreatePurchasDto): Promise<Purchases> {
     const product = await this.productService.findOne(createPurchasDto.product_id);
 
-    const newStore = (product.store || 0) + createPurchasDto.purchase_qty;
+    const newStore = (product.store || 0) + createPurchasDto.purshase_qty;
     product.store = newStore;
-    product.purshase_price = createPurchasDto.purchase_price;
-    await this.productService.update({ id: product.id, store: newStore });
+    product.purshase_price = createPurchasDto.purshase_price;
+
+    await this.productService.update({
+      id: product.id,
+      store: newStore,
+      purshase_price: createPurchasDto.purshase_price,
+    });
 
     const purchase = this.purchasesRepository.create({
       ...createPurchasDto,
@@ -74,14 +79,19 @@ export class PurchasesService {
     if (product.store <= 0) {
       throw new BadRequestException("Cannot process return. Product stock is 0 or insufficient.");
     }
-    if (updatePurchasDto.purchase_qty > product.store) {
+    if (updatePurchasDto.purshase_qty > product.store) {
       throw new BadRequestException("Return quantity exceeds available stock.");
     }
 
-    const newStore = (product.store || 0) + updatePurchasDto.purchase_qty;
+    const newStore = (product.store || 0) + updatePurchasDto.purshase_qty;
     product.store = newStore;
-    product.purshase_price = updatePurchasDto.purchase_price;
-    await this.productService.update({ id: product.id, store: newStore });
+    product.purshase_price = updatePurchasDto.purshase_price;
+
+    await this.productService.update({
+      id: product.id,
+      store: newStore,
+      purshase_price: updatePurchasDto.purshase_price,
+    });
 
     await this.purchasesRepository.update(updatePurchasDto.id, {
       ...updatePurchasDto,

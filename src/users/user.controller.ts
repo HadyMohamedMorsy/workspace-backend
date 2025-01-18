@@ -9,9 +9,9 @@ import {
 } from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModule } from "src/shared/decorators/clear-cache.decorator";
+import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
-import { ClearCacheAnotherModuleInterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
+import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
@@ -52,12 +52,12 @@ export class UserController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModule("/api/v1/lists")
+  @ClearCacheAnotherModules(["/api/v1/lists"])
   @EntityName("user")
   @UseInterceptors(
     DeleteCacheInterceptor,
     EntityIsExistInterceptor,
-    ClearCacheAnotherModuleInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
   )
   @Permissions([
     {
@@ -70,12 +70,12 @@ export class UserController {
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModule("/api/v1/lists")
+  @ClearCacheAnotherModules(["/api/v1/lists"])
   @EntityName("user")
   @UseInterceptors(
     DeleteCacheInterceptor,
     EntityIsExistInterceptor,
-    ClearCacheAnotherModuleInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
   )
   @Permissions([
     {

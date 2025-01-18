@@ -22,7 +22,7 @@ export class CreatePurchasDto {
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
-  purchase_price: number;
+  purshase_price: number;
 
   @IsNumber()
   @Type(() => Number)
@@ -35,5 +35,5 @@ export class CreatePurchasDto {
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
-  purchase_qty: number;
+  purshase_qty: number;
 }

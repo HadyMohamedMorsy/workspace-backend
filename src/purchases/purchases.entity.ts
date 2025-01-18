@@ -9,8 +9,8 @@ export class Purchases {
   @Column({ default: "item" })
   type_store: string;
 
-  @Column("decimal", { precision: 10, scale: 2 })
-  purchase_price: number;
+  @Column({ nullable: true })
+  purshase_price: number;
 
   @Column({ nullable: true })
   weight_kg: number;
@@ -21,10 +21,10 @@ export class Purchases {
   @Column({ nullable: true })
   weight_product: number;
 
-  @Column()
-  purchase_qty: number;
+  @Column({ nullable: true })
+  purshase_qty: number;
 
-  @Column()
+  @Column({ nullable: true })
   total: number;
 
   @ManyToOne(() => Product, product => product.purchases, {

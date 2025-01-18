@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CategoryService } from "src/categories/category.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -13,7 +13,9 @@ export class ProductService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     protected readonly apiFeaturesService: APIFeaturesService,
-    protected readonly categoryService: CategoryService,
+
+    @Inject(forwardRef(() => CategoryService))
+    private readonly categoryService: CategoryService,
   ) {}
 
   // Create a new product
@@ -30,6 +32,33 @@ export class ProductService {
       categories,
     });
     return await this.productRepository.save(product);
+  }
+
+  async getProductsRelatedCategory(filterData: any) {
+    const queryBuilder = this.productRepository
+      .createQueryBuilder("product")
+      .innerJoin("product.categories", "category", "category.id = :categoryId", {
+        categoryId: filterData.category_id,
+      });
+
+    // Add filtering based on search term (if provided)
+    if (filterData.search) {
+      queryBuilder.andWhere("(product.name LIKE :searchTerm OR product.code LIKE :searchTerm)", {
+        searchTerm: `%${filterData.search}%`,
+      });
+    }
+
+    // Apply pagination
+    const [products, totalProducts] = await queryBuilder
+      .skip(filterData.start)
+      .take(filterData.length)
+      .getManyAndCount();
+
+    return {
+      data: products,
+      recordsFiltered: products.length,
+      totalRecords: +totalProducts,
+    };
   }
 
   // Get all products

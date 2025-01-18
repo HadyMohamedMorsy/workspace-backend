@@ -24,7 +24,7 @@ export class Order {
   })
   type_user: TypeUser;
 
-  @Column("decimal", { precision: 10, scale: 2 })
+  @Column({ nullable: true })
   total_order: number;
 
   @Column("json", { nullable: true })
