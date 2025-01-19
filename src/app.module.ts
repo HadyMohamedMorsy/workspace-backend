@@ -15,6 +15,7 @@ import { AuthenticationGuard } from "./auth/guards/authentication/authentication
 import { CategoryModule } from "./categories/category.module";
 import { CompanyModule } from "./companies/company.module";
 import { ExpensesPlaceModule } from "./expenses-place/expense-place.module";
+import { ExpensesPlaceChildModule } from "./expenses-place/expenses-place-child/expense-place-child.module";
 import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.module";
 import { IndividualModule } from "./individual/individual.module";
 import { OrdersModule } from "./orders/orders.module";
@@ -43,6 +44,7 @@ const ENV = process.env.NODE_ENV;
     SearchModule,
     IndividualModule,
     ExpensesSalariesModule,
+    ExpensesPlaceChildModule,
     ExpensesPlaceModule,
     CategoryModule,
     ReturnsModule,

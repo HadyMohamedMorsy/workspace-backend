@@ -2,22 +2,24 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { ExpensePlaceChild } from "./expenses-place-child/expense-place-child.entity";
+import { ExpensePlace } from "../expense-place.entity";
 
 @Entity()
-export class ExpensePlace {
+export class ExpensePlaceChild {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  name: string;
+  cost: number;
 
-  @OneToMany(() => ExpensePlaceChild, expense => expense.expensePlace)
-  expensePlaceChild: ExpensePlaceChild[];
+  @ManyToOne(() => ExpensePlace, expense => expense.expensePlaceChild, {
+    onDelete: "CASCADE",
+  })
+  expensePlace: ExpensePlace;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
