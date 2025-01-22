@@ -32,6 +32,9 @@ export class Returns {
   })
   product: Product;
 
+  @Column({ type: "text" })
+  note: string;
+
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
 

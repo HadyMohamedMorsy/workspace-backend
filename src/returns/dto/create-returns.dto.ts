@@ -6,6 +6,10 @@ export class CreateReturnsDto {
   @IsNotEmpty()
   type_store: string;
 
+  @IsString()
+  @IsNotEmpty()
+  note: string;
+
   @ValidateIf(obj => obj.type_store === "weight")
   @IsNumber()
   @IsNotEmpty()

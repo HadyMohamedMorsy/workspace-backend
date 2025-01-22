@@ -1,6 +1,8 @@
 import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
+import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
+import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
@@ -28,7 +30,13 @@ export class ExpensesPlaceChildController {
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @EntityName("ExpensePlace", "expensePlace_id")
+  @ClearCacheAnotherModules(["/api/v1/expenses-place"])
+  @UseInterceptors(
+    DeleteCacheInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
+    EntityIsExistInterceptor,
+  )
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
@@ -40,8 +48,13 @@ export class ExpensesPlaceChildController {
   }
 
   @Post("/update")
-  @EntityName("ExpensePlaceChild")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @EntityName("ExpensePlace", "expensePlace_id")
+  @ClearCacheAnotherModules(["/api/v1/expenses-place"])
+  @UseInterceptors(
+    DeleteCacheInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
+    EntityIsExistInterceptor,
+  )
   @Permissions([
     {
       resource: Resource.ExpensesPlace,

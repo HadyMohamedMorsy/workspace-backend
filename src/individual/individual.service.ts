@@ -22,8 +22,9 @@ export class IndividualService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(Individual);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
+    const filteredRecord = await this.apiFeaturesService
+      .setRepository(Individual)
+      .getFilteredData(filterData);
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     const results = {

@@ -45,13 +45,14 @@ export class ReturnsService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(Returns);
     const filteredRecord = filterData.product_id
-      ? await this.apiFeaturesService.getFilteredData(filterData, {
+      ? await this.apiFeaturesService.setRepository(Returns).getFilteredData({
+          ...filterData,
           relations: ["product"],
           findRelated: { moduleName: "product", id: filterData.product_id },
         })
-      : await this.apiFeaturesService.getFilteredData(filterData, {
+      : await this.apiFeaturesService.setRepository(Returns).getFilteredData({
+          ...filterData,
           relations: ["product"],
         });
     const totalRecords = await this.apiFeaturesService.getTotalDocs();

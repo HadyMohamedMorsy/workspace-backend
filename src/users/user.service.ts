@@ -33,7 +33,9 @@ export class UserService {
 
   public async findAll(filterData: any) {
     this.apiFeaturesService.setRepository(User);
-    const filteredRecords = await this.apiFeaturesService.getFilteredData(filterData);
+    const filteredRecords = await this.apiFeaturesService
+      .setRepository(User)
+      .getFilteredData(filterData);
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     return {

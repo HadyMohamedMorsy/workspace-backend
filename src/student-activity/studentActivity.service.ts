@@ -22,8 +22,9 @@ export class StudentActivityService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(StudentActivity);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
+    const filteredRecord = await this.apiFeaturesService
+      .setRepository(StudentActivity)
+      .getFilteredData(filterData);
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     return {

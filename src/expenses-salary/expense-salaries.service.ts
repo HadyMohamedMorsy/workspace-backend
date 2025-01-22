@@ -33,10 +33,12 @@ export class ExpensesSalariesService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(ExpenseSalaries);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData, {
-      relations: ["user"],
-    });
+    const filteredRecord = await this.apiFeaturesService
+      .setRepository(ExpenseSalaries)
+      .getFilteredData({
+        ...filterData,
+        relations: ["user"],
+      });
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     return {
@@ -57,16 +59,21 @@ export class ExpensesSalariesService {
 
   // Update a record
   async update(updateExpensesSalariesDto: UpdateExpenseSalariesDto) {
-    const user = await this.usersService.findOneById(updateExpensesSalariesDto.user_id);
+    const { user_id, ...updateDto } = updateExpensesSalariesDto; // Destructure correctly
+
+    const user = await this.usersService.findOneById(user_id);
     if (!user) {
       throw new NotFoundException(`user is not found `);
     }
 
-    await this.expensesSalariesRepository.update(updateExpensesSalariesDto.id, {
-      ...updateExpensesSalariesDto,
+    await this.expensesSalariesRepository.update(updateDto.id, {
+      ...updateDto,
       user,
     });
-    return this.expensesSalariesRepository.findOne({ where: { id: updateExpensesSalariesDto.id } });
+    return this.expensesSalariesRepository.findOne({
+      where: { id: updateExpensesSalariesDto.id },
+      relations: ["user"],
+    });
   }
 
   // Delete a record

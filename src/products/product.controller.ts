@@ -30,7 +30,12 @@ export class ProductController {
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/purchases", "/api/v1/returns", "/api/v1/category"])
+  @ClearCacheAnotherModules([
+    "/api/v1/purchases",
+    "/api/v1/returns",
+    "/api/v1/category",
+    "/api/v1/dashboard",
+  ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
@@ -43,7 +48,12 @@ export class ProductController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/purchases", "/api/v1/returns", "/api/v1/category"])
+  @ClearCacheAnotherModules([
+    "/api/v1/purchases",
+    "/api/v1/returns",
+    "/api/v1/category",
+    "/api/v1/dashboard",
+  ])
   @EntityName("product")
   @UseInterceptors(
     DeleteCacheInterceptor,

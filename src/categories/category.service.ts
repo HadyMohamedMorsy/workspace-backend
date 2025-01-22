@@ -26,8 +26,9 @@ export class CategoryService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(Category);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
+    const filteredRecord = await this.apiFeaturesService
+      .setRepository(Category)
+      .getFilteredData(filterData);
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     return {

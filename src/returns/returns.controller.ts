@@ -30,7 +30,7 @@ export class ReturnsController {
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category"])
+  @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category", "/api/v1/dashboard"])
   @EntityName("product", "product_id")
   @UseInterceptors(
     DeleteCacheInterceptor,
@@ -48,7 +48,7 @@ export class ReturnsController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category"])
+  @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category", "/api/v1/dashboard"])
   @EntityName("returns")
   @UseInterceptors(
     DeleteCacheInterceptor,

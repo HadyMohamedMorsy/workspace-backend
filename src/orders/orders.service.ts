@@ -64,8 +64,9 @@ export class OrdersService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(Order);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
+    const filteredRecord = await this.apiFeaturesService
+      .setRepository(Order)
+      .getFilteredData(filterData);
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     return {

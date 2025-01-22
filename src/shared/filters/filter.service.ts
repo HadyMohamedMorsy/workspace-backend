@@ -10,104 +10,98 @@ export class APIFeaturesService {
 
   setRepository(entity: EntityTarget<any>) {
     this.#repository = this.dataSource.getRepository(entity);
+    return this;
   }
 
   #queryBuilder(filterData: any): any {
     const queryOptions: any = {};
-    let whereConditions: Record<string, any> = {};
 
-    if (filterData.columns && filterData.columns.length) {
-      queryOptions.select = [...filterData.columns.map(col => col.name), "id", "created_at"];
-    }
+    // Handle columns selection
+    this.#handleColumnSelection(filterData, queryOptions);
 
-    if (filterData.customFilters) {
-      whereConditions = {
-        ...whereConditions,
-        ...this.#applyCustomFilters(filterData.customFilters),
-      };
-    }
+    // Apply custom filters if provided
+    this.#applyCustomFiltersToQuery(filterData, queryOptions);
 
-    if (Object.keys(whereConditions).length > 0) {
-      queryOptions.where = whereConditions;
-    }
+    // Apply search filters
+    this.#applySearchFilter(filterData, queryOptions);
 
-    if (filterData.search && filterData.search.value) {
-      // Search filter
-      const searchableColumns = filterData.columns.filter(col => col.searchable);
-      if (searchableColumns.length) {
-        queryOptions.where = this.searchQuery(searchableColumns, filterData.search.value);
-      }
-    }
+    // Handle sorting
+    this.#applySorting(filterData, queryOptions);
 
-    // Columns to select
-    if (filterData.provideFields && filterData.provideFields.length) {
-      queryOptions.select = [
-        ...filterData.columns.map(col => col.name),
-        "id",
-        ...filterData.provideFields,
-      ];
-    }
+    // Handle pagination
+    this.#applyPagination(filterData, queryOptions);
 
-    // Sorting
-    queryOptions.order = this.#buildSortQuery(filterData);
-
-    // Pagination
-    const { start, length } = filterData;
-    queryOptions.skip = start ?? 0;
-    queryOptions.take = length ?? 10;
+    // Handle relations and related conditions
+    this.#applyRelationsAndRelatedConditions(filterData, queryOptions);
 
     return queryOptions;
   }
 
-  async getFilteredData(
-    filterData: any,
-    options?: {
-      relations?: string[];
-      findRelated?: { moduleName: string; id: number };
-      findRelations?: { moduleName: string; ids: number[] };
-    },
-  ): Promise<any[]> {
-    if (!this.#repository) {
-      throw new Error("Repository is not set for the entity");
+  #handleColumnSelection(filterData: any, queryOptions: any): void {
+    if (filterData.columns && filterData.columns.length) {
+      queryOptions.select = [...filterData.columns.map((col: any) => col.name), "id", "created_at"];
     }
-    const queryOptions: any = {
-      ...this.#queryBuilder(filterData),
-    };
-
-    if (options && options.relations.length > 0) {
-      queryOptions.relations = options.relations;
-    }
-
-    if (options?.findRelated) {
-      queryOptions.where = {
-        ...queryOptions.where,
-        [options.findRelated.moduleName]: { id: options.findRelated.id },
-      };
-    } else if (options?.findRelations) {
-      queryOptions.where = {
-        ...queryOptions.where,
-        [options.findRelations.moduleName]: { id: In(options.findRelations.ids) },
-      };
-    }
-
-    try {
-      // Execute the query with relations
-      return await this.#repository.find(queryOptions);
-    } catch (error) {
-      console.error("Error during query execution:", error);
-      throw error;
+    // Handle additional fields to select
+    if (filterData.provideFields && filterData.provideFields.length) {
+      queryOptions.select = [...queryOptions.select, ...filterData.provideFields];
     }
   }
 
-  async getTotalDocs(): Promise<number> {
-    if (!this.#repository) {
-      throw new Error("Repository is not set for the entity");
+  // Apply custom filters
+  #applyCustomFiltersToQuery(filterData: any, queryOptions: any): void {
+    if (filterData.customFilters) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        ...this.#applyCustomFilters(filterData.customFilters),
+      };
     }
-
-    return await this.#repository.count({});
   }
 
-  searchQuery(
+  // Apply search filter if provided
+  #applySearchFilter(filterData: any, queryOptions: any): void {
+    if (filterData.search && filterData.search.value) {
+      const searchableColumns = filterData.columns.filter((col: any) => col.searchable);
+      if (searchableColumns.length) {
+        queryOptions.where = this.#searchQuery(searchableColumns, filterData.search.value);
+      }
+    }
+  }
+
+  // Apply sorting to the query options
+  #applySorting(filterData: any, queryOptions: any): void {
+    queryOptions.order = this.#buildSortQuery(filterData);
+  }
+
+  // Apply pagination to the query options
+  #applyPagination(filterData: any, queryOptions: any): void {
+    const { start, length } = filterData;
+    queryOptions.skip = start ?? 0;
+    queryOptions.take = length ?? 10;
+  }
+
+  #applyRelationsAndRelatedConditions(filterData: any, queryOptions: any): void {
+    // Handle relations
+    if (filterData.relations && filterData.relations.length > 0) {
+      queryOptions.relations = filterData.relations;
+    }
+
+    // Handle findRelated and findRelations
+    if (filterData.findRelated) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        [filterData.findRelated.moduleName]: { id: filterData.findRelated.id },
+      };
+    }
+
+    if (filterData.findRelations) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        [filterData.findRelations.moduleName]: { id: In(filterData.findRelations.ids) },
+      };
+    }
+  }
+
+  #searchQuery(
     searchableColumns: {
       name: string;
       searchable: boolean;
@@ -151,19 +145,35 @@ export class APIFeaturesService {
           $gte: new Date(value.startDate),
           $lte: new Date(value.endDate),
         };
-      } else if (
-        key === "priceRange" &&
-        value.minPrice !== undefined &&
-        value.maxPrice !== undefined
-      ) {
-        filterConditions["price"] = {
-          $gte: value.minPrice,
-          $lte: value.maxPrice,
-        };
       } else {
         filterConditions[key] = value;
       }
     }
     return filterConditions;
+  }
+
+  async getFilteredData(filterData: any): Promise<any[]> {
+    if (!this.#repository) {
+      throw new Error("Repository is not set for the entity");
+    }
+    const queryOptions: any = {
+      ...this.#queryBuilder(filterData),
+    };
+
+    try {
+      // Execute the query with relations
+      return await this.#repository.find(queryOptions);
+    } catch (error) {
+      console.error("Error during query execution:", error);
+      throw error;
+    }
+  }
+
+  async getTotalDocs(): Promise<number> {
+    if (!this.#repository) {
+      throw new Error("Repository is not set for the entity");
+    }
+
+    return await this.#repository.count({});
   }
 }

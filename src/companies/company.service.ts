@@ -22,8 +22,9 @@ export class CompanyService {
 
   // Get all products
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(Company);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
+    const filteredRecord = await this.apiFeaturesService
+      .setRepository(Company)
+      .getFilteredData(filterData);
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     return {

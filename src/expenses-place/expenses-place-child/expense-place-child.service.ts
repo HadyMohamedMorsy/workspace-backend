@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
+import { ExpensesPlaceService } from "../expense-place.service";
 import { CreateExpensePlaceChildDto } from "./dto/create-expense-place-child.dto";
 import { UpdateExpensePlaceChildDto } from "./dto/update-expense-place-child.dto";
 import { ExpensePlaceChild } from "./expense-place-child.entity";
@@ -12,19 +13,24 @@ export class ExpensesPlaceChildService {
     @InjectRepository(ExpensePlaceChild)
     private expensesPlaceChildRepository: Repository<ExpensePlaceChild>,
     protected readonly apiFeaturesService: APIFeaturesService,
+    protected readonly expenseService: ExpensesPlaceService,
   ) {}
 
   // Create a new record
   async create(createExpensePlaceChildDto: CreateExpensePlaceChildDto): Promise<ExpensePlaceChild> {
-    const ExpensesSalaries = this.expensesPlaceChildRepository.create(createExpensePlaceChildDto);
-    return await this.expensesPlaceChildRepository.save(ExpensesSalaries);
+    const expenses = await this.expenseService.findOne(createExpensePlaceChildDto.expensePlace_id);
+
+    const expensesSalaries = this.expensesPlaceChildRepository.create({
+      ...createExpensePlaceChildDto,
+      expensePlace: expenses,
+    });
+    return await this.expensesPlaceChildRepository.save(expensesSalaries);
   }
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(ExpensePlaceChild);
-
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData, {
+    const data = await this.apiFeaturesService.setRepository(ExpensePlaceChild).getFilteredData({
+      ...filterData,
       relations: ["expensePlace"],
       findRelated: { moduleName: "expensePlace", id: filterData.expensePlace_id },
     });
@@ -32,8 +38,8 @@ export class ExpensesPlaceChildService {
     const totalRecords = await this.apiFeaturesService.getTotalDocs();
 
     return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
+      data: data,
+      recordsFiltered: data.length,
       totalRecords: +totalRecords,
     };
   }
@@ -49,10 +55,13 @@ export class ExpensesPlaceChildService {
 
   // Update a record
   async update(updateExpensePlaceChildDto: UpdateExpensePlaceChildDto) {
-    await this.expensesPlaceChildRepository.update(
-      updateExpensePlaceChildDto.id,
-      updateExpensePlaceChildDto,
-    );
+    const expenses = await this.expenseService.findOne(updateExpensePlaceChildDto.expensePlace_id);
+
+    await this.expensesPlaceChildRepository.update(updateExpensePlaceChildDto.id, {
+      ...updateExpensePlaceChildDto,
+      expensePlace: expenses,
+    });
+
     return this.expensesPlaceChildRepository.findOne({
       where: { id: updateExpensePlaceChildDto.id },
     });
