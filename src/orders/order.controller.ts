@@ -11,6 +11,7 @@ import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.
 import { Permission } from "src/users/enum/permissions-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateOrderDto } from "./dto/create-order.dto";
+import { UpdateOrderDto } from "./dto/update-order.dto";
 import { OrdersService } from "./orders.service";
 
 @Controller("order")
@@ -46,6 +47,29 @@ export class OrderController {
   ])
   async create(@Body() createOrderDto: CreateOrderDto) {
     return await this.ordersService.create(createOrderDto);
+  }
+
+  @Post("/update")
+  @ClearCacheAnotherModules([
+    "/api/v1/purchases",
+    "/api/v1/returns",
+    "/api/v1/category",
+    "/api/v1/product",
+  ])
+  @EntityName("order")
+  @UseInterceptors(
+    DeleteCacheInterceptor,
+    EntityIsExistInterceptor,
+    ClearCacheAnotherModulesIsnterceptor,
+  )
+  @Permissions([
+    {
+      resource: Resource.Order,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async update(@Body() updateOrderDto: UpdateOrderDto) {
+    return await this.ordersService.update(updateOrderDto);
   }
 
   @Delete("/delete")

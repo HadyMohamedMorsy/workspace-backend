@@ -8,14 +8,17 @@ export class CreatePurchasDto {
 
   @ValidateIf(obj => obj.type_store === "weight")
   @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
   weight_kg: number;
 
   @ValidateIf(obj => obj.type_store === "weight")
+  @Type(() => Number)
   @IsNumber()
   weight_g: number;
 
   @ValidateIf(obj => obj.type_store === "weight")
+  @Type(() => Number)
   @IsNumber()
   weight_product: number;
 

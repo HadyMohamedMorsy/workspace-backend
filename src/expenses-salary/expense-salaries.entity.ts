@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { TypeSallary } from "./enum/type.enum";
 
 @Entity()
 export class ExpenseSalaries {
@@ -15,6 +16,15 @@ export class ExpenseSalaries {
 
   @Column({ nullable: true })
   cost: number;
+
+  @Column({ default: TypeSallary.Internal })
+  type_sallary: string;
+
+  @Column({ nullable: true })
+  name: string;
+
+  @Column({ nullable: true })
+  destination: string;
 
   @ManyToOne(() => User, user => user.salaries)
   user: User;

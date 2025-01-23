@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
+import { User } from "src/users/user.entity";
 import { UserService } from "src/users/user.service";
 import { Repository } from "typeorm";
 import { CreateExpenseSalariesDto } from "./dto/create-expense-salaries.dto";
 import { UpdateExpenseSalariesDto } from "./dto/update-expense-salaries.dto";
+import { TypeSallary } from "./enum/type.enum";
 import { ExpenseSalaries } from "./expense-salaries.entity";
 
 @Injectable()
@@ -18,17 +20,24 @@ export class ExpensesSalariesService {
 
   // Create a new record
   async create(createExpensesSalariesDto: CreateExpenseSalariesDto): Promise<ExpenseSalaries> {
-    const user = await this.usersService.findOneById(createExpensesSalariesDto.user_id);
-    if (!user) {
-      throw new NotFoundException(`user is not found `);
+    let user: User | null = null;
+    let expensesSalaries: ExpenseSalaries | null = null;
+
+    if (createExpensesSalariesDto.type_sallary === TypeSallary.Internal) {
+      user = await this.usersService.findOneById(createExpensesSalariesDto.user_id);
+      if (!user) {
+        throw new NotFoundException(`user is not found `);
+      }
+
+      expensesSalaries = this.expensesSalariesRepository.create({
+        ...createExpensesSalariesDto,
+        user,
+      });
+    } else {
+      expensesSalaries = this.expensesSalariesRepository.create(createExpensesSalariesDto);
     }
 
-    const ExpensesSalaries = this.expensesSalariesRepository.create({
-      ...createExpensesSalariesDto,
-      user,
-    });
-
-    return await this.expensesSalariesRepository.save(ExpensesSalaries);
+    return await this.expensesSalariesRepository.save(expensesSalaries);
   }
 
   // Get all records
@@ -59,17 +68,22 @@ export class ExpensesSalariesService {
 
   // Update a record
   async update(updateExpensesSalariesDto: UpdateExpenseSalariesDto) {
-    const { user_id, ...updateDto } = updateExpensesSalariesDto; // Destructure correctly
+    let user: User | null = null;
+    const { user_id, ...updateDto } = updateExpensesSalariesDto;
 
-    const user = await this.usersService.findOneById(user_id);
-    if (!user) {
-      throw new NotFoundException(`user is not found `);
+    if (updateExpensesSalariesDto.type_sallary === TypeSallary.Internal) {
+      user = await this.usersService.findOneById(user_id);
+      if (!user) {
+        throw new NotFoundException(`user is not found `);
+      }
+
+      await this.expensesSalariesRepository.update(updateDto.id, {
+        ...updateDto,
+        user,
+      });
+    } else {
+      await this.expensesSalariesRepository.update(updateDto.id, updateDto);
     }
-
-    await this.expensesSalariesRepository.update(updateDto.id, {
-      ...updateDto,
-      user,
-    });
     return this.expensesSalariesRepository.findOne({
       where: { id: updateExpensesSalariesDto.id },
       relations: ["user"],

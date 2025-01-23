@@ -99,35 +99,8 @@ export class OrdersService {
 
   // Update a record
   async update(updateOrderDto: UpdateOrderDto) {
-    const totalOrder = updateOrderDto.order_items.reduce((total, item) => {
-      return total + this.getOrderItemTotalPrice(item, updateOrderDto.type_order);
-    }, 0);
-
-    const orderPrice = updateOrderDto.order_items.reduce((total, item) => {
-      return total + this.getOrderItemTotalPrice(item, "PAID");
-    }, 0);
-
-    const payload = {
-      ...updateOrderDto,
-      total_order: totalOrder,
-      order_price: orderPrice,
-      order_items: updateOrderDto.order_items.map(item => {
-        return {
-          product: item.product.id,
-          quantity: item.quantity,
-        };
-      }),
-    };
-
-    const orderSaved = await this.orderRepository.update(payload.id, payload);
-
-    if (orderSaved) {
-      updateOrderDto.order_items.forEach(async order => {
-        await this.productService.update(order.product);
-      });
-    }
-
-    return orderSaved;
+    await this.orderRepository.update(updateOrderDto.id, updateOrderDto);
+    return this.orderRepository.findOne({ where: { id: updateOrderDto.id } });
   }
 
   // Delete a record

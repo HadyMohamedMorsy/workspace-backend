@@ -3,6 +3,9 @@ import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
 import { LISTS_ROLES_AR, LISTS_ROLES_EN } from "./lists/roles/roles";
 import { LISTS_TYPE_COMPANY_AR, LISTS_TYPE_COMPANY_EN } from "./lists/type-company/type-company";
+import { LIST_TYPE_ORDER_AR, LIST_TYPE_ORDER_EN } from "./lists/type-order/type-order";
+import { LIST_TYPE_SALLARY_AR, LIST_TYPE_SALLARY_EN } from "./lists/type-sallary/type-sallary";
+import { LIST_TYPE_USER_AR, LIST_TYPE_USER_EN } from "./lists/type-user/type-user";
 import { LIST_TYOE_WORK_AR, LIST_TYOE_WORK_EN } from "./lists/type-wrok/type-work";
 
 @Injectable()
@@ -24,6 +27,18 @@ export class ListService {
     city: {
       en: LIST_CITY_EN,
       ar: LIST_CITY_AR,
+    },
+    type_order: {
+      en: LIST_TYPE_ORDER_EN,
+      ar: LIST_TYPE_ORDER_AR,
+    },
+    type_order_user: {
+      en: LIST_TYPE_USER_EN,
+      ar: LIST_TYPE_USER_AR,
+    },
+    type_sallary: {
+      en: LIST_TYPE_SALLARY_EN,
+      ar: LIST_TYPE_SALLARY_AR,
     },
   };
 
