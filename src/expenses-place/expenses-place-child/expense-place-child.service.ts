@@ -19,11 +19,19 @@ export class ExpensesPlaceChildService {
   // Create a new record
   async create(createExpensePlaceChildDto: CreateExpensePlaceChildDto): Promise<ExpensePlaceChild> {
     const expenses = await this.expenseService.findOne(createExpensePlaceChildDto.expensePlace_id);
+    const totalExpense = (expenses.total || 0) + createExpensePlaceChildDto.cost;
+    expenses.total = totalExpense;
+
+    await this.expenseService.update({
+      id: expenses.id,
+      total: totalExpense,
+    });
 
     const expensesSalaries = this.expensesPlaceChildRepository.create({
       ...createExpensePlaceChildDto,
       expensePlace: expenses,
     });
+
     return await this.expensesPlaceChildRepository.save(expensesSalaries);
   }
 
@@ -56,6 +64,14 @@ export class ExpensesPlaceChildService {
   // Update a record
   async update(updateExpensePlaceChildDto: UpdateExpensePlaceChildDto) {
     const expenses = await this.expenseService.findOne(updateExpensePlaceChildDto.expensePlace_id);
+
+    const totalExpense = (expenses.total || 0) + updateExpensePlaceChildDto.cost;
+    expenses.total = totalExpense;
+
+    await this.expenseService.update({
+      id: expenses.id,
+      total: totalExpense,
+    });
 
     await this.expensesPlaceChildRepository.update(updateExpensePlaceChildDto.id, {
       ...updateExpensePlaceChildDto,

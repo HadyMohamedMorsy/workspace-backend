@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource, EntityTarget, In, Like, Repository } from "typeorm";
+import { Between, DataSource, EntityTarget, In, Like, Repository } from "typeorm";
 
 @Injectable()
 export class APIFeaturesService {
@@ -37,7 +37,7 @@ export class APIFeaturesService {
     return queryOptions;
   }
 
-  #handleColumnSelection(filterData: any, queryOptions: any): void {
+  #handleColumnSelection(filterData: any, queryOptions: any) {
     if (filterData.columns && filterData.columns.length) {
       queryOptions.select = [...filterData.columns.map((col: any) => col.name), "id", "created_at"];
     }
@@ -48,17 +48,22 @@ export class APIFeaturesService {
   }
 
   // Apply custom filters
-  #applyCustomFiltersToQuery(filterData: any, queryOptions: any): void {
+  #applyCustomFiltersToQuery(filterData: any, queryOptions: any) {
     if (filterData.customFilters) {
-      queryOptions.where = {
-        ...queryOptions.where,
-        ...this.#applyCustomFilters(filterData.customFilters),
-      };
+      const customFilters = this.#applyCustomFilters(filterData.customFilters);
+      const { start_date, end_date, ...filters } = customFilters;
+
+      if (customFilters) {
+        queryOptions.where = {
+          ...queryOptions.where,
+          ...filters,
+          created_at: Between(start_date, end_date),
+        };
+      }
     }
   }
 
-  // Apply search filter if provided
-  #applySearchFilter(filterData: any, queryOptions: any): void {
+  #applySearchFilter(filterData: any, queryOptions: any) {
     if (filterData.search && filterData.search.value) {
       const searchableColumns = filterData.columns.filter((col: any) => col.searchable);
       if (searchableColumns.length) {
@@ -67,25 +72,21 @@ export class APIFeaturesService {
     }
   }
 
-  // Apply sorting to the query options
-  #applySorting(filterData: any, queryOptions: any): void {
+  #applySorting(filterData: any, queryOptions: any) {
     queryOptions.order = this.#buildSortQuery(filterData);
   }
 
-  // Apply pagination to the query options
-  #applyPagination(filterData: any, queryOptions: any): void {
+  #applyPagination(filterData: any, queryOptions: any) {
     const { start, length } = filterData;
     queryOptions.skip = start ?? 0;
     queryOptions.take = length ?? 10;
   }
 
-  #applyRelationsAndRelatedConditions(filterData: any, queryOptions: any): void {
-    // Handle relations
+  #applyRelationsAndRelatedConditions(filterData: any, queryOptions: any) {
     if (filterData.relations && filterData.relations.length > 0) {
       queryOptions.relations = filterData.relations;
     }
 
-    // Handle findRelated and findRelations
     if (filterData.findRelated) {
       queryOptions.where = {
         ...queryOptions.where,
@@ -139,16 +140,20 @@ export class APIFeaturesService {
   #applyCustomFilters(customFilters: Record<string, any>): Record<string, any> {
     const filterConditions: Record<string, any> = {};
 
+    const filterHandlers = {
+      start_date: this.#handleStartDateFilter,
+      end_date: this.#handleEndDateFilter,
+    };
+
     for (const [key, value] of Object.entries(customFilters)) {
-      if (key === "dateRange" && value.startDate && value.endDate) {
-        filterConditions["created_at"] = {
-          $gte: new Date(value.startDate),
-          $lte: new Date(value.endDate),
-        };
+      if (filterHandlers[key]) {
+        const handler = filterHandlers[key];
+        handler(value, filterConditions);
       } else {
         filterConditions[key] = value;
       }
     }
+
     return filterConditions;
   }
 
@@ -169,11 +174,19 @@ export class APIFeaturesService {
     }
   }
 
-  async getTotalDocs(): Promise<number> {
+  async getTotalDocs() {
     if (!this.#repository) {
       throw new Error("Repository is not set for the entity");
     }
 
     return await this.#repository.count({});
+  }
+
+  #handleStartDateFilter(value: any, filterConditions: Record<string, any>) {
+    filterConditions["start_date"] = new Date(value);
+  }
+
+  #handleEndDateFilter(value: any, filterConditions: Record<string, any>) {
+    filterConditions["end_date"] = new Date(value);
   }
 }

@@ -16,6 +16,9 @@ export class ExpensePlace {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  total: number;
+
   @OneToMany(() => ExpensePlaceChild, expense => expense.expensePlace)
   expensePlaceChild: ExpensePlaceChild[];
 
