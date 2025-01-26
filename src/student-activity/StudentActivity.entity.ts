@@ -1,7 +1,10 @@
+import { Deals } from "src/deals/deals.entity";
+import { Order } from "src/orders/order.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -19,6 +22,12 @@ export class StudentActivity {
 
   @Column({ length: 256 })
   college: string;
+
+  @OneToMany(() => Deals, deals => deals.studentActivity)
+  deals: Deals[];
+
+  @OneToMany(() => Order, order => order.studentActivity)
+  orders: Order[];
 
   @Column("simple-array", { nullable: true })
   subjects: string[] | [null];

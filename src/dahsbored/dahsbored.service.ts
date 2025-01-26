@@ -33,8 +33,8 @@ export class DahboredService {
       .select("SUM(expenseSalaries.cost)", "totalCost")
       .where("expenseSalaries.cost > 0")
       .andWhere("expenseSalaries.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -45,8 +45,8 @@ export class DahboredService {
       .select("SUM(expensePlace.cost)", "totalCost")
       .where("expensePlace.cost > 0")
       .andWhere("expensePlace.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -57,8 +57,8 @@ export class DahboredService {
       .select("COUNT(purshase.id)", "count")
       .where("purshase.total > 0")
       .andWhere("purshase.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -69,8 +69,8 @@ export class DahboredService {
       .select("COUNT(returns.id)", "count")
       .where("returns.total > 0")
       .andWhere("returns.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -81,8 +81,8 @@ export class DahboredService {
       .select("SUM(returns.total)", "total")
       .where("returns.total > 0")
       .andWhere("returns.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -93,8 +93,8 @@ export class DahboredService {
       .select("SUM(purshase.total)", "total")
       .where("purshase.total > 0")
       .andWhere("purshase.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -105,8 +105,8 @@ export class DahboredService {
       .select("COUNT(order.id)", "count")
       .where("order.type_order = 'PAID'")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -116,8 +116,8 @@ export class DahboredService {
       .select("COUNT(order.id)", "count")
       .where("order.type_order = 'COST'")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -128,8 +128,8 @@ export class DahboredService {
       .select("COUNT(order.id)", "count")
       .where("order.type_order = 'FREE'")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -140,8 +140,8 @@ export class DahboredService {
       .select("COUNT(order.id)", "count")
       .where("order.type_order = 'HOLD'")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -153,8 +153,8 @@ export class DahboredService {
       .where("order.total_order > 0")
       .andWhere("order.type_order = 'PAID'")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -166,8 +166,8 @@ export class DahboredService {
       .where("order.total_order > 0")
       .andWhere("order.type_order = 'COST'")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -179,8 +179,8 @@ export class DahboredService {
       .where("order.total_order > 0")
       .andWhere("order.type_order = 'HOLD'")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }
@@ -191,8 +191,8 @@ export class DahboredService {
       .select("SUM(order.order_price)", "total")
       .where("order.order_price > 0")
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
-        startFrom: filter.start_from,
-        startTo: filter.start_to,
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
       })
       .getRawOne();
   }

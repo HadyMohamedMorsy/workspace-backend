@@ -15,14 +15,19 @@ import { AuthenticationGuard } from "./auth/guards/authentication/authentication
 import { CategoryModule } from "./categories/category.module";
 import { CompanyModule } from "./companies/company.module";
 import { DashboredModule } from "./dahsbored/dashbored.module";
+import { DealsModule } from "./deals/deals.module";
 import { ExpensesPlaceModule } from "./expenses-place/expense-place.module";
 import { ExpensesPlaceChildModule } from "./expenses-place/expenses-place-child/expense-place-child.module";
 import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.module";
+import { GeneralOfferModule } from "./general-offer/generalOffer.module";
 import { IndividualModule } from "./individual/individual.module";
+import { OfferCoWorkingSpaceModule } from "./offer-co-working-space/offer-co-working-space.module";
+import { OfferPackageModule } from "./offer-packages/offerpackages.module";
 import { OrdersModule } from "./orders/orders.module";
 import { ProductsModule } from "./products/products.module";
 import { PurchasesModule } from "./purchases/purchases.module";
 import { ReturnsModule } from "./returns/returns.module";
+import { RoomsModule } from "./rooms/rooms.module";
 import appConfig from "./shared/config/app.config";
 import databaseConfig from "./shared/config/database.config";
 import { FilterDateModule } from "./shared/filters/filter-date.module";
@@ -42,8 +47,13 @@ const ENV = process.env.NODE_ENV;
     UploadsModule,
     CompanyModule,
     DashboredModule,
+    OfferPackageModule,
+    RoomsModule,
     listModule,
     SearchModule,
+    GeneralOfferModule,
+    OfferCoWorkingSpaceModule,
+    DealsModule,
     IndividualModule,
     ExpensesSalariesModule,
     ExpensesPlaceChildModule,

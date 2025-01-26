@@ -1,7 +1,10 @@
+import { Deals } from "src/deals/deals.entity";
+import { Order } from "src/orders/order.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -52,6 +55,12 @@ export class Company {
 
   @Column("json", { nullable: true })
   holders: holder[] | null;
+
+  @OneToMany(() => Deals, deals => deals.company)
+  deals: Deals[];
+
+  @OneToMany(() => Order, order => order.company)
+  orders: Order[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

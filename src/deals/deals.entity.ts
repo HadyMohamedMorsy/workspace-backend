@@ -1,5 +1,7 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
+import { TypeUser } from "src/orders/enum/type.enum";
+import { Room } from "src/rooms/room.entity";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import {
   Column,
@@ -9,21 +11,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { TypeOrder, TypeUser } from "./enum/type.enum";
 
 @Entity()
-export class Order {
+export class Deals {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ nullable: true })
-  order_number: string;
-
-  @Column({
-    type: "enum",
-    enum: TypeOrder,
-  })
-  type_order: TypeOrder;
 
   @Column({
     type: "enum",
@@ -31,29 +23,40 @@ export class Order {
   })
   type_user: TypeUser;
 
-  @ManyToOne(() => Individual, individual => individual.orders, {
+  @Column()
+  hours: number;
+
+  @Column({ type: "timestamp", nullable: true })
+  start_date: Date;
+
+  @Column({ type: "timestamp", nullable: true })
+  end_date: Date;
+
+  @Column()
+  price_hour: number;
+
+  @Column()
+  total: number;
+
+  @ManyToOne(() => Room, room => room.deal_room, {
+    onDelete: "CASCADE",
+  })
+  room: Room;
+
+  @ManyToOne(() => Individual, individual => individual.deals, {
     onDelete: "CASCADE",
   })
   individual: Individual;
 
-  @ManyToOne(() => Company, company => company.orders, {
+  @ManyToOne(() => Company, company => company.deals, {
     onDelete: "CASCADE",
   })
   company: Company;
 
-  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.orders, {
+  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.deals, {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
-
-  @Column({ nullable: true })
-  order_price: number;
-
-  @Column({ nullable: true })
-  total_order: number;
-
-  @Column("json", { nullable: true })
-  order_items: OrderItemDto[] | null;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
@@ -64,9 +67,4 @@ export class Order {
     onUpdate: "CURRENT_TIMESTAMP",
   })
   updated_at: Date;
-}
-
-export class OrderItemDto {
-  product: number;
-  quantity: number;
 }

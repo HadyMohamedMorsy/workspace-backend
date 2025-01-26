@@ -44,6 +44,16 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
     ],
   },
   {
+    resource: Resource.Rooms,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
     resource: Resource.ExpensesPlace,
     actions: [
       Permission.CREATE,
@@ -105,6 +115,46 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
   },
   {
     resource: Resource.Order,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.GeneralOffer,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.OfferWorkingSpace,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.OfferPackages,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Deals,
     actions: [
       Permission.CREATE,
       Permission.UPDATE,

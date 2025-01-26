@@ -1,16 +1,22 @@
 import { Injectable } from "@nestjs/common";
+import { RoomsService } from "src/rooms/rooms.service";
 import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
 import { LISTS_ROLES_AR, LISTS_ROLES_EN } from "./lists/roles/roles";
 import { LISTS_TYPE_COMPANY_AR, LISTS_TYPE_COMPANY_EN } from "./lists/type-company/type-company";
+import { LIST_TYPE_DISCOUNT_AR, LIST_TYPE_DISCOUNT_EN } from "./lists/type-discount/type-discount";
 import { LIST_TYPE_ORDER_AR, LIST_TYPE_ORDER_EN } from "./lists/type-order/type-order";
+import { LIST_TYPE_PRODUCT_AR, LIST_TYPE_PRODUCT_EN } from "./lists/type-product/type-product";
 import { LIST_TYPE_SALLARY_AR, LIST_TYPE_SALLARY_EN } from "./lists/type-sallary/type-sallary";
 import { LIST_TYPE_USER_AR, LIST_TYPE_USER_EN } from "./lists/type-user/type-user";
 import { LIST_TYOE_WORK_AR, LIST_TYOE_WORK_EN } from "./lists/type-wrok/type-work";
 
 @Injectable()
 export class ListService {
-  constructor(private readonly usersService: UserService) {}
+  constructor(
+    private readonly usersService: UserService,
+    private readonly roomService: RoomsService,
+  ) {}
   #lists = {
     roles: {
       en: LISTS_ROLES_EN,
@@ -40,6 +46,14 @@ export class ListService {
       en: LIST_TYPE_SALLARY_EN,
       ar: LIST_TYPE_SALLARY_AR,
     },
+    type_discount: {
+      en: LIST_TYPE_DISCOUNT_EN,
+      ar: LIST_TYPE_DISCOUNT_AR,
+    },
+    type_product: {
+      en: LIST_TYPE_PRODUCT_EN,
+      ar: LIST_TYPE_PRODUCT_AR,
+    },
   };
 
   async getLists(keys: string[], lang: string): Promise<Record<string, any>> {
@@ -53,6 +67,7 @@ export class ListService {
 
   async getEntityList(module: string) {
     if (module === "user") return await this.usersService.findList();
+    if (module === "room") return await this.roomService.findList();
   }
 
   async getPermissionTree(permissions: { resource: string; actions: string[] }[]) {

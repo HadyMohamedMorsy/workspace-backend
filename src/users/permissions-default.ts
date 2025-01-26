@@ -103,6 +103,66 @@ export const GENERALMANGER: PermissionsUser[] = [
       Permission.INDEX,
     ],
   },
+  {
+    resource: Resource.GeneralOffer,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Rooms,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.GeneralOffer,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.OfferWorkingSpace,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.OfferPackages,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.Deals,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.VIEW,
+      Permission.DELETE,
+      Permission.INDEX,
+    ],
+  },
 ];
 
 export const OPERATIONMANGER: PermissionsUser[] = [
