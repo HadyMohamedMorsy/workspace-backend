@@ -1,8 +1,10 @@
-import { Body, Controller, Delete, HttpCode, Post } from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, UseGuards } from "@nestjs/common";
+import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DealsService } from "./deals.service";
 import { CreateDealsDto } from "./dto/create-deals.dto";
 import { UpdateDealsDto } from "./dto/update-deals.dto";
 
+@UseGuards(AuthorizationGuard)
 @Controller("deals")
 export class DealsController {
   constructor(private readonly dealsService: DealsService) {}

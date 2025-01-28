@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
+import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
@@ -8,6 +17,7 @@ import { CreateGeneralOfferDto } from "./dto/create-general-offer.dto";
 import { UpdateGeneralOfferDto } from "./dto/update-general-offer.dto";
 import { GeneralOfferService } from "./generalOffer.service";
 
+@UseGuards(AuthorizationGuard)
 @Controller("general-offer")
 export class GeneralOfferController {
   constructor(private readonly generalOfferService: GeneralOfferService) {}

@@ -1,4 +1,4 @@
-import { Module, forwardRef } from "@nestjs/common";
+import { Global, Module, forwardRef } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
 import { JwtModule } from "@nestjs/jwt";
@@ -12,6 +12,7 @@ import { HashingProvider } from "./providers/hashing.provider";
 import { RefreshTokensProvider } from "./providers/refresh-tokens.provider";
 import { SignInProvider } from "./providers/sign-in.provider";
 
+@Global()
 @Module({
   controllers: [AuthController],
   providers: [

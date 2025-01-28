@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
+import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
@@ -10,6 +19,7 @@ import { CreateIndividualDto } from "./dto/create-individual.dto";
 import { UpdateIndividualDto } from "./dto/update-individual.dto";
 import { IndividualService } from "./individual.service";
 
+@UseGuards(AuthorizationGuard)
 @Controller("individual")
 export class IndividualController {
   constructor(private readonly individualService: IndividualService) {}

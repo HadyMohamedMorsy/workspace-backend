@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
+import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permission } from "src/users/enum/permissions-enum";
@@ -8,6 +17,7 @@ import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
 import { RoomsService } from "./rooms.service";
 
+@UseGuards(AuthorizationGuard)
 @Controller("rooms")
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}

@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
+import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
@@ -12,6 +21,7 @@ import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { ProductService } from "./products.service";
 
+@UseGuards(AuthorizationGuard)
 @Controller("product")
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

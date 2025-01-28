@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, UseInterceptors } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
 import { Resource } from "src/auth/enums/auth-type.enum";
+import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
@@ -12,6 +21,7 @@ import { CreateExpensePlaceChildDto } from "./dto/create-expense-place-child.dto
 import { UpdateExpensePlaceChildDto } from "./dto/update-expense-place-child.dto";
 import { ExpensesPlaceChildService } from "./expense-place-child.service";
 
+@UseGuards(AuthorizationGuard)
 @Controller("expenses-child-place")
 export class ExpensesPlaceChildController {
   constructor(private readonly expensesPlaceChildService: ExpensesPlaceChildService) {}
