@@ -1,6 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsString, ValidateIf } from "class-validator";
-import moment from "moment";
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { TypeUser } from "src/orders/enum/type.enum";
 
 export class CreateDealsDto {
@@ -16,11 +15,11 @@ export class CreateDealsDto {
 
   @IsString()
   @IsNotEmpty()
-  start_date = moment().utc().startOf("day").toDate();
+  start_date: string;
 
   @IsString()
   @IsNotEmpty()
-  end_date = moment().utc().endOf("day").toDate();
+  end_date: string;
 
   @IsNumber()
   @Type(() => Number)
@@ -38,21 +37,8 @@ export class CreateDealsDto {
   })
   type_user: TypeUser;
 
-  @ValidateIf(obj => obj.type_user === "individual")
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
-  individual_id: number;
-
-  @ValidateIf(obj => obj.type_user === "company")
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  company_id: number;
-
-  @ValidateIf(obj => obj.type_user === "studentActivity")
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  studentActivity_id: number;
+  customer_id: number;
 }

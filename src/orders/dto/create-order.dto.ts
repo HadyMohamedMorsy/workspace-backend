@@ -6,7 +6,6 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  ValidateIf,
   ValidateNested,
 } from "class-validator";
 import { TypeOrder, TypeUser } from "../enum/type.enum";
@@ -27,29 +26,10 @@ export class CreateOrderDto {
   @IsNotEmpty()
   order_number: string;
 
-  @ValidateIf(obj => obj.type_user === "employed")
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
-  user_id: number;
-
-  @ValidateIf(obj => obj.type_user === "individual")
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  individual_id: number;
-
-  @ValidateIf(obj => obj.type_user === "company")
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  company_id: number;
-
-  @ValidateIf(obj => obj.type_user === "studentActivity")
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  studentActivity_id: number;
+  customer_id: number;
 
   @IsArray()
   @ValidateNested({ each: true })

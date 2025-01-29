@@ -6,11 +6,6 @@ export class CreateRoomDto {
   @IsNotEmpty()
   name: string;
 
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  total: number;
-
   @IsString()
   @IsNotEmpty()
   featured_image: string;

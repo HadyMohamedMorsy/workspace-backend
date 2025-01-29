@@ -1,11 +1,15 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { CompanyService } from "src/companies/company.service";
+import { IndividualService } from "src/individual/individual.service";
 import { Product } from "src/products/product.entity";
 import { ProductService } from "src/products/products.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
+import { StudentActivityService } from "src/student-activity/studentActivity.service";
 import { In, Repository } from "typeorm";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
+import { TypeUser } from "./enum/type.enum";
 import { Order } from "./order.entity";
 
 export class orderItem {
@@ -20,6 +24,9 @@ export class OrdersService {
     private orderRepository: Repository<Order>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly productService: ProductService,
+    protected readonly companyService: CompanyService,
+    protected readonly individualService: IndividualService,
+    protected readonly studentActivityService: StudentActivityService,
   ) {}
 
   // Create a new record
@@ -32,10 +39,27 @@ export class OrdersService {
       return total + this.getOrderItemTotalPrice(item, "PAID");
     }, 0);
 
+    let customer;
+
+    switch (createOrderDto.type_user) {
+      case TypeUser.Individual:
+        customer = await this.individualService.findOne(createOrderDto.customer_id);
+        break;
+      case TypeUser.Company:
+        customer = await this.companyService.findOne(createOrderDto.customer_id);
+        break;
+      case TypeUser.StudentActivity:
+        customer = await this.studentActivityService.findOne(createOrderDto.customer_id);
+        break;
+      default:
+        throw new Error("Invalid user type");
+    }
+
     const payload = {
       ...createOrderDto,
       total_order: totalOrder,
       order_price: orderPrice,
+      [createOrderDto.type_user.toLowerCase()]: customer,
       order_items: createOrderDto.order_items.map(item => {
         return {
           product: item.product.id,
