@@ -1,4 +1,4 @@
-import { TypeOrder } from "src/orders/enum/type.enum";
+import { TypeOrder } from "src/shared/enum/global-enum";
 
 export const LIST_TYPE_ORDER_EN = [
   { value: "all", label: "All" },

@@ -1,5 +1,6 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
+import { TypeOrder, TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import {
   Column,
@@ -9,7 +10,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { TypeOrder, TypeUser } from "./enum/type.enum";
 
 @Entity()
 export class Order {

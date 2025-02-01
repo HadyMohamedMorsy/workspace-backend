@@ -1,9 +1,11 @@
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Room } from "src/rooms/room.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -26,6 +28,11 @@ export class OfferPackages {
     onDelete: "CASCADE",
   })
   room: Room;
+
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.packages, {
+    onDelete: "CASCADE",
+  })
+  assignesPackages: AssignesPackages;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

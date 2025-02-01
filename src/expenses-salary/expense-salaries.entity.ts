@@ -1,3 +1,4 @@
+import { TypeSallary } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import {
   Column,
@@ -7,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { TypeSallary } from "./enum/type.enum";
 
 @Entity()
 export class ExpenseSalaries {

@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
-import { TypeUser } from "src/orders/enum/type.enum";
+import { TypeUser } from "src/shared/enum/global-enum";
 
 export class CreateDealsDto {
   @IsNumber()

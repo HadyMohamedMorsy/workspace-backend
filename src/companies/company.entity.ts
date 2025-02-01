@@ -1,5 +1,9 @@
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Order } from "src/orders/order.entity";
+import { CompanyType } from "src/shared/enum/global-enum";
 import {
   Column,
   CreateDateColumn,
@@ -8,11 +12,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-
-export enum CompanyType {
-  GENERAL = "General",
-  NGOS = "NGOs",
-}
 
 @Entity()
 export class Company {
@@ -61,6 +60,15 @@ export class Company {
 
   @OneToMany(() => Order, order => order.company)
   orders: Order[];
+
+  @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.company)
+  assignGeneralOffers: AssignGeneralOffer[];
+
+  @OneToMany(() => AssignesMembership, AssignesMembership => AssignesMembership.company)
+  assignMemeberships: AssignesMembership[];
+
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.studentActivity)
+  assignesPackages: AssignesPackages[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

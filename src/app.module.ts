@@ -8,6 +8,9 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { join } from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { AssignGeneralOfferModule } from "./assignes-global-offers/assignes-general-offer.module";
+import { AssignesMembershipModule } from "./assignes-memberships/assignes-membership.module";
+import { AssignesPackagesModule } from "./assigness-packages-offers/assignes-packages.module";
 import { AuthModule } from "./auth/auth.module";
 import jwtConfig from "./auth/config/jwt.config";
 import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard";
@@ -20,6 +23,7 @@ import { ExpensesPlaceModule } from "./expenses-place/expense-place.module";
 import { ExpensesPlaceChildModule } from "./expenses-place/expenses-place-child/expense-place-child.module";
 import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.module";
 import { GeneralOfferModule } from "./general-offer/generalOffer.module";
+import { GeneralSettingsModule } from "./general-settings/settings.module";
 import { IndividualModule } from "./individual/individual.module";
 import { OfferCoWorkingSpaceModule } from "./offer-co-working-space/offer-co-working-space.module";
 import { OfferPackageModule } from "./offer-packages/offerpackages.module";
@@ -39,6 +43,7 @@ import { TransformInterceptor } from "./shared/interceptor/transform-response.in
 import { LanMiddleware } from "./shared/middleware/lang.middleware";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
+import { TaskModule } from "./tasks/tasks.module";
 import { UsersModule } from "./users/users.module";
 
 const ENV = process.env.NODE_ENV;
@@ -52,6 +57,11 @@ const ENV = process.env.NODE_ENV;
     listModule,
     SearchModule,
     GeneralOfferModule,
+    GeneralSettingsModule,
+    TaskModule,
+    AssignesPackagesModule,
+    AssignGeneralOfferModule,
+    AssignesMembershipModule,
     OfferCoWorkingSpaceModule,
     DealsModule,
     IndividualModule,

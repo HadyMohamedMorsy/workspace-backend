@@ -4,12 +4,12 @@ import { CompanyService } from "src/companies/company.service";
 import { IndividualService } from "src/individual/individual.service";
 import { Product } from "src/products/product.entity";
 import { ProductService } from "src/products/products.service";
+import { TypeUser } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivityService } from "src/student-activity/studentActivity.service";
 import { In, Repository } from "typeorm";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
-import { TypeUser } from "./enum/type.enum";
 import { Order } from "./order.entity";
 
 export class orderItem {

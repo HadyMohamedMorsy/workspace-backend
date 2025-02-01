@@ -7,11 +7,11 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { HashingProvider } from "src/auth/providers/hashing.provider";
+import { Role } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateUserDto } from "./dtos/create-user.dto";
 import { PatchUserDto } from "./dtos/patch-user.dto";
-import { Role } from "./enum/roles-enum";
 import {
   ACCOUNTANT,
   COMMUNITY_OFFICER,

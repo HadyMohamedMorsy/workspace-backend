@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { TypeSallary } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { User } from "src/users/user.entity";
 import { UserService } from "src/users/user.service";
 import { Repository } from "typeorm";
 import { CreateExpenseSalariesDto } from "./dto/create-expense-salaries.dto";
 import { UpdateExpenseSalariesDto } from "./dto/update-expense-salaries.dto";
-import { TypeSallary } from "./enum/type.enum";
 import { ExpenseSalaries } from "./expense-salaries.entity";
 
 @Injectable()

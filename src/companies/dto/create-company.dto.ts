@@ -8,11 +8,7 @@ import {
   MaxLength,
   ValidateNested,
 } from "class-validator";
-
-export enum CompanyType {
-  GENERAL = "General",
-  NGOS = "NGOs",
-}
+import { CompanyType } from "src/shared/enum/global-enum";
 
 export class CreateCompanyDto {
   @IsString()

@@ -8,7 +8,7 @@ import {
   IsString,
   ValidateNested,
 } from "class-validator";
-import { TypeOrder, TypeUser } from "../enum/type.enum";
+import { TypeOrder, TypeUser } from "src/shared/enum/global-enum";
 
 export class CreateOrderDto {
   @IsEnum(TypeOrder, {

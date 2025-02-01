@@ -1,7 +1,7 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { TypeUser } from "src/orders/enum/type.enum";
 import { Room } from "src/rooms/room.entity";
+import { TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import {
   Column,

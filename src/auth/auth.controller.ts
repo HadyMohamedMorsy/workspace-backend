@@ -9,9 +9,9 @@ import {
 } from "@nestjs/common";
 
 import { Auth } from "src/shared/decorators/auth.decorator";
+import { AuthType } from "src/shared/enum/global-enum";
 import { RefreshTokenDto } from "./dtos/refresh-token.dto";
 import { SignInDto } from "./dtos/signin.dto";
-import { AuthType } from "./enums/auth-type.enum";
 import { AuthService } from "./providers/auth.service";
 
 @Controller("auth")

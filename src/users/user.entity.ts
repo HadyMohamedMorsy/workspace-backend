@@ -1,4 +1,6 @@
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
+import { Permission, Role } from "src/shared/enum/global-enum";
+import { Task } from "src/tasks/tasks.entity";
 import {
   Column,
   CreateDateColumn,
@@ -7,8 +9,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Permission } from "./enum/permissions-enum";
-import { Role } from "./enum/roles-enum";
 
 @Entity()
 export class User {
@@ -59,6 +59,12 @@ export class User {
     nullable: true,
   })
   password: string;
+
+  @OneToMany(() => Task, task => task.user)
+  task: Task[];
+
+  @OneToMany(() => Task, task => task.createdBy)
+  createdTasks: Task[];
 
   @OneToMany(() => ExpenseSalaries, salary => salary.user)
   salaries: User[];

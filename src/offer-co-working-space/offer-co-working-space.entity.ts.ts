@@ -1,7 +1,9 @@
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -19,6 +21,11 @@ export class CoWorkingSpace {
 
   @Column()
   days: number;
+
+  @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.memeberShip, {
+    onDelete: "CASCADE",
+  })
+  assignessMemebership: AssignesMembership[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

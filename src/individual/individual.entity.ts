@@ -1,3 +1,6 @@
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Order } from "src/orders/order.entity";
 import {
@@ -43,6 +46,15 @@ export class Individual {
 
   @OneToMany(() => Order, order => order.individual)
   orders: Order[];
+
+  @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.individual)
+  assignGeneralOffers: AssignGeneralOffer[];
+
+  @OneToMany(() => AssignesMembership, AssignesMembership => AssignesMembership.individual)
+  assignMemeberships: AssignesMembership[];
+
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.studentActivity)
+  assignesPackages: AssignesPackages[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

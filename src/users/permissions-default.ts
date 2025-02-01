@@ -1,5 +1,4 @@
-import { Resource } from "src/auth/enums/auth-type.enum";
-import { Permission } from "./enum/permissions-enum";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { PermissionsUser } from "./user.entity";
 
 export const GENERALMANGER: PermissionsUser[] = [

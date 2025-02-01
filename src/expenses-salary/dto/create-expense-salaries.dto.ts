@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsString, ValidateIf } from "class-validator";
-import { TypeSallary } from "../enum/type.enum";
+import { TypeSallary } from "src/shared/enum/global-enum";
 
 export class CreateExpenseSalariesDto {
   @IsNumber()

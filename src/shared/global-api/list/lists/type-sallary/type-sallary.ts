@@ -1,4 +1,4 @@
-import { TypeSallary } from "src/expenses-salary/enum/type.enum";
+import { TypeSallary } from "src/shared/enum/global-enum";
 
 export const LIST_TYPE_SALLARY_EN = [
   { value: "all", label: "All" },

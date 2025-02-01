@@ -1,7 +1,9 @@
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -15,6 +17,11 @@ export class GeneralOffer {
 
   @Column({ unique: true })
   name: string;
+
+  @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.generalOffer, {
+    onDelete: "CASCADE",
+  })
+  assignessOffers: GeneralOffer;
 
   @Column({ type: "timestamp", nullable: true })
   start_date: Date;

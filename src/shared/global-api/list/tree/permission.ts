@@ -1,5 +1,4 @@
-import { Resource } from "src/auth/enums/auth-type.enum";
-import { Permission } from "src/users/enum/permissions-enum";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { PermissionsUser } from "src/users/user.entity";
 
 export const PERMISSIONS_TREE: PermissionsUser[] = [

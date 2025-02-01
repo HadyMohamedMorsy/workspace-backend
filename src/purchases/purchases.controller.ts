@@ -7,15 +7,14 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { Resource } from "src/auth/enums/auth-type.enum";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
-import { Permission } from "src/users/enum/permissions-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreatePurchasDto } from "./dto/create-purchases.dto";
 import { UpdatePurchasDto } from "./dto/update-purchases.dto";

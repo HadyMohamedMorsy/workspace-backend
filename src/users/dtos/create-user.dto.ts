@@ -12,8 +12,7 @@ import {
   MinLength,
   ValidateNested,
 } from "class-validator";
-import { Permission } from "../enum/permissions-enum";
-import { Role } from "../enum/roles-enum";
+import { Permission, Role } from "src/shared/enum/global-enum";
 import { Match } from "./custom/match-password";
 
 export class CreateUserDto {

@@ -1,4 +1,4 @@
-import { TypeUser } from "src/orders/enum/type.enum";
+import { TypeUser } from "src/shared/enum/global-enum";
 
 export const LIST_TYPE_USER_EN = [
   { value: "all", label: "All" },
