@@ -3,6 +3,9 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Order } from "src/orders/order.entity";
+import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
+import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
+import { Shared } from "src/reservations/shared/shared.entity";
 import {
   Column,
   CreateDateColumn,
@@ -40,6 +43,15 @@ export class StudentActivity {
 
   @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.studentActivity)
   assignesPackages: AssignesPackages[];
+
+  @OneToMany(() => Shared, shared => shared.studentActivity)
+  shared: Shared[];
+
+  @OneToMany(() => Deskarea, deskarea => deskarea.company)
+  deskarea: Deskarea[];
+
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.studentActivity)
+  reservationRooms: ReservationRoom[];
 
   @Column("simple-array", { nullable: true })
   subjects: string[] | [null];

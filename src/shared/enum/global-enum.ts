@@ -77,3 +77,8 @@ export enum Permission {
   VIEW = "view",
   INDEX = "index",
 }
+
+export enum TimeOfDay {
+  AM = "am",
+  PM = "pm",
+}

@@ -1,11 +1,13 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackages } from "src/offer-packages/offer-package.entity.ts";
+import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -34,6 +36,11 @@ export class AssignesPackages {
     onDelete: "CASCADE",
   })
   packages: OfferPackages;
+
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages, {
+    onDelete: "CASCADE",
+  })
+  reservationRooms: ReservationRoom;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
