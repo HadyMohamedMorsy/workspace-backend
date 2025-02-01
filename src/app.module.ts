@@ -30,6 +30,9 @@ import { OfferPackageModule } from "./offer-packages/offerpackages.module";
 import { OrdersModule } from "./orders/orders.module";
 import { ProductsModule } from "./products/products.module";
 import { PurchasesModule } from "./purchases/purchases.module";
+import { DeskareaModule } from "./reservations/deskarea/deskarea.module";
+import { ReservationRoomModule } from "./reservations/rooms/reservation-room.module";
+import { SharedModule } from "./reservations/shared/shared.module";
 import { ReturnsModule } from "./returns/returns.module";
 import { RoomsModule } from "./rooms/rooms.module";
 import appConfig from "./shared/config/app.config";
@@ -60,6 +63,9 @@ const ENV = process.env.NODE_ENV;
     GeneralSettingsModule,
     TaskModule,
     AssignesPackagesModule,
+    DeskareaModule,
+    ReservationRoomModule,
+    SharedModule,
     AssignGeneralOfferModule,
     AssignesMembershipModule,
     OfferCoWorkingSpaceModule,
