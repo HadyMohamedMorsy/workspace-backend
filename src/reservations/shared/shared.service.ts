@@ -1,13 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Company } from "src/companies/company.entity";
-import { CompanyService } from "src/companies/company.service";
 import { Individual } from "src/individual/individual.entity";
-import { IndividualService } from "src/individual/individual.service";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
-import { StudentActivityService } from "src/student-activity/studentActivity.service";
 import { In, Repository } from "typeorm";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
@@ -18,9 +15,6 @@ export class SharedService {
   constructor(
     @InjectRepository(Shared)
     private sharedRepository: Repository<Shared>,
-    protected readonly individualService: IndividualService,
-    protected readonly companyService: CompanyService,
-    protected readonly studentActivityService: StudentActivityService,
     protected readonly apiFeaturesService: APIFeaturesService,
   ) {}
 

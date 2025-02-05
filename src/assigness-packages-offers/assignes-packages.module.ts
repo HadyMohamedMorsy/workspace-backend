@@ -1,28 +1,22 @@
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { CompanyModule } from "src/companies/company.module";
-import { IndividualModule } from "src/individual/individual.module";
 import { OfferPackageModule } from "src/offer-packages/offerpackages.module";
 import { customerMiddleware } from "src/shared/middleware/customer.middleware";
-import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { AssignesPackageController } from "./assignes-packages.controller";
-import { assignes_packages } from "./assignes-packages.entity";
-import { assignes_packagesService } from "./assignes-packages.service";
+import { AssignesPackages } from "./assignes-packages.entity";
+import { AssignesPackagesService } from "./assignes-packages.service";
+import { CheckActivePackagesMiddleware } from "./middleware/assigness-packages,middleware";
 
 @Module({
-  imports: [
-    OfferPackageModule,
-    IndividualModule,
-    CompanyModule,
-    StudentActivityModule,
-    TypeOrmModule.forFeature([assignes_packages]),
-  ],
+  imports: [OfferPackageModule, TypeOrmModule.forFeature([AssignesPackages])],
   controllers: [AssignesPackageController],
-  providers: [assignes_packagesService],
-  exports: [assignes_packagesService],
+  providers: [AssignesPackagesService],
+  exports: [AssignesPackagesService],
 })
-export class assignes_packagesModule {
+export class assignesPackagesModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(customerMiddleware).forRoutes("assignes-package/store");
+    consumer
+      .apply(CheckActivePackagesMiddleware, customerMiddleware)
+      .forRoutes("assignes-package/store");
   }
 }

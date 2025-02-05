@@ -17,14 +17,14 @@ import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-re
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
-import { assign_general_offerservice } from "./assignes-general-offer.service";
+import { AssignGeneralOfferservice } from "./assignes-general-offer.service";
 import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.dto";
 import { UpdateAssignGeneralOfferDto } from "./dto/update-assign-general-offer.dto";
 
 @UseGuards(AuthorizationGuard)
 @Controller("assign-general-offer")
 export class AssignGeneralOfferController {
-  constructor(private readonly assign_general_offerservice: assign_general_offerservice) {}
+  constructor(private readonly AssignGeneralOfferservice: AssignGeneralOfferservice) {}
 
   @Post("/index")
   @HttpCode(200)
@@ -36,7 +36,7 @@ export class AssignGeneralOfferController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.assign_general_offerservice.findAll(filterQueryDto);
+    return this.AssignGeneralOfferservice.findAll(filterQueryDto);
   }
 
   @Post("/store")
@@ -54,7 +54,7 @@ export class AssignGeneralOfferController {
   ) {
     const customer = req["customer"];
 
-    return await this.assign_general_offerservice.create(createAssignGeneralOfferDto, customer);
+    return await this.AssignGeneralOfferservice.create(createAssignGeneralOfferDto, customer);
   }
 
   @Post("/update")
@@ -67,7 +67,7 @@ export class AssignGeneralOfferController {
     },
   ])
   async update(@Body() updateAssignGeneralOfferDto: UpdateAssignGeneralOfferDto) {
-    return await this.assign_general_offerservice.update(updateAssignGeneralOfferDto);
+    return await this.AssignGeneralOfferservice.update(updateAssignGeneralOfferDto);
   }
 
   @Delete("/delete")
@@ -80,6 +80,6 @@ export class AssignGeneralOfferController {
     },
   ])
   async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.assign_general_offerservice.remove(bodyDelete.id);
+    return this.AssignGeneralOfferservice.remove(bodyDelete.id);
   }
 }

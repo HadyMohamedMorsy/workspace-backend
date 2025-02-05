@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateCoWorkingSpaceDto } from "./dto/create-offer-co-working-space.dto";
@@ -40,6 +41,116 @@ export class OfferCoWorkingSpaceService {
     const offers = await this.offerCoWorkingSpaceRepository.find({});
     return {
       data: offers,
+    };
+  }
+
+  async findOneRelatedIndividual(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessMemebership", "ea")
+      .leftJoinAndSelect("ea.individual", "ei")
+      .andWhere("e.id = :memeber_id", {
+        memeber_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedCompany(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessMemebership", "ea")
+      .leftJoinAndSelect("ea.company", "ec")
+      .andWhere("e.id = :memeber_id", {
+        memeber_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedStudentActivity(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessMemebership", "ea")
+      .leftJoinAndSelect("ea.studentActivity", "es")
+      .andWhere("e.id = :memeber_id", {
+        memeber_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedShared(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessMemebership", "ea")
+      .leftJoinAndSelect("ea.shared", "ec")
+      .andWhere("e.id = :memeber_id", {
+        memeber_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedDeskArea(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessMemebership", "ea")
+      .leftJoinAndSelect("ea.deskarea", "ec")
+      .andWhere("e.id = :memeber_id", {
+        memeber_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
     };
   }
 

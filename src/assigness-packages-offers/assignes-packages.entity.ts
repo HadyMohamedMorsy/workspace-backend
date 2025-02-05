@@ -15,34 +15,34 @@ import {
 } from "typeorm";
 
 @Entity()
-export class assignes_packages {
+export class AssignesPackages {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: "enum", enum: ReservationStatus })
   status: ReservationStatus;
 
-  @ManyToOne(() => Individual, individual => individual.assignes_packages, {
+  @ManyToOne(() => Individual, individual => individual.assignesPackages, {
     onDelete: "CASCADE",
   })
   individual: Individual;
 
-  @ManyToOne(() => Company, company => company.assignes_packages, {
+  @ManyToOne(() => Company, company => company.assignesPackages, {
     onDelete: "CASCADE",
   })
   company: Company;
 
-  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.assignes_packages, {
+  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.assignesPackages, {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
 
-  @ManyToOne(() => OfferPackages, offerPackages => offerPackages.assignes_packages, {
+  @ManyToOne(() => OfferPackages, offerPackages => offerPackages.assignesPackages, {
     onDelete: "CASCADE",
   })
   packages: OfferPackages;
 
-  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignes_packages, {
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages, {
     onDelete: "CASCADE",
   })
   reservationRooms: ReservationRoom;

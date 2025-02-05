@@ -1,6 +1,6 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
-import { assignes_packages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
@@ -70,8 +70,8 @@ export class Company {
   @OneToMany(() => AssignesMembership, AssignesMembership => AssignesMembership.company)
   assign_memberships: AssignesMembership[];
 
-  @OneToMany(() => assignes_packages, assignes_packages => assignes_packages.studentActivity)
-  assignes_packages: assignes_packages[];
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.studentActivity)
+  assignesPackages: AssignesPackages[];
 
   @OneToMany(() => Shared, shared => shared.company)
   shared: Shared[];

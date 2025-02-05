@@ -7,7 +7,7 @@ import { customerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { AssignGeneralOfferController } from "./assignes-general-offer.controller";
 import { AssignGeneralOffer } from "./assignes-general-offer.entity";
-import { assign_general_offerservice } from "./assignes-general-offer.service";
+import { AssignGeneralOfferservice } from "./assignes-general-offer.service";
 
 @Module({
   imports: [
@@ -18,8 +18,8 @@ import { assign_general_offerservice } from "./assignes-general-offer.service";
     TypeOrmModule.forFeature([AssignGeneralOffer]),
   ],
   controllers: [AssignGeneralOfferController],
-  providers: [assign_general_offerservice],
-  exports: [assign_general_offerservice],
+  providers: [AssignGeneralOfferservice],
+  exports: [AssignGeneralOfferservice],
 })
 export class AssignGeneralOfferModule {
   configure(consumer: MiddlewareConsumer) {

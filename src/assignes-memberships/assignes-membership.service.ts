@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
@@ -64,6 +65,78 @@ export class AssignesMembershipService {
       throw new NotFoundException(`AssignesMembership with id ${id} not found`);
     }
     return assignesMembership;
+  }
+
+  async findAssignesByIndividual(filterData: any) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(AssignGeneralOffer)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.individual", "ei")
+      .leftJoinAndSelect("e.memeberShip", "em")
+      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deskarea", "ed")
+      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+  async findAssignesByCompany(filterData: any) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(AssignGeneralOffer)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.company", "ec")
+      .leftJoinAndSelect("e.memeberShip", "em")
+      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deskarea", "ed")
+      .andWhere("ec.id = :company_id", { company_id: filterData.company_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+  async findAssignesByStudentActivity(filterData: any) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(AssignGeneralOffer)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.studentActivity", "es")
+      .leftJoinAndSelect("e.memeberShip", "em")
+      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deskarea", "ed")
+      .andWhere("es.id = :studentActivity_id", {
+        studentActivity_id: filterData.studentActivity_id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
   }
 
   // Update a record

@@ -48,6 +48,72 @@ export class GeneralOfferService {
     return this.generalOfferRepository.findOne({ where: { id } });
   }
 
+  async findOneRelatedIndividual(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessOffers", "ea")
+      .leftJoinAndSelect("ea.individual", "ei")
+      .andWhere("e.id = :offer_id", {
+        offer_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedCompany(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessOffers", "ea")
+      .leftJoinAndSelect("ea.company", "ec")
+      .andWhere("e.id = :offer_id", {
+        offer_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedStudentActivity(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignessOffers", "ea")
+      .leftJoinAndSelect("ea.studentActivity", "es")
+      .andWhere("e.id = :offer_id", {
+        offer_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
   // Update a record
   async update(updateGeneralOfferDto: UpdateGeneralOfferDto) {
     await this.generalOfferRepository.update(updateGeneralOfferDto.id, updateGeneralOfferDto);

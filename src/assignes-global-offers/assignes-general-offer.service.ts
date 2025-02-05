@@ -11,7 +11,7 @@ import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.d
 import { UpdateAssignGeneralOfferDto } from "./dto/update-assign-general-offer.dto";
 
 @Injectable()
-export class assign_general_offerservice {
+export class AssignGeneralOfferservice {
   constructor(
     @InjectRepository(AssignGeneralOffer)
     private assignGeneralOfferRepository: Repository<AssignGeneralOffer>,
@@ -63,6 +63,72 @@ export class assign_general_offerservice {
       throw new NotFoundException(`AssignGeneralOffer with id ${id} not found`);
     }
     return assignGeneralOffer;
+  }
+
+  async findAssignesByIndividual(filterData: any) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(AssignGeneralOffer)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.individual", "ei")
+      .leftJoinAndSelect("e.generalOffer", "eg")
+      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+  async findAssignesByCompany(filterData: any) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(AssignGeneralOffer)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.company", "ec")
+      .leftJoinAndSelect("e.generalOffer", "eg")
+      .andWhere("ec.id = :company_id", { company_id: filterData.company_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+  async findAssignesByStudentActivity(filterData: any) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(AssignGeneralOffer)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.studentActivity", "es")
+      .leftJoinAndSelect("e.generalOffer", "eg")
+      .andWhere("es.id = :studentActivity_id", {
+        studentActivity_id: filterData.studentActivity_id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
   }
 
   // Update a record

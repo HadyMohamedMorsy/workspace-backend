@@ -17,14 +17,14 @@ import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-re
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
-import { assignes_packagesService } from "./assignes-packages.service";
+import { AssignesPackagesService } from "./assignes-packages.service";
 import { CreateAssignesPackageDto } from "./dto/create-assignes-packages.dto";
 import { UpdateAssignesPackageDto } from "./dto/update-assignes-packages.dto";
 
 @UseGuards(AuthorizationGuard)
 @Controller("assignes-package")
 export class AssignesPackageController {
-  constructor(private readonly assignes_packageservice: assignes_packagesService) {}
+  constructor(private readonly AssignesPackagesService: AssignesPackagesService) {}
 
   @Post("/index")
   @HttpCode(200)
@@ -36,7 +36,7 @@ export class AssignesPackageController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.assignes_packageservice.findAll(filterQueryDto);
+    return this.AssignesPackagesService.findAll(filterQueryDto);
   }
 
   @Post("/store")
@@ -50,7 +50,7 @@ export class AssignesPackageController {
   ])
   async create(@Body() createAssignesPackageDto: CreateAssignesPackageDto, @Req() req: Request) {
     const customer = req["customer"];
-    return await this.assignes_packageservice.create(createAssignesPackageDto, customer);
+    return await this.AssignesPackagesService.create(createAssignesPackageDto, customer);
   }
 
   @Post("/update")
@@ -63,7 +63,7 @@ export class AssignesPackageController {
     },
   ])
   async update(@Body() updateAssignesPackageDto: UpdateAssignesPackageDto) {
-    return await this.assignes_packageservice.update(updateAssignesPackageDto);
+    return await this.AssignesPackagesService.update(updateAssignesPackageDto);
   }
 
   @Delete("/delete")
@@ -76,6 +76,6 @@ export class AssignesPackageController {
     },
   ])
   async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.assignes_packageservice.remove(bodyDelete.id);
+    return this.AssignesPackagesService.remove(bodyDelete.id);
   }
 }

@@ -3,17 +3,17 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { NextFunction, Request, Response } from "express";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { Repository } from "typeorm";
-import { AssignesMembership } from "../assignes-membership.entity";
+import { AssignesPackages } from "../assignes-packages.entity";
 
 @Injectable()
-export class CheckActiveMembershipMiddleware implements NestMiddleware {
+export class CheckActivePackagesMiddleware implements NestMiddleware {
   constructor(
-    @InjectRepository(AssignesMembership)
-    private readonly assignesMembershipRepository: Repository<AssignesMembership>,
+    @InjectRepository(AssignesPackages)
+    private readonly assignesPackagesRepositry: Repository<AssignesPackages>,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { customer_id, membership_id, type_user } = req.body;
+    const { customer_id, package_id, type_user } = req.body;
 
     if (!["individual", "company", "studentActivity"].includes(type_user)) {
       throw new Error("Invalid customer type");
@@ -32,17 +32,17 @@ export class CheckActiveMembershipMiddleware implements NestMiddleware {
         break;
     }
 
-    const existingActiveMembership = await this.assignesMembershipRepository.findOne({
+    const existingOfferPackage = await this.assignesPackagesRepositry.findOne({
       where: {
         ...customerCondition,
-        memeberShip: { id: membership_id },
+        packages: { id: package_id },
         status: ReservationStatus.ACTIVE,
       },
     });
 
-    if (existingActiveMembership) {
+    if (existingOfferPackage) {
       throw new ConflictException(
-        "An active membership already exists for this customer and membership.",
+        "An active offer Package already exists for this customer and offer Package.",
       );
     }
 

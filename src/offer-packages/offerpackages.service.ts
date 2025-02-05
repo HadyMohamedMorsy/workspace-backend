@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { RoomsService } from "src/rooms/rooms.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -54,6 +55,93 @@ export class OfferPackagesService {
   // Get record by ID
   async findOne(id: number): Promise<OfferPackages> {
     return this.offerpackagesRepository.findOne({ where: { id } });
+  }
+
+  async findOneRelatedIndividual(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignesPackages", "ea")
+      .leftJoinAndSelect("ea.individual", "ei")
+      .andWhere("e.id = :offer_id", {
+        offer_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedCompany(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignesPackages", "ea")
+      .leftJoinAndSelect("ea.company", "ec")
+      .andWhere("e.id = :offer_package_id", {
+        offer_package_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOneRelatedStudentActivity(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignesPackages", "ea")
+      .leftJoinAndSelect("ea.studentActivity", "es")
+      .andWhere("e.id = :offer_package_id", {
+        offer_package_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+  async findOneRelatedRoom(filterData: any) {
+    this.apiFeaturesService.setRepository(GeneralOffer);
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assignesPackages", "ea")
+      .leftJoinAndSelect("ea.room", "es")
+      .andWhere("e.id = :offer_package_id", {
+        offer_package_id: filterData.id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
   }
 
   // Update a record

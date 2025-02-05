@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsString, Validate } from "class-validator";
 import { TimeOfDay } from "src/shared/enum/global-enum";
-import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-houer-validation";
+import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-hour-validation";
 
 export class CreateDeskAreaDto {
   @IsString()

@@ -21,7 +21,7 @@ export class GeneralOffer {
   @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.generalOffer, {
     onDelete: "CASCADE",
   })
-  assignessOffers: GeneralOffer;
+  assignessOffers: AssignGeneralOffer;
 
   @Column({ type: "timestamp", nullable: true })
   start_date: Date;

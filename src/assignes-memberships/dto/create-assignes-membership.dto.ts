@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { IsDateBefore } from "src/shared/validations/is-date-before.validation";
 
 export class CreateAssignesMembershipDto {
   @IsNumber()
@@ -15,6 +16,7 @@ export class CreateAssignesMembershipDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsDateBefore("end_date")
   start_date: string;
 
   @IsString()

@@ -3,7 +3,7 @@ import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsString, Validate } from "class-validator";
 import { TimeOfDay } from "src/shared/enum/global-enum";
 import { IsNotPastTimeGroupValidator } from "src/shared/validations/is-current-time";
-import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-houer-validation";
+import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-hour-validation";
 import { CreateSharedDto } from "./create-shared.dto";
 
 export class UpdateSharedDto extends PartialType(CreateSharedDto) {

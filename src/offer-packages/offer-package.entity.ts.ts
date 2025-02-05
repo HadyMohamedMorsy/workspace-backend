@@ -1,4 +1,4 @@
-import { assignes_packages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Room } from "src/rooms/room.entity";
 import {
   Column,
@@ -29,10 +29,10 @@ export class OfferPackages {
   })
   room: Room;
 
-  @OneToMany(() => assignes_packages, assignes_packages => assignes_packages.packages, {
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.packages, {
     onDelete: "CASCADE",
   })
-  assignes_packages: assignes_packages;
+  assignesPackages: AssignesPackages;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
