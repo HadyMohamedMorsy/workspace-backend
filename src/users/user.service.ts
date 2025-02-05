@@ -32,15 +32,13 @@ export class UserService {
   ) {}
 
   public async findAll(filterData: any) {
-    this.apiFeaturesService.setRepository(User);
-    const filteredRecords = await this.apiFeaturesService
-      .setRepository(User)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(User).buildQuery(filterData);
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
-      data: filteredRecords,
-      recordsFiltered: filteredRecords.length,
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
     };
   }

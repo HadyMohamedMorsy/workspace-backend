@@ -22,10 +22,10 @@ export class IndividualService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
-      .setRepository(Individual)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Individual).buildQuery(filterData);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     const results = {
       data: filteredRecord,

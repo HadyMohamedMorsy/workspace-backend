@@ -20,11 +20,21 @@ export class GeneralOfferService {
     return await this.generalOfferRepository.save(generalOffer);
   }
 
+  async findList() {
+    const offers = await this.generalOfferRepository.find({});
+    return {
+      data: offers,
+    };
+  }
+
   // Get all records
   async findAll(filterData) {
     this.apiFeaturesService.setRepository(GeneralOffer);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+
+    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,

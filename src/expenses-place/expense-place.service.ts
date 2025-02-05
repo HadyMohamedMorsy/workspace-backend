@@ -22,10 +22,10 @@ export class ExpensesPlaceService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
-      .setRepository(ExpensePlace)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(ExpensePlace).buildQuery(filterData);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,

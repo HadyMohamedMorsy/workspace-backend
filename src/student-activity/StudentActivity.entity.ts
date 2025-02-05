@@ -1,6 +1,6 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
-import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { assignes_packages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
@@ -36,13 +36,13 @@ export class StudentActivity {
   orders: Order[];
 
   @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.studentActivity)
-  assignGeneralOffers: AssignGeneralOffer[];
+  assign_general_offers: AssignGeneralOffer[];
 
   @OneToMany(() => AssignesMembership, AssignesMembership => AssignesMembership.studentActivity)
-  assignMemeberships: AssignesMembership[];
+  assign_memberships: AssignesMembership[];
 
-  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.studentActivity)
-  assignesPackages: AssignesPackages[];
+  @OneToMany(() => assignes_packages, assignes_packages => assignes_packages.studentActivity)
+  assignes_packages: assignes_packages[];
 
   @OneToMany(() => Shared, shared => shared.studentActivity)
   shared: Shared[];

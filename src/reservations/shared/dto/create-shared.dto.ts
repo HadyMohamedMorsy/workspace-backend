@@ -1,48 +1,48 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsString, Validate } from "class-validator";
-import { TimeOfDay } from "src/shared/enum/global-enum";
-import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-houer-validation";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Validate } from "class-validator";
+import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { IsNotPastTimeGroupValidator } from "src/shared/validations/is-current-time";
 
 export class CreateSharedDto {
   @IsString()
   @IsNotEmpty()
   selected_day: string;
 
-  @IsString()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
-  start_hour: string;
+  start_hour: number;
 
-  @IsString()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
-  start_minute: string;
+  start_minute: number;
 
   @IsString()
   @IsNotEmpty()
   @IsEnum(TimeOfDay)
   start_time: TimeOfDay;
 
-  @IsString()
-  @IsNotEmpty()
-  end_hour: string;
-
-  @IsString()
-  @IsNotEmpty()
-  end_minute: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @IsEnum(TimeOfDay)
-  end_time: TimeOfDay;
-
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
   customer_id: number;
 
+  @IsEnum(TypeUser, {
+    message:
+      "type order must be one of the following: individual or company or studentActivity or User",
+  })
+  type_user: TypeUser;
+
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
   note: string;
 
-  @Validate(IsStartBeforeEndValidator)
-  validate_time: boolean;
+  @IsEnum(ReservationStatus)
+  @IsOptional()
+  status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  @Validate(IsNotPastTimeGroupValidator)
+  validateStartTimeGroup: boolean;
 }

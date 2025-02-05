@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
-import { TypeUser } from "src/shared/enum/global-enum";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 
 export class CreateAssignesPackageDto {
   @IsNumber()
@@ -26,4 +26,8 @@ export class CreateAssignesPackageDto {
   @IsString()
   @IsNotEmpty()
   end_date: string;
+
+  @IsEnum(ReservationStatus)
+  @IsOptional()
+  status: ReservationStatus = ReservationStatus.ACTIVE;
 }

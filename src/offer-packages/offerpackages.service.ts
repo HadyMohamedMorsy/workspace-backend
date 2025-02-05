@@ -28,17 +28,26 @@ export class OfferPackagesService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(OfferPackages);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData({
-      ...filterData,
-      relations: ["room"],
-    });
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(OfferPackages)
+      .buildQuery(filterData);
+
+    queryBuilder.leftJoin("e.room", "er").addSelect(["er.id", "er.name"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
+    };
+  }
+
+  async findList() {
+    const offers = await this.offerpackagesRepository.find({});
+    return {
+      data: offers,
     };
   }
 

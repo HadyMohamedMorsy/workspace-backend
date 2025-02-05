@@ -22,10 +22,11 @@ export class StudentActivityService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
+    const queryBuilder = this.apiFeaturesService
       .setRepository(StudentActivity)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+      .buildQuery(filterData);
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,

@@ -1,8 +1,8 @@
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum } from "class-validator";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { TimeOfDay } from "src/shared/enum/global-enum";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -15,24 +15,25 @@ export class Shared {
   selected_day: string;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
-  start_hour: string;
+  start_hour: number;
 
   @Column()
-  start_minute: string;
+  start_minute: number;
 
   @Column({ type: "enum", enum: TimeOfDay })
   @IsEnum(TimeOfDay)
   start_time: TimeOfDay;
 
-  @Column()
-  end_hour: string;
+  @Column({ nullable: true })
+  end_hour: number;
 
-  @Column()
-  end_minute: string;
+  @Column({ nullable: true })
+  end_minute: number;
 
-  @Column({ type: "enum", enum: TimeOfDay })
+  @Column({ type: "enum", enum: ReservationStatus })
+  status: ReservationStatus;
+
+  @Column({ type: "enum", enum: TimeOfDay, nullable: true })
   @IsEnum(TimeOfDay)
   end_time: TimeOfDay;
 

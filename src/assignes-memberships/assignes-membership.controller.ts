@@ -4,12 +4,15 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
+import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
@@ -37,15 +40,20 @@ export class AssignesMembershipController {
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createAssignesMembershipDto: CreateAssignesMembershipDto) {
-    return await this.assignesMembershipService.create(createAssignesMembershipDto);
+  async create(
+    @Body() createAssignesMembershipDto: CreateAssignesMembershipDto,
+    @Req() req: Request,
+  ) {
+    const customer = req["customer"];
+    return await this.assignesMembershipService.create(createAssignesMembershipDto, customer);
   }
 
   @Post("/update")

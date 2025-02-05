@@ -39,14 +39,13 @@ export class TaskService {
 
   // Get all tasks
   async findAll(filterData) {
-    const filteredTasks = await this.apiFeaturesService
-      .setRepository(Task) // Change to Task
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Task).buildQuery(filterData);
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     const results = {
-      data: filteredTasks,
-      recordsFiltered: filteredTasks.length,
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
     };
 

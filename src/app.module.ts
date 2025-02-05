@@ -10,7 +10,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AssignGeneralOfferModule } from "./assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "./assignes-memberships/assignes-membership.module";
-import { AssignesPackagesModule } from "./assigness-packages-offers/assignes-packages.module";
+import { assignes_packagesModule } from "./assigness-packages-offers/assignes-packages.module";
 import { AuthModule } from "./auth/auth.module";
 import jwtConfig from "./auth/config/jwt.config";
 import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard";
@@ -47,7 +47,6 @@ import { LanMiddleware } from "./shared/middleware/lang.middleware";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
 import { TaskModule } from "./tasks/tasks.module";
-import { UsersModule } from "./users/users.module";
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -62,7 +61,7 @@ const ENV = process.env.NODE_ENV;
     GeneralOfferModule,
     GeneralSettingsModule,
     TaskModule,
-    AssignesPackagesModule,
+    assignes_packagesModule,
     DeskareaModule,
     ReservationRoomModule,
     SharedModule,
@@ -81,7 +80,7 @@ const ENV = process.env.NODE_ENV;
     OrdersModule,
     StudentActivityModule,
     FilterDateModule,
-    UsersModule,
+    // UsersModule,
     AuthModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "uploads"),

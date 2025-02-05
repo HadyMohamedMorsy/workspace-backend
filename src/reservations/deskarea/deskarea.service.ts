@@ -22,11 +22,9 @@ export class DeskareaService {
 
   // Get all deskareas
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
-      .setRepository(Deskarea)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
-
+    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
     return {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,

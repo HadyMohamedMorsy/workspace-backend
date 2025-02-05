@@ -42,13 +42,16 @@ export class ExpensesSalariesService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
+    const queryBuilder = this.apiFeaturesService
       .setRepository(ExpenseSalaries)
-      .getFilteredData({
-        ...filterData,
-        relations: ["user"],
-      });
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin("e.user", "ep")
+      .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,

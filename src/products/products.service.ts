@@ -63,15 +63,15 @@ export class ProductService {
 
   // Get all products
   async findAll(filterData) {
-    const filteredProducts = await this.apiFeaturesService.setRepository(Product).getFilteredData({
-      ...filterData,
-      relations: ["categories"],
-    });
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Product).buildQuery(filterData);
+    queryBuilder.leftJoin("e.categories", "ep").addSelect(["ep.id", "ep.name"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
-      data: filteredProducts,
-      recordsFiltered: filteredProducts.length,
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
     };
   }

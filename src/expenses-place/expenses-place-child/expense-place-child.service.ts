@@ -37,17 +37,22 @@ export class ExpensesPlaceChildService {
 
   // Get all records
   async findAll(filterData) {
-    const data = await this.apiFeaturesService.setRepository(ExpensePlaceChild).getFilteredData({
-      ...filterData,
-      relations: ["expensePlace"],
-      findRelated: { moduleName: "expensePlace", id: filterData.expensePlace_id },
-    });
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(ExpensePlaceChild)
+      .buildQuery(filterData);
 
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    if (filterData.expensePlace_id) {
+      queryBuilder.leftJoin("e.expensePlace", "ep").andWhere("ep.id = :expenseplace_id", {
+        expenseplace_id: filterData.expensePlace_id,
+      });
+    }
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
-      data: data,
-      recordsFiltered: data.length,
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
     };
   }

@@ -6,6 +6,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -54,8 +55,9 @@ export class OrderController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createOrderDto: CreateOrderDto) {
-    return await this.ordersService.create(createOrderDto);
+  async create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
+    const customer = req["customer"];
+    return await this.ordersService.create(createOrderDto, customer);
   }
 
   @Post("/update")

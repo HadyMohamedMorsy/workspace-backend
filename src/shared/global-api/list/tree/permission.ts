@@ -162,4 +162,54 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
       Permission.INDEX,
     ],
   },
+  {
+    resource: Resource.Shared,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.AssignesPackage,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.ReservationRoom,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.AssignGeneralOffer,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.INDEX,
+    ],
+  },
+  {
+    resource: Resource.AssignesMembership,
+    actions: [
+      Permission.CREATE,
+      Permission.UPDATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.INDEX,
+    ],
+  },
 ];

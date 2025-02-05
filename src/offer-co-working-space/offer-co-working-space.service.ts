@@ -22,14 +22,24 @@ export class OfferCoWorkingSpaceService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(CoWorkingSpace);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(CoWorkingSpace)
+      .buildQuery(filterData);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
+    };
+  }
+
+  async findList() {
+    const offers = await this.offerCoWorkingSpaceRepository.find({});
+    return {
+      data: offers,
     };
   }
 

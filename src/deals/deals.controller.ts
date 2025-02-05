@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DealsService } from "./deals.service";
 import { CreateDealsDto } from "./dto/create-deals.dto";
@@ -16,8 +16,9 @@ export class DealsController {
   }
 
   @Post("/store")
-  async create(@Body() createDealsDto: CreateDealsDto) {
-    return await this.dealsService.create(createDealsDto);
+  async create(@Body() createDealsDto: CreateDealsDto, @Req() req: Request) {
+    const customer = req["customer"];
+    return await this.dealsService.create(createDealsDto, customer);
   }
 
   @Post("/update")

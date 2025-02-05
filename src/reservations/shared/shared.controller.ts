@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -37,16 +38,16 @@ export class SharedController {
   }
 
   @Post("/store")
-  @EntityName("shared")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createSharedDto: CreateSharedDto) {
-    return await this.sharedService.create(createSharedDto);
+  async create(@Body() createSharedDto: CreateSharedDto, @Req() req: Request) {
+    const customer = req["customer"];
+    return await this.sharedService.create(createSharedDto, customer);
   }
 
   @Post("/update")

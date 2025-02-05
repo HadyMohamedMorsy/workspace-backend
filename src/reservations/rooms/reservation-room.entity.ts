@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString } from "class-validator";
-import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { assignes_packages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
@@ -52,10 +52,10 @@ export class ReservationRoom {
   })
   studentActivity: StudentActivity;
 
-  @ManyToOne(() => AssignesPackages, assignesPackages => assignesPackages.reservationRooms, {
+  @ManyToOne(() => assignes_packages, assignes_packages => assignes_packages.reservationRooms, {
     onDelete: "CASCADE",
   })
-  assignesPackages: AssignesPackages;
+  assignes_packages: assignes_packages;
 
   @ManyToOne(() => Room, room => room.reservationRoom, {
     onDelete: "CASCADE",

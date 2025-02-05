@@ -1,4 +1,7 @@
 import { Injectable } from "@nestjs/common";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
+import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
+import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
 import { RoomsService } from "src/rooms/rooms.service";
 import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
@@ -16,6 +19,9 @@ export class ListService {
   constructor(
     private readonly usersService: UserService,
     private readonly roomService: RoomsService,
+    private readonly generalOfferService: GeneralOfferService,
+    private readonly offerPackagesService: OfferPackagesService,
+    private readonly offerCoWorkingSpaceService: OfferCoWorkingSpaceService,
   ) {}
   #lists = {
     roles: {
@@ -68,6 +74,9 @@ export class ListService {
   async getEntityList(module: string) {
     if (module === "user") return await this.usersService.findList();
     if (module === "room") return await this.roomService.findList();
+    if (module === "global-offer") return await this.generalOfferService.findList();
+    if (module === "membership-offer") return await this.offerCoWorkingSpaceService.findList();
+    if (module === "offer-package-offer") return await this.offerPackagesService.findList();
   }
 
   async getPermissionTree(permissions: { resource: string; actions: string[] }[]) {

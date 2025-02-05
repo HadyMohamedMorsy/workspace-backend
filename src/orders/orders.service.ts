@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CompanyService } from "src/companies/company.service";
-import { IndividualService } from "src/individual/individual.service";
+import { Company } from "src/companies/company.entity";
+import { Individual } from "src/individual/individual.entity";
 import { Product } from "src/products/product.entity";
 import { ProductService } from "src/products/products.service";
-import { TypeUser } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { StudentActivityService } from "src/student-activity/studentActivity.service";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { In, Repository } from "typeorm";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
@@ -24,13 +23,13 @@ export class OrdersService {
     private orderRepository: Repository<Order>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly productService: ProductService,
-    protected readonly companyService: CompanyService,
-    protected readonly individualService: IndividualService,
-    protected readonly studentActivityService: StudentActivityService,
   ) {}
 
   // Create a new record
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+  async create(
+    createOrderDto: CreateOrderDto,
+    customer: Individual | Company | StudentActivity,
+  ): Promise<Order> {
     const totalOrder = createOrderDto.order_items.reduce((total, item) => {
       return total + this.getOrderItemTotalPrice(item, createOrderDto.type_order);
     }, 0);
@@ -38,22 +37,6 @@ export class OrdersService {
     const orderPrice = createOrderDto.order_items.reduce((total, item) => {
       return total + this.getOrderItemTotalPrice(item, "PAID");
     }, 0);
-
-    let customer;
-
-    switch (createOrderDto.type_user) {
-      case TypeUser.Individual:
-        customer = await this.individualService.findOne(createOrderDto.customer_id);
-        break;
-      case TypeUser.Company:
-        customer = await this.companyService.findOne(createOrderDto.customer_id);
-        break;
-      case TypeUser.StudentActivity:
-        customer = await this.studentActivityService.findOne(createOrderDto.customer_id);
-        break;
-      default:
-        throw new Error("Invalid user type");
-    }
 
     const payload = {
       ...createOrderDto,
@@ -88,10 +71,17 @@ export class OrdersService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
-      .setRepository(Order)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+    queryBuilder
+      .leftJoin("e.individual", "ep")
+      .addSelect(["ep.id", "ep.name", "ep.whatsApp"])
+      .leftJoin("e.company", "ec")
+      .addSelect(["ec.id", "ec.phone", "ec.name"])
+      .leftJoin("e.studentActivity", "es")
+      .addSelect(["es.id", "es.name", "es.unviresty"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,

@@ -22,9 +22,9 @@ export class RoomsService {
 
   // Get all records
   async findAll(filterData) {
-    this.apiFeaturesService.setRepository(Room);
-    const filteredRecord = await this.apiFeaturesService.getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Room).buildQuery(filterData);
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,

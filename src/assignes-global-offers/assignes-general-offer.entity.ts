@@ -1,7 +1,7 @@
 import { Company } from "src/companies/company.entity";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { Individual } from "src/individual/individual.entity";
-import { TypeUser } from "src/shared/enum/global-enum";
+import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import {
   Column,
@@ -17,17 +17,17 @@ export class AssignGeneralOffer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Individual, individual => individual.assignGeneralOffers, {
+  @ManyToOne(() => Individual, individual => individual.assign_general_offers, {
     onDelete: "CASCADE",
   })
   individual: Individual;
 
-  @ManyToOne(() => Company, company => company.assignGeneralOffers, {
+  @ManyToOne(() => Company, company => company.assign_general_offers, {
     onDelete: "CASCADE",
   })
   company: Company;
 
-  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.assignGeneralOffers, {
+  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.assign_general_offers, {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
@@ -37,6 +37,9 @@ export class AssignGeneralOffer {
     enum: TypeUser,
   })
   type_user: TypeUser;
+
+  @Column({ type: "enum", enum: ReservationStatus })
+  status: ReservationStatus;
 
   @ManyToOne(() => GeneralOffer, generalOffer => generalOffer.assignessOffers, {
     onDelete: "CASCADE",

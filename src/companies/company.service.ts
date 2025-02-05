@@ -22,11 +22,10 @@ export class CompanyService {
 
   // Get all products
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
-      .setRepository(Company)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Company).buildQuery(filterData);
 
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
     return {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,

@@ -26,11 +26,10 @@ export class CategoryService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
-      .setRepository(Category)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Category).buildQuery(filterData);
 
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
     return {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,

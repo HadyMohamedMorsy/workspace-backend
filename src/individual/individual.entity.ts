@@ -1,6 +1,6 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
-import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { assignes_packages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
@@ -26,7 +26,7 @@ export class Individual {
   @Column({ unique: true, length: 11 })
   number: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, name: "whatsapp" })
   whatsApp: string;
 
   @Column({ default: "freelancer" })
@@ -51,13 +51,13 @@ export class Individual {
   orders: Order[];
 
   @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.individual)
-  assignGeneralOffers: AssignGeneralOffer[];
+  assign_general_offers: AssignGeneralOffer[];
 
   @OneToMany(() => AssignesMembership, AssignesMembership => AssignesMembership.individual)
-  assignMemeberships: AssignesMembership[];
+  assign_memberships: AssignesMembership[];
 
-  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.studentActivity)
-  assignesPackages: AssignesPackages[];
+  @OneToMany(() => assignes_packages, assignes_packages => assignes_packages.studentActivity)
+  assignes_packages: assignes_packages[];
 
   @OneToMany(() => Shared, shared => shared.individual)
   shared: Shared[];

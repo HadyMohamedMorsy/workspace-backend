@@ -21,10 +21,12 @@ export class GeneralSettingsService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
+    const queryBuilder = this.apiFeaturesService
       .setRepository(GeneralSettings)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+      .buildQuery(filterData);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     const results = {
       data: filteredRecord,

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Between, DataSource, EntityTarget, In, Like, Repository } from "typeorm";
+import { DataSource, EntityTarget, Repository, SelectQueryBuilder } from "typeorm";
 
 @Injectable()
 export class APIFeaturesService {
@@ -13,128 +13,94 @@ export class APIFeaturesService {
     return this;
   }
 
-  #queryBuilder(filterData: any): any {
-    const queryOptions: any = {};
+  // Instead of executing the query immediately, we now return the query builder.
+  buildQuery(filterData: any): SelectQueryBuilder<any> {
+    const queryBuilder = this.#repository.createQueryBuilder("e");
 
-    // Handle columns selection
-    this.#handleColumnSelection(filterData, queryOptions);
+    this.#handleColumnSelection(filterData, queryBuilder);
 
-    // Apply custom filters if provided
-    this.#applyCustomFiltersToQuery(filterData, queryOptions);
+    this.#applyCustomFiltersToQuery(filterData, queryBuilder);
 
-    // Apply search filters
-    this.#applySearchFilter(filterData, queryOptions);
+    this.#applySearchFilter(filterData, queryBuilder);
 
-    // Handle sorting
-    this.#applySorting(filterData, queryOptions);
+    this.#applySorting(filterData, queryBuilder);
 
-    // Handle pagination
-    this.#applyPagination(filterData, queryOptions);
+    this.#applyPagination(filterData, queryBuilder);
 
-    // Handle relations and related conditions
-    this.#applyRelationsAndRelatedConditions(filterData, queryOptions);
-
-    return queryOptions;
+    return queryBuilder;
   }
 
-  #handleColumnSelection(filterData: any, queryOptions: any) {
-    if (filterData.columns && filterData.columns.length) {
-      queryOptions.select = [...filterData.columns.map((col: any) => col.name), "id", "created_at"];
-    }
-    // Handle additional fields to select
-    if (filterData.provideFields && filterData.provideFields.length) {
-      queryOptions.select = [...queryOptions.select, ...filterData.provideFields];
-    }
-  }
+  #handleColumnSelection(filterData: any, queryBuilder: SelectQueryBuilder<any>) {
+    const filterValidColumns = fields => {
+      if (!fields || fields.length === 0) return [];
 
-  // Apply custom filters
-  #applyCustomFiltersToQuery(filterData: any, queryOptions: any) {
-    if (filterData.customFilters) {
-      const customFilters = this.#applyCustomFilters(filterData.customFilters);
-      const { start_date, end_date, ...filters } = customFilters;
+      return fields
+        .filter(
+          field =>
+            typeof field.name === "string" &&
+            !field.name.includes(".") &&
+            field.name !== "id" &&
+            field.name !== "created_at",
+        )
+        .map(field => `e.${field.name}`);
+    };
 
-      if (customFilters) {
-        queryOptions.where = {
-          ...queryOptions.where,
-          ...filters,
-          created_at: Between(start_date, end_date),
-        };
+    if (filterData.columns && Array.isArray(filterData.columns)) {
+      const validColumns = filterValidColumns(filterData.columns);
+      if (validColumns.length > 0) {
+        queryBuilder.select([...validColumns, "e.id", "e.created_at"]);
+      }
+    }
+
+    if (filterData.provideFields && Array.isArray(filterData.provideFields)) {
+      const validProvideFields = filterValidColumns(filterData.provideFields);
+      if (validProvideFields.length > 0) {
+        queryBuilder.addSelect(validProvideFields);
       }
     }
   }
 
-  #applySearchFilter(filterData: any, queryOptions: any) {
+  #applyCustomFiltersToQuery(filterData: any, queryBuilder: SelectQueryBuilder<any>) {
+    if (filterData.customFilters) {
+      const customFilters = this.#applyCustomFilters(filterData.customFilters);
+
+      if (customFilters) {
+        Object.entries(customFilters).forEach(([key, value]) => {
+          queryBuilder.andWhere(`e.${key} = :${key}`, { [key]: value });
+        });
+      }
+    }
+  }
+
+  #applySearchFilter(filterData: any, queryBuilder: SelectQueryBuilder<any>) {
     if (filterData.search && filterData.search.value) {
       const searchableColumns = filterData.columns.filter((col: any) => col.searchable);
       if (searchableColumns.length) {
-        queryOptions.where = this.#searchQuery(searchableColumns, filterData.search.value);
+        searchableColumns.forEach(column => {
+          queryBuilder.orWhere(`e.${column.name} LIKE :search`, {
+            search: `%${filterData.search.value}%`,
+          });
+        });
       }
     }
   }
 
-  #applySorting(filterData: any, queryOptions: any) {
-    queryOptions.order = this.#buildSortQuery(filterData);
-  }
-
-  #applyPagination(filterData: any, queryOptions: any) {
-    const { start, length } = filterData;
-    queryOptions.skip = start ?? 0;
-    queryOptions.take = length ?? 10;
-  }
-
-  #applyRelationsAndRelatedConditions(filterData: any, queryOptions: any) {
-    if (filterData.relations && filterData.relations.length > 0) {
-      queryOptions.relations = filterData.relations;
-    }
-
-    if (filterData.findRelated) {
-      queryOptions.where = {
-        ...queryOptions.where,
-        [filterData.findRelated.moduleName]: { id: filterData.findRelated.id },
-      };
-    }
-
-    if (filterData.findRelations) {
-      queryOptions.where = {
-        ...queryOptions.where,
-        [filterData.findRelations.moduleName]: { id: In(filterData.findRelations.ids) },
-      };
-    }
-  }
-
-  #searchQuery(
-    searchableColumns: {
-      name: string;
-      searchable: boolean;
-      orderable: boolean;
-    }[],
-    search: string,
-  ) {
-    if (searchableColumns.length) {
-      return searchableColumns.map(column => ({
-        [column.name]: Like(`%${search}%`),
-      }));
-    }
-  }
-
-  #buildSortQuery(filterData: any) {
-    let orderQuery = {};
-
+  #applySorting(filterData: any, queryBuilder: SelectQueryBuilder<any>) {
     if (filterData.order && filterData.order.length > 0 && filterData.columns.length > 0) {
       filterData.order.forEach(({ column, dir }) => {
         const columnInfo = filterData.columns[column];
-
         if (columnInfo && columnInfo.orderable) {
-          orderQuery[columnInfo.name] = dir === "asc" ? "ASC" : "DESC";
+          queryBuilder.addOrderBy(`e.${columnInfo.name}`, dir.toUpperCase());
         }
       });
+    } else {
+      queryBuilder.addOrderBy("e.created_at", "DESC");
     }
+  }
 
-    if (Object.keys(orderQuery).length === 0) {
-      orderQuery = { created_at: "DESC" };
-    }
-
-    return orderQuery;
+  #applyPagination(filterData: any, queryBuilder: SelectQueryBuilder<any>) {
+    const { start, length } = filterData;
+    queryBuilder.skip(start ?? 0).take(length ?? 10);
   }
 
   #applyCustomFilters(customFilters: Record<string, any>): Record<string, any> {
@@ -157,35 +123,12 @@ export class APIFeaturesService {
     return filterConditions;
   }
 
-  async getFilteredData(filterData: any): Promise<any[]> {
-    if (!this.#repository) {
-      throw new Error("Repository is not set for the entity");
-    }
-    const queryOptions: any = {
-      ...this.#queryBuilder(filterData),
-    };
-
-    try {
-      // Execute the query with relations
-      return await this.#repository.find(queryOptions);
-    } catch (error) {
-      console.error("Error during query execution:", error);
-      throw error;
-    }
-  }
-
-  async getTotalDocs() {
-    if (!this.#repository) {
-      throw new Error("Repository is not set for the entity");
-    }
-
-    return await this.#repository.count({});
-  }
-
+  // The start date filter handler
   #handleStartDateFilter(value: any, filterConditions: Record<string, any>) {
     filterConditions["start_date"] = new Date(value);
   }
 
+  // The end date filter handler
   #handleEndDateFilter(value: any, filterConditions: Record<string, any>) {
     filterConditions["end_date"] = new Date(value);
   }

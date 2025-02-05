@@ -1,50 +1,33 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CompanyService } from "src/companies/company.service";
+import { Company } from "src/companies/company.entity";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
-import { IndividualService } from "src/individual/individual.service";
-import { TypeUser } from "src/shared/enum/global-enum";
+import { Individual } from "src/individual/individual.entity";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { StudentActivityService } from "src/student-activity/studentActivity.service";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { Repository } from "typeorm";
 import { AssignGeneralOffer } from "./assignes-general-offer.entity";
 import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.dto";
 import { UpdateAssignGeneralOfferDto } from "./dto/update-assign-general-offer.dto";
 
 @Injectable()
-export class AssignGeneralOfferService {
+export class assign_general_offerservice {
   constructor(
     @InjectRepository(AssignGeneralOffer)
     private assignGeneralOfferRepository: Repository<AssignGeneralOffer>,
     protected readonly apiFeaturesService: APIFeaturesService,
-    protected readonly individualService: IndividualService,
-    protected readonly companyService: CompanyService,
-    protected readonly studentActivityService: StudentActivityService,
     protected readonly generalOfferService: GeneralOfferService,
   ) {}
 
   // Create a new record
-  async create(create: CreateAssignGeneralOfferDto): Promise<AssignGeneralOffer> {
+  async create(
+    create: CreateAssignGeneralOfferDto,
+    customer: Individual | Company | StudentActivity,
+  ): Promise<AssignGeneralOffer> {
     const generalOffer = await this.generalOfferService.findOne(create.offer_id);
 
     if (!generalOffer) {
       throw new NotFoundException(`${generalOffer} with  not found`);
-    }
-
-    let customer;
-
-    switch (create.type_user) {
-      case TypeUser.Individual:
-        customer = await this.individualService.findOne(create.customer_id);
-        break;
-      case TypeUser.Company:
-        customer = await this.companyService.findOne(create.customer_id);
-        break;
-      case TypeUser.StudentActivity:
-        customer = await this.studentActivityService.findOne(create.customer_id);
-        break;
-      default:
-        throw new Error("Invalid user type");
     }
 
     const assignGeneralOffer = this.assignGeneralOfferRepository.create({
@@ -57,10 +40,12 @@ export class AssignGeneralOfferService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = await this.apiFeaturesService
+    const queryBuilder = this.apiFeaturesService
       .setRepository(AssignGeneralOffer)
-      .getFilteredData(filterData);
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+      .buildQuery(filterData);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     const results = {
       data: filteredRecord,

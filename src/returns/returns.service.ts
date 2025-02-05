@@ -45,17 +45,17 @@ export class ReturnsService {
 
   // Get all records
   async findAll(filterData) {
-    const filteredRecord = filterData.product_id
-      ? await this.apiFeaturesService.setRepository(Returns).getFilteredData({
-          ...filterData,
-          relations: ["product"],
-          findRelated: { moduleName: "product", id: filterData.product_id },
-        })
-      : await this.apiFeaturesService.setRepository(Returns).getFilteredData({
-          ...filterData,
-          relations: ["product"],
-        });
-    const totalRecords = await this.apiFeaturesService.getTotalDocs();
+    const queryBuilder = this.apiFeaturesService.setRepository(Returns).buildQuery(filterData);
+
+    if (filterData.product_id) {
+      queryBuilder
+        .leftJoin("e.product", "ep")
+        .addSelect(["ep.id", "ep.name"])
+        .andWhere("ep.id = :product_id", { product_id: filterData.product_id });
+    }
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
 
     return {
       data: filteredRecord,
