@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateStudentActivityDto } from "./dto/create-StudentActivity.dto";
@@ -25,6 +26,20 @@ export class StudentActivityService {
     const queryBuilder = this.apiFeaturesService
       .setRepository(StudentActivity)
       .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.assign_memberships", "ep", "ep.status = :status_memeber", {
+        status_memeber: ReservationStatus.ACTIVE,
+      })
+      .leftJoinAndSelect("ep.memeberShip", "ms")
+      .leftJoinAndSelect("e.assignesPackages", "es", "es.status = :status_package", {
+        status_package: ReservationStatus.ACTIVE,
+      })
+      .leftJoinAndSelect("es.packages", "pa")
+      .leftJoinAndSelect("pa.room", "pr")
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
@@ -33,6 +48,28 @@ export class StudentActivityService {
       recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
     };
+  }
+
+  async findByUserAll(filterData) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(StudentActivity)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
   }
 
   // Get record by ID

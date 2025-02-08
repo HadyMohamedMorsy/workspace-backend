@@ -24,9 +24,9 @@ import { UpdateAssignGeneralOfferDto } from "./dto/update-assign-general-offer.d
 @UseGuards(AuthorizationGuard)
 @Controller("assign-general-offer")
 export class AssignGeneralOfferController {
-  constructor(private readonly AssignGeneralOfferservice: AssignGeneralOfferservice) {}
+  constructor(private readonly assignGeneralOfferservice: AssignGeneralOfferservice) {}
 
-  @Post("/index")
+  @Post("/individual")
   @HttpCode(200)
   @UseInterceptors(CachingInterceptor)
   @Permissions([
@@ -35,8 +35,47 @@ export class AssignGeneralOfferController {
       actions: [Permission.INDEX],
     },
   ])
-  async findAll(@Body() filterQueryDto: any) {
-    return this.AssignGeneralOfferservice.findAll(filterQueryDto);
+  async findIndividuaAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignGeneralOfferservice.findAssignesByIndividual(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignGeneralOfferservice.findAssignesByCompany(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignGeneralOfferservice.findAssignesByStudentActivity(filterQueryDto);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findUserAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignGeneralOfferservice.findAssignesByUser(filterQueryDto);
   }
 
   @Post("/store")
@@ -53,8 +92,12 @@ export class AssignGeneralOfferController {
     @Req() req: Request,
   ) {
     const customer = req["customer"];
+    const createdBy = req["createdBy"];
 
-    return await this.AssignGeneralOfferservice.create(createAssignGeneralOfferDto, customer);
+    return await this.assignGeneralOfferservice.create(createAssignGeneralOfferDto, {
+      customer,
+      createdBy,
+    });
   }
 
   @Post("/update")
@@ -67,7 +110,7 @@ export class AssignGeneralOfferController {
     },
   ])
   async update(@Body() updateAssignGeneralOfferDto: UpdateAssignGeneralOfferDto) {
-    return await this.AssignGeneralOfferservice.update(updateAssignGeneralOfferDto);
+    return await this.assignGeneralOfferservice.update(updateAssignGeneralOfferDto);
   }
 
   @Delete("/delete")
@@ -80,6 +123,6 @@ export class AssignGeneralOfferController {
     },
   ])
   async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.AssignGeneralOfferservice.remove(bodyDelete.id);
+    return this.assignGeneralOfferservice.remove(bodyDelete.id);
   }
 }

@@ -6,6 +6,7 @@ import { Product } from "src/products/product.entity";
 import { ProductService } from "src/products/products.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import { In, Repository } from "typeorm";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
@@ -28,7 +29,10 @@ export class OrdersService {
   // Create a new record
   async create(
     createOrderDto: CreateOrderDto,
-    customer: Individual | Company | StudentActivity,
+    reqBody: {
+      customer: Individual | Company | StudentActivity;
+      createdBy: User;
+    },
   ): Promise<Order> {
     const totalOrder = createOrderDto.order_items.reduce((total, item) => {
       return total + this.getOrderItemTotalPrice(item, createOrderDto.type_order);
@@ -42,7 +46,8 @@ export class OrdersService {
       ...createOrderDto,
       total_order: totalOrder,
       order_price: orderPrice,
-      [createOrderDto.type_user.toLowerCase()]: customer,
+      createdBy: reqBody.createdBy,
+      [createOrderDto.type_user.toLowerCase()]: reqBody.customer,
       order_items: createOrderDto.order_items.map(item => {
         return {
           product: item.product.id,
@@ -78,7 +83,79 @@ export class OrdersService {
       .leftJoin("e.company", "ec")
       .addSelect(["ec.id", "ec.phone", "ec.name"])
       .leftJoin("e.studentActivity", "es")
-      .addSelect(["es.id", "es.name", "es.unviresty"]);
+      .addSelect(["es.id", "es.name", "es.unviresty"])
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
+  async findOrderByUserAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+    queryBuilder
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+  async findOrderByIndividualAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+    queryBuilder
+      .leftJoinAndSelect("e.individual", "ei")
+      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+  async findOrderByComapnyAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+    queryBuilder
+      .leftJoinAndSelect("e.company", "ec")
+      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+  async findOrderByStudentActivityAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+    queryBuilder
+      .leftJoinAndSelect("e.studentActivity", "es")
+      .andWhere("es.id = :studentActivity_id", {
+        studentActivity_id: filterData.studentActivity_id,
+      })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -117,7 +194,6 @@ export class OrdersService {
     return this.orderRepository.findOne({ where: { id: updateOrderDto.id } });
   }
 
-  // Delete a record
   async remove(orderId: number) {
     await this.orderRepository.delete(orderId);
   }

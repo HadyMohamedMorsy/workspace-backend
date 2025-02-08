@@ -5,6 +5,7 @@ import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
@@ -67,6 +68,11 @@ export class AssignesMembership {
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
+
+  @ManyToOne(() => User, user => user.createdByMemebership, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @UpdateDateColumn({
     type: "timestamp",

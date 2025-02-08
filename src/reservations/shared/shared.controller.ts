@@ -37,6 +37,58 @@ export class SharedController {
     return this.sharedService.findAll(filterQueryDto);
   }
 
+  @Post("/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findIndividuaSharedAll(@Body() filterQueryDto: any) {
+    return this.sharedService.findSharedByIndividualAll(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanySharedAll(@Body() filterQueryDto: any) {
+    return this.sharedService.findSharedByComapnyAll(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentSharedAll(@Body() filterQueryDto: any) {
+    return this.sharedService.findSharedByStudentActivityAll(filterQueryDto);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findUserSharedAll(@Body() filterQueryDto: any) {
+    return this.sharedService.findSharedByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
@@ -47,7 +99,11 @@ export class SharedController {
   ])
   async create(@Body() createSharedDto: CreateSharedDto, @Req() req: Request) {
     const customer = req["customer"];
-    return await this.sharedService.create(createSharedDto, customer);
+    const createdBy = req["createdBy"];
+    return await this.sharedService.create(createSharedDto, {
+      customer,
+      createdBy,
+    });
   }
 
   @Post("/update")

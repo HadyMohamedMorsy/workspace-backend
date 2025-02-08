@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -36,6 +37,19 @@ export class TaskController {
     return this.taskService.findAll(filterQueryDto);
   }
 
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Task,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findByUserAll(@Body() filterQueryDto: any) {
+    return this.taskService.findUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
@@ -44,8 +58,11 @@ export class TaskController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createTaskDto: CreateTaskDto) {
-    return await this.taskService.create(createTaskDto);
+  async create(@Body() createTaskDto: CreateTaskDto, @Req() req: Request) {
+    const user = req["user"];
+    const createdBy = req["createdBy"];
+    const payload = { ...createTaskDto, user, createdBy };
+    return await this.taskService.create(payload);
   }
 
   @Post("/update")
@@ -57,8 +74,11 @@ export class TaskController {
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateTaskDto: UpdateTaskDto) {
-    return await this.taskService.update(updateTaskDto);
+  async update(@Body() updateTaskDto: UpdateTaskDto, @Req() req: Request) {
+    const user = req["user"];
+    const createdBy = req["createdBy"];
+    const payload = { ...updateTaskDto, user, createdBy };
+    return await this.taskService.update(payload);
   }
 
   @Delete("/delete")

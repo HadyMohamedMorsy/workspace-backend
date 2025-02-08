@@ -4,6 +4,7 @@ import { OfferPackages } from "src/offer-packages/offer-package.entity.ts";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
@@ -58,6 +59,11 @@ export class AssignesPackages {
 
   @Column({ nullable: true })
   remaining: number;
+
+  @ManyToOne(() => User, user => user.createdByPackages, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

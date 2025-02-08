@@ -6,10 +6,12 @@ import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -51,7 +53,7 @@ export class Individual {
   orders: Order[];
 
   @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.individual)
-  assign_general_offers: AssignGeneralOffer[];
+  assignGeneralOffers: AssignGeneralOffer[];
 
   @OneToMany(() => AssignesMembership, AssignesMembership => AssignesMembership.individual)
   assign_memberships: AssignesMembership[];
@@ -67,6 +69,11 @@ export class Individual {
 
   @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.individual)
   reservationRooms: ReservationRoom[];
+
+  @ManyToOne(() => User, user => user.createdByIndividual, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

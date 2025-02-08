@@ -3,7 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { CompanyModule } from "src/companies/company.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { RoomsModule } from "src/rooms/rooms.module";
-import { customerMiddleware } from "src/shared/middleware/customer.middleware";
+import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { DealsController } from "./deals.controller";
 import { Deals } from "./deals.entity";
@@ -23,6 +23,6 @@ import { DealsService } from "./deals.service";
 })
 export class DealsModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(customerMiddleware).forRoutes("deals/store");
+    consumer.apply(CustomerMiddleware).forRoutes("deals/store");
   }
 }

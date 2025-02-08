@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -36,6 +37,19 @@ export class IndividualController {
     return this.individualService.findAll(filterQueryDto);
   }
 
+  @Post("/user")
+  @Permissions([
+    {
+      resource: Resource.Individual,
+      actions: [Permission.INDEX],
+    },
+  ])
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  async findByUserAll(@Body() filterQueryDto: any) {
+    return this.individualService.findByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
@@ -44,8 +58,9 @@ export class IndividualController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateIndividualDto) {
-    return await this.individualService.create(createProductDto);
+  async create(@Body() createProductDto: CreateIndividualDto, @Req() req: Request) {
+    const payload = { ...createProductDto, createdBy: req["createdBy"] };
+    return await this.individualService.create(payload);
   }
 
   @Post("/update")
@@ -57,8 +72,9 @@ export class IndividualController {
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateIndividualDto) {
-    return await this.individualService.update(updateProductDto);
+  async update(@Body() updateProductDto: UpdateIndividualDto, @Req() req: Request) {
+    const payload = { ...updateProductDto, createdBy: req["createdBy"] };
+    return await this.individualService.update(payload);
   }
 
   @Delete("/delete")

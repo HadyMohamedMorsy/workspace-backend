@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsString, Validate } from "class-validator";
-import { TimeOfDay } from "src/shared/enum/global-enum";
+import { TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
 import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-hour-validation";
 
 export class CreateReservationRoomDto {
@@ -43,6 +43,12 @@ export class CreateReservationRoomDto {
   @IsNotEmpty()
   @Type(() => Number)
   room_id: number;
+
+  @IsEnum(TypeUser, {
+    message:
+      "type order must be one of the following: individual or company or studentActivity or User",
+  })
+  type_user: TypeUser;
 
   @IsString()
   @IsNotEmpty()

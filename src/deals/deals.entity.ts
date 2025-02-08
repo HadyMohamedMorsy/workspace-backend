@@ -3,6 +3,7 @@ import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
 import { TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
@@ -57,6 +58,11 @@ export class Deals {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
+
+  @ManyToOne(() => User, user => user.createdByDeal, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import { AssignesPackages } from "./assignes-packages.entity";
 import { CreateAssignesPackageDto } from "./dto/create-assignes-packages.dto";
@@ -23,7 +23,10 @@ export class AssignesPackagesService {
   // Create a new record
   async create(
     create: CreateAssignesPackageDto,
-    customer: Individual | Company | StudentActivity,
+    reqBody: {
+      customer: Individual | Company | StudentActivity;
+      createdBy: User;
+    },
   ): Promise<AssignesPackages> {
     const packages = await this.offerPackagesService.findOne(create.package_id);
     if (!packages) {
@@ -32,17 +35,33 @@ export class AssignesPackagesService {
 
     const assignes_packages = this.assignesPackagesRepository.create({
       ...create,
-      [create.type_user.toLowerCase()]: customer,
+      createdBy: reqBody.createdBy,
+      [create.type_user.toLowerCase()]: reqBody.customer,
       packages,
     });
     return await this.assignesPackagesRepository.save(assignes_packages);
   }
 
-  // Get all records
-  async findAll(filterData) {
+  // Get a single record by ID
+  async findOne(id: number): Promise<AssignesPackages> {
+    const assignes_packages = await this.assignesPackagesRepository.findOne({ where: { id } });
+    if (!assignes_packages) {
+      throw new NotFoundException(`assignes_packages with id ${id} not found`);
+    }
+    return assignes_packages;
+  }
+
+  async findAssignesByUser(filterData: any) {
     const queryBuilder = this.apiFeaturesService
       .setRepository(AssignesPackages)
       .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.packages", "ep")
+      .leftJoinAndSelect("e.reservationRooms", "er")
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -55,26 +74,18 @@ export class AssignesPackagesService {
 
     return results;
   }
-
-  // Get a single record by ID
-  async findOne(id: number): Promise<AssignesPackages> {
-    const assignes_packages = await this.assignesPackagesRepository.findOne({ where: { id } });
-    if (!assignes_packages) {
-      throw new NotFoundException(`assignes_packages with id ${id} not found`);
-    }
-    return assignes_packages;
-  }
-
   async findAssignesByIndividual(filterData: any) {
     const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
+      .setRepository(AssignesPackages)
       .buildQuery(filterData);
 
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("e.reservationRooms", "er")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id });
+      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -89,14 +100,16 @@ export class AssignesPackagesService {
   }
   async findAssignesByCompany(filterData: any) {
     const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
+      .setRepository(AssignesPackages)
       .buildQuery(filterData);
 
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("e.reservationRooms", "er")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id });
+      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -111,7 +124,7 @@ export class AssignesPackagesService {
   }
   async findAssignesByStudentActivity(filterData: any) {
     const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
+      .setRepository(AssignesPackages)
       .buildQuery(filterData);
 
     queryBuilder
@@ -120,7 +133,9 @@ export class AssignesPackagesService {
       .leftJoinAndSelect("e.reservationRooms", "er")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
-      });
+      })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

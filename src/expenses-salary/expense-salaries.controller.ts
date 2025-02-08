@@ -36,6 +36,19 @@ export class ExpensesSalariesController {
     return this.expensesSalariesService.findAll(filterQueryDto);
   }
 
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ExpensesSalaries,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findByUserAll(@Body() filterQueryDto: any) {
+    return this.expensesSalariesService.findByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([

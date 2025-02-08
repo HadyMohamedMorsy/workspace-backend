@@ -6,7 +6,7 @@ import { StudentActivityService } from "src/student-activity/studentActivity.ser
 import { TypeUser } from "../enum/global-enum";
 
 @Injectable()
-export class customerMiddleware implements NestMiddleware {
+export class CustomerMiddleware implements NestMiddleware {
   constructor(
     private readonly individualService: IndividualService,
     private readonly companyService: CompanyService,

@@ -4,7 +4,7 @@ import { CompanyModule } from "src/companies/company.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { ProductsModule } from "src/products/products.module";
 import { FilterDateModule } from "src/shared/filters/filter-date.module";
-import { customerMiddleware } from "src/shared/middleware/customer.middleware";
+import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { OrderController } from "./order.controller";
 import { Order } from "./order.entity";
@@ -12,11 +12,11 @@ import { OrdersService } from "./orders.service";
 
 @Module({
   imports: [
+    CompanyModule,
+    IndividualModule,
+    StudentActivityModule,
     ProductsModule,
     FilterDateModule,
-    IndividualModule,
-    CompanyModule,
-    StudentActivityModule,
     TypeOrmModule.forFeature([Order]),
   ],
   controllers: [OrderController],
@@ -25,6 +25,6 @@ import { OrdersService } from "./orders.service";
 })
 export class OrdersModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(customerMiddleware).forRoutes("order/store");
+    consumer.apply(CustomerMiddleware).forRoutes("order/store");
   }
 }

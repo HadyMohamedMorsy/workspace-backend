@@ -2,6 +2,7 @@ import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { TypeOrder, TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
@@ -54,6 +55,11 @@ export class Order {
 
   @Column("json", { nullable: true })
   order_items: OrderItemDto[] | null;
+
+  @ManyToOne(() => User, user => user.createdByOrder, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

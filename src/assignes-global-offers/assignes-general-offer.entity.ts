@@ -3,6 +3,7 @@ import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
@@ -17,17 +18,17 @@ export class AssignGeneralOffer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Individual, individual => individual.assign_general_offers, {
+  @ManyToOne(() => Individual, individual => individual.assignGeneralOffers, {
     onDelete: "CASCADE",
   })
   individual: Individual;
 
-  @ManyToOne(() => Company, company => company.assign_general_offers, {
+  @ManyToOne(() => Company, company => company.assignGeneralOffers, {
     onDelete: "CASCADE",
   })
   company: Company;
 
-  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.assign_general_offers, {
+  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.assignGeneralOffers, {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
@@ -45,6 +46,11 @@ export class AssignGeneralOffer {
     onDelete: "CASCADE",
   })
   generalOffer: GeneralOffer;
+
+  @ManyToOne(() => User, user => user.createdByGeneralOffer, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

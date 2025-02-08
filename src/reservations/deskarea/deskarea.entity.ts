@@ -2,8 +2,9 @@ import { IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { TimeOfDay } from "src/shared/enum/global-enum";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
@@ -13,6 +14,9 @@ export class Deskarea {
 
   @Column()
   selected_day: string;
+
+  @Column({ type: "enum", enum: ReservationStatus })
+  status: ReservationStatus;
 
   @Column()
   @IsString()
@@ -58,6 +62,11 @@ export class Deskarea {
 
   @Column()
   note: string;
+
+  @ManyToOne(() => User, user => user.createdByDeskArea, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

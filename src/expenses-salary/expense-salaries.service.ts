@@ -60,6 +60,26 @@ export class ExpensesSalariesService {
     };
   }
 
+  async findByUserAll(filterData) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(ExpenseSalaries)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin("e.user", "ep")
+      .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"])
+      .andWhere("ep.id = :user_id", { user_id: filterData.user_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+
   // Get record by ID
   async findOne(id: number): Promise<ExpenseSalaries> {
     const expensesSalaries = await this.expensesSalariesRepository.findOne({ where: { id } });

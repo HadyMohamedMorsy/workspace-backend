@@ -53,9 +53,8 @@ export class APIFeaturesService {
     }
 
     if (filterData.provideFields && Array.isArray(filterData.provideFields)) {
-      const validProvideFields = filterValidColumns(filterData.provideFields);
-      if (validProvideFields.length > 0) {
-        queryBuilder.addSelect(validProvideFields);
+      if (filterData.provideFields.length > 0) {
+        queryBuilder.addSelect(filterData.provideFields.map(col => `e.${col}`));
       }
     }
   }
@@ -74,7 +73,9 @@ export class APIFeaturesService {
 
   #applySearchFilter(filterData: any, queryBuilder: SelectQueryBuilder<any>) {
     if (filterData.search && filterData.search.value) {
-      const searchableColumns = filterData.columns.filter((col: any) => col.searchable);
+      const searchableColumns = filterData.columns.filter(
+        (col: any) => col.searchable && !col.name.includes("."),
+      );
       if (searchableColumns.length) {
         searchableColumns.forEach(column => {
           queryBuilder.orWhere(`e.${column.name} LIKE :search`, {
@@ -106,30 +107,10 @@ export class APIFeaturesService {
   #applyCustomFilters(customFilters: Record<string, any>): Record<string, any> {
     const filterConditions: Record<string, any> = {};
 
-    const filterHandlers = {
-      start_date: this.#handleStartDateFilter,
-      end_date: this.#handleEndDateFilter,
-    };
-
     for (const [key, value] of Object.entries(customFilters)) {
-      if (filterHandlers[key]) {
-        const handler = filterHandlers[key];
-        handler(value, filterConditions);
-      } else {
-        filterConditions[key] = value;
-      }
+      filterConditions[key] = value;
     }
 
     return filterConditions;
-  }
-
-  // The start date filter handler
-  #handleStartDateFilter(value: any, filterConditions: Record<string, any>) {
-    filterConditions["start_date"] = new Date(value);
-  }
-
-  // The end date filter handler
-  #handleEndDateFilter(value: any, filterConditions: Record<string, any>) {
-    filterConditions["end_date"] = new Date(value);
   }
 }

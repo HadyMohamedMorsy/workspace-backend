@@ -19,7 +19,7 @@ export class Task {
   })
   user: User;
 
-  @ManyToOne(() => User, user => user.createdTasks, {
+  @ManyToOne(() => User, user => user.createdByTasks, {
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "createdById" })

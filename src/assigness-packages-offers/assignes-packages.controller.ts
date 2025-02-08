@@ -24,19 +24,58 @@ import { UpdateAssignesPackageDto } from "./dto/update-assignes-packages.dto";
 @UseGuards(AuthorizationGuard)
 @Controller("assignes-package")
 export class AssignesPackageController {
-  constructor(private readonly AssignesPackagesService: AssignesPackagesService) {}
+  constructor(private readonly assignesPackagesService: AssignesPackagesService) {}
 
-  @Post("/index")
+  @Post("/individual")
   @HttpCode(200)
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignesPackage,
+      resource: Resource.AssignGeneralOffer,
       actions: [Permission.INDEX],
     },
   ])
-  async findAll(@Body() filterQueryDto: any) {
-    return this.AssignesPackagesService.findAll(filterQueryDto);
+  async findIndividuaAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesPackagesService.findAssignesByIndividual(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesPackagesService.findAssignesByCompany(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentActivityAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesPackagesService.findAssignesByStudentActivity(filterQueryDto);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findUserAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesPackagesService.findAssignesByUser(filterQueryDto);
   }
 
   @Post("/store")
@@ -50,7 +89,11 @@ export class AssignesPackageController {
   ])
   async create(@Body() createAssignesPackageDto: CreateAssignesPackageDto, @Req() req: Request) {
     const customer = req["customer"];
-    return await this.AssignesPackagesService.create(createAssignesPackageDto, customer);
+    const createdBy = req["createdBy"];
+    return await this.assignesPackagesService.create(createAssignesPackageDto, {
+      customer,
+      createdBy,
+    });
   }
 
   @Post("/update")
@@ -63,7 +106,7 @@ export class AssignesPackageController {
     },
   ])
   async update(@Body() updateAssignesPackageDto: UpdateAssignesPackageDto) {
-    return await this.AssignesPackagesService.update(updateAssignesPackageDto);
+    return await this.assignesPackagesService.update(updateAssignesPackageDto);
   }
 
   @Delete("/delete")
@@ -76,6 +119,6 @@ export class AssignesPackageController {
     },
   ])
   async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.AssignesPackagesService.remove(bodyDelete.id);
+    return this.assignesPackagesService.remove(bodyDelete.id);
   }
 }

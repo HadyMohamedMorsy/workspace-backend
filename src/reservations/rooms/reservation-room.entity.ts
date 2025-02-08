@@ -3,8 +3,9 @@ import { AssignesPackages } from "src/assigness-packages-offers/assignes-package
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
-import { TimeOfDay } from "src/shared/enum/global-enum";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
@@ -14,6 +15,9 @@ export class ReservationRoom {
 
   @Column()
   selected_day: string;
+
+  @Column({ type: "enum", enum: ReservationStatus })
+  status: ReservationStatus;
 
   @Column()
   @IsString()
@@ -64,6 +68,11 @@ export class ReservationRoom {
 
   @Column()
   note: string;
+
+  @ManyToOne(() => User, user => user.createdByReservationRoom, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

@@ -6,6 +6,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -37,6 +38,19 @@ export class CompanyController {
     return this.companyService.findAll(filterQueryDto);
   }
 
+  @Post("/user")
+  @Permissions([
+    {
+      resource: Resource.Company,
+      actions: [Permission.INDEX],
+    },
+  ])
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  async findByUserAll(@Body() filterQueryDto: any) {
+    return this.companyService.findByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
@@ -45,8 +59,9 @@ export class CompanyController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateCompanyDto) {
-    return await this.companyService.create(createProductDto);
+  async create(@Body() createCompanyDto: CreateCompanyDto, @Req() req: Request) {
+    const payload = { ...createCompanyDto, createdBy: req["createdBy"] };
+    return await this.companyService.create(payload);
   }
 
   @Post("/update")
@@ -58,8 +73,9 @@ export class CompanyController {
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateCompanyDto) {
-    return await this.companyService.update(updateProductDto);
+  async update(@Body() updateCompanyDto: UpdateCompanyDto, @Req() req: Request) {
+    const payload = { ...updateCompanyDto, createdBy: req["createdBy"] };
+    return await this.companyService.update(payload);
   }
 
   @Delete("/delete")

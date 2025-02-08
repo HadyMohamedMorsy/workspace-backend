@@ -1,5 +1,16 @@
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { Company } from "src/companies/company.entity";
+import { Deals } from "src/deals/deals.entity";
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
+import { Individual } from "src/individual/individual.entity";
+import { Order } from "src/orders/order.entity";
+import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
+import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
+import { Shared } from "src/reservations/shared/shared.entity";
 import { Permission, Role } from "src/shared/enum/global-enum";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { Task } from "src/tasks/tasks.entity";
 import {
   Column,
@@ -66,7 +77,40 @@ export class User {
   task: Task[];
 
   @OneToMany(() => Task, task => task.createdBy)
-  createdTasks: Task[];
+  createdByTasks: Task[];
+
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.createdBy)
+  createdByPackages: AssignesPackages[];
+
+  @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.createdBy)
+  createdByGeneralOffer: AssignGeneralOffer[];
+
+  @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.createdBy)
+  createdByMemebership: AssignesMembership[];
+
+  @OneToMany(() => Deals, deals => deals.createdBy)
+  createdByDeal: Deals[];
+
+  @OneToMany(() => Order, order => order.createdBy)
+  createdByOrder: Order[];
+
+  @OneToMany(() => StudentActivity, studentActivity => studentActivity.createdBy)
+  createdByStudentActivity: StudentActivity[];
+
+  @OneToMany(() => Company, company => company.createdBy)
+  createdByCompany: Company[];
+
+  @OneToMany(() => Individual, individual => individual.createdBy)
+  createdByIndividual: Individual[];
+
+  @OneToMany(() => Shared, shared => shared.createdBy)
+  createdByShared: Shared[];
+
+  @OneToMany(() => Deskarea, deskarea => deskarea.createdBy)
+  createdByDeskArea: Deskarea[];
+
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.createdBy)
+  createdByReservationRoom: ReservationRoom[];
 
   @OneToMany(() => ExpenseSalaries, salary => salary.user)
   salaries: User[];

@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -36,6 +37,58 @@ export class ReservationRoomController {
     return this.reservationRoomService.findAll(filterQueryDto);
   }
 
+  @Post("/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findIndividuaRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findRoomsByIndividualAll(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findRoomsByStudentActivityAll(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findRoomsByComapnyAll(filterQueryDto);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findUserRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findRoomsByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @EntityName("reservation-room")
   @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
@@ -45,8 +98,13 @@ export class ReservationRoomController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createReservationRoomDto: CreateReservationRoomDto) {
-    return await this.reservationRoomService.create(createReservationRoomDto);
+  async create(@Body() createReservationRoomDto: CreateReservationRoomDto, @Req() req: Request) {
+    const customer = req["customer"];
+    const createdBy = req["createdBy"];
+    return await this.reservationRoomService.create(createReservationRoomDto, {
+      customer,
+      createdBy,
+    });
   }
 
   @Post("/update")

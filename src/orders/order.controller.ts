@@ -41,6 +41,58 @@ export class OrderController {
     return this.ordersService.findAll(filterQueryDto);
   }
 
+  @Post("/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Order,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findIndividuaOrderlAll(@Body() filterQueryDto: any) {
+    return this.ordersService.findOrderByIndividualAll(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Order,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyOrderlAll(@Body() filterQueryDto: any) {
+    return this.ordersService.findOrderByComapnyAll(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Order,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentOrderlAll(@Body() filterQueryDto: any) {
+    return this.ordersService.findOrderByStudentActivityAll(filterQueryDto);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Order,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findUserOrderlAll(@Body() filterQueryDto: any) {
+    return this.ordersService.findOrderByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @ClearCacheAnotherModules([
     "/api/v1/purchases",
@@ -57,7 +109,11 @@ export class OrderController {
   ])
   async create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
     const customer = req["customer"];
-    return await this.ordersService.create(createOrderDto, customer);
+    const createdBy = req["createdBy"];
+    return await this.ordersService.create(createOrderDto, {
+      customer,
+      createdBy,
+    });
   }
 
   @Post("/update")

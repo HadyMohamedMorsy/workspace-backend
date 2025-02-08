@@ -5,7 +5,8 @@ import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
-import { In, Repository } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Repository } from "typeorm";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { Shared } from "./shared.entity";
@@ -18,7 +19,13 @@ export class SharedService {
     protected readonly apiFeaturesService: APIFeaturesService,
   ) {}
 
-  async create(createSharedDto: CreateSharedDto, customer: Individual | Company | StudentActivity) {
+  async create(
+    createSharedDto: CreateSharedDto,
+    reqBody: {
+      customer: Individual | Company | StudentActivity;
+      createdBy: User;
+    },
+  ) {
     const { customer_id, type_user } = createSharedDto;
     const isReservation = await this.findActiveOrInactiveReservationsForCustomer(
       customer_id,
@@ -30,13 +37,16 @@ export class SharedService {
 
     const shared = this.sharedRepository.create({
       ...createSharedDto,
-      [createSharedDto.type_user.toLowerCase()]: customer,
+      createdBy: reqBody.createdBy,
+      [type_user.toLowerCase()]: reqBody.customer,
     });
     return await this.sharedRepository.save(shared);
   }
 
   async findAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+    queryBuilder.leftJoin("e.createdBy", "ec").addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
     return {
@@ -60,7 +70,7 @@ export class SharedService {
       relations: [customerRelationField],
       where: [
         {
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.INACTIVE]),
+          status: ReservationStatus.ACTIVE,
           ...customerCondition,
         },
       ],
@@ -75,6 +85,78 @@ export class SharedService {
       throw new NotFoundException(`${shared} with id ${id} not found`);
     }
     return shared;
+  }
+
+  async findSharedByIndividualAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+    queryBuilder
+      .leftJoinAndSelect("e.individual", "ei")
+      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+  async findSharedByComapnyAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+    queryBuilder
+      .leftJoinAndSelect("e.company", "ec")
+      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+  async findSharedByStudentActivityAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+    queryBuilder
+      .leftJoinAndSelect("e.studentActivity", "es")
+      .andWhere("es.id = :studentActivity_id", {
+        studentActivity_id: filterData.studentActivity_id,
+      })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+  }
+  async findSharedByUserAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+    queryBuilder
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .andWhere("ec.id = :user_id", {
+        user_id: filterData.user_id,
+      });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
   }
 
   async update(updateSharedDto: UpdateSharedDto) {

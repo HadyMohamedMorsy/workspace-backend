@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { UserService } from "src/users/user.service";
 import { Repository } from "typeorm"; // Change to update-task.dto
 import { CreateTaskDto } from "./dto/create-tasks.dto";
 import { UpdateTaskDto } from "./dto/update-tasks.dto";
@@ -12,34 +11,28 @@ export class TaskService {
   // Change service name to TaskService
   constructor(
     @InjectRepository(Task)
-    private taskRepository: Repository<Task>, // Change to Task repository
+    private taskRepository: Repository<Task>,
     protected readonly apiFeaturesService: APIFeaturesService,
-    private readonly usersService: UserService,
   ) {}
 
-  // Create a new task
-  async create(create: CreateTaskDto): Promise<Task> {
-    const user = await this.usersService.findOneById(create.user_id);
-    if (!user) {
-      throw new NotFoundException(`user is not found `);
-    }
-
-    const createdBy = await this.usersService.findOneById(create.created_by);
-    if (!user) {
-      throw new NotFoundException(`user is not found `);
-    }
-
-    const task = this.taskRepository.create({
-      ...create,
-      user,
-      createdBy,
+  async create(create: CreateTaskDto) {
+    const task = this.taskRepository.create(create);
+    const newTask = await this.taskRepository.save(task);
+    return this.taskRepository.findOne({
+      where: { id: newTask.id },
+      relations: ["user"],
     });
-    return await this.taskRepository.save(task);
   }
 
-  // Get all tasks
   async findAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Task).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin("e.user", "eu")
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["eu.id", "eu.firstName", "eu.lastName"])
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
@@ -52,7 +45,28 @@ export class TaskService {
     return results;
   }
 
-  // Find a task by ID
+  async findUserAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Task).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin("e.user", "ec")
+      .leftJoin("e.createdBy", "eu")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .addSelect(["eu.id", "eu.firstName", "eu.lastName"])
+      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+
   async findOne(id: number): Promise<Task> {
     const task = await this.taskRepository.findOne({ where: { id } });
     if (!task) {
@@ -61,10 +75,14 @@ export class TaskService {
     return task;
   }
 
-  // Update an existing task
   async update(updateTaskDto: UpdateTaskDto) {
-    await this.taskRepository.update(updateTaskDto.id, updateTaskDto);
-    return this.taskRepository.findOne({ where: { id: updateTaskDto.id } });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { user_id, ...payload } = updateTaskDto;
+    await this.taskRepository.update(updateTaskDto.id, payload);
+    return this.taskRepository.findOne({
+      where: { id: updateTaskDto.id },
+      relations: ["user"],
+    });
   }
 
   // Delete a task

@@ -7,11 +7,6 @@ export class CreateTaskDto {
   @IsNotEmpty()
   user_id: number;
 
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  created_by: number;
-
   @IsString()
   @IsNotEmpty()
   name: string;

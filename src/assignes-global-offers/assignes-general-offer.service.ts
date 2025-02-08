@@ -5,6 +5,7 @@ import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Individual } from "src/individual/individual.entity";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import { AssignGeneralOffer } from "./assignes-general-offer.entity";
 import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.dto";
@@ -22,7 +23,10 @@ export class AssignGeneralOfferservice {
   // Create a new record
   async create(
     create: CreateAssignGeneralOfferDto,
-    customer: Individual | Company | StudentActivity,
+    reqBody: {
+      customer: Individual | Company | StudentActivity;
+      createdBy: User;
+    },
   ): Promise<AssignGeneralOffer> {
     const generalOffer = await this.generalOfferService.findOne(create.offer_id);
 
@@ -32,17 +36,32 @@ export class AssignGeneralOfferservice {
 
     const assignGeneralOffer = this.assignGeneralOfferRepository.create({
       ...create,
-      [create.type_user.toLowerCase()]: customer,
+      createdBy: reqBody.createdBy,
+      [create.type_user.toLowerCase()]: reqBody.customer,
       generalOffer,
     });
     return await this.assignGeneralOfferRepository.save(assignGeneralOffer);
   }
 
-  // Get all records
-  async findAll(filterData) {
+  // Get a single record by ID
+  async findOne(id: number): Promise<AssignGeneralOffer> {
+    const assignGeneralOffer = await this.assignGeneralOfferRepository.findOne({ where: { id } });
+    if (!assignGeneralOffer) {
+      throw new NotFoundException(`AssignGeneralOffer with id ${id} not found`);
+    }
+    return assignGeneralOffer;
+  }
+
+  async findAssignesByUser(filterData: any) {
     const queryBuilder = this.apiFeaturesService
       .setRepository(AssignGeneralOffer)
       .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.generalOffer", "eg")
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -55,16 +74,6 @@ export class AssignGeneralOfferservice {
 
     return results;
   }
-
-  // Get a single record by ID
-  async findOne(id: number): Promise<AssignGeneralOffer> {
-    const assignGeneralOffer = await this.assignGeneralOfferRepository.findOne({ where: { id } });
-    if (!assignGeneralOffer) {
-      throw new NotFoundException(`AssignGeneralOffer with id ${id} not found`);
-    }
-    return assignGeneralOffer;
-  }
-
   async findAssignesByIndividual(filterData: any) {
     const queryBuilder = this.apiFeaturesService
       .setRepository(AssignGeneralOffer)
@@ -73,7 +82,9 @@ export class AssignGeneralOfferservice {
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.generalOffer", "eg")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id });
+      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -94,7 +105,9 @@ export class AssignGeneralOfferservice {
     queryBuilder
       .leftJoinAndSelect("e.company", "ec")
       .leftJoinAndSelect("e.generalOffer", "eg")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id });
+      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -117,7 +130,9 @@ export class AssignGeneralOfferservice {
       .leftJoinAndSelect("e.generalOffer", "eg")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
-      });
+      })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

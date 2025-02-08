@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -36,6 +37,19 @@ export class StudentActivityController {
     return this.studentActivityService.findAll(filterQueryDto);
   }
 
+  @Post("/user")
+  @Permissions([
+    {
+      resource: Resource.StudentActivity,
+      actions: [Permission.INDEX],
+    },
+  ])
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  async findByUserAll(@Body() filterQueryDto: any) {
+    return this.studentActivityService.findByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
@@ -44,8 +58,9 @@ export class StudentActivityController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateStudentActivityDto) {
-    return await this.studentActivityService.create(createProductDto);
+  async create(@Body() createStudentDto: CreateStudentActivityDto, @Req() req: Request) {
+    const payload = { ...createStudentDto, createdBy: req["createdBy"] };
+    return await this.studentActivityService.create(payload);
   }
 
   @Post("/update")
@@ -57,8 +72,9 @@ export class StudentActivityController {
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateStudentActivityDto) {
-    return await this.studentActivityService.update(updateProductDto);
+  async update(@Body() updateStudentDto: UpdateStudentActivityDto, @Req() req: Request) {
+    const payload = { ...updateStudentDto, createdBy: req["createdBy"] };
+    return await this.studentActivityService.update(payload);
   }
 
   @Delete("/delete")

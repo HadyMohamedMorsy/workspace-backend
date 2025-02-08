@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersModule } from "src/users/users.module";
+import { TaskMiddleware } from "./middleware/task.middleware";
 import { TaskController } from "./tasks.controller";
 import { Task } from "./tasks.entity";
 import { TaskService } from "./tasks.service";
@@ -11,4 +12,8 @@ import { TaskService } from "./tasks.service";
   providers: [TaskService],
   exports: [TaskService],
 })
-export class TaskModule {}
+export class TaskModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TaskMiddleware).forRoutes("tasks/store", "tasks/update");
+  }
+}

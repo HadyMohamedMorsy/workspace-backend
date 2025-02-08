@@ -43,10 +43,12 @@ import { listModule } from "./shared/global-api/list/list.module";
 import { SearchModule } from "./shared/global-api/search-list/search-list.module";
 import { UploadsModule } from "./shared/global-api/uploads/uploads.module";
 import { TransformInterceptor } from "./shared/interceptor/transform-response.interceptor";
+import { CreatedByMiddleware } from "./shared/middleware/createdby.middleware";
 import { LanMiddleware } from "./shared/middleware/lang.middleware";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
 import { TaskModule } from "./tasks/tasks.module";
+import { UsersModule } from "./users/users.module";
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -80,7 +82,7 @@ const ENV = process.env.NODE_ENV;
     OrdersModule,
     StudentActivityModule,
     FilterDateModule,
-    // UsersModule,
+    UsersModule,
     AuthModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "uploads"),
@@ -137,5 +139,6 @@ const ENV = process.env.NODE_ENV;
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
+    consumer.apply(CreatedByMiddleware).exclude("auth/login").forRoutes("*");
   }
 }

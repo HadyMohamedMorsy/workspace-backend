@@ -1,9 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
-import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
-import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
-import { OrdersService } from "src/orders/orders.service";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -17,10 +13,6 @@ export class IndividualService {
     @InjectRepository(Individual)
     private individualRepository: Repository<Individual>,
     protected readonly apiFeaturesService: APIFeaturesService,
-    protected readonly assignesPackagesService: AssignesPackagesService,
-    protected readonly assignGeneralOfferservice: AssignGeneralOfferservice,
-    protected readonly assignesMembershipModule: AssignesMembershipModule,
-    protected readonly ordersService: OrdersService,
   ) {}
 
   // Create a new record
@@ -42,7 +34,28 @@ export class IndividualService {
         status_package: ReservationStatus.ACTIVE,
       })
       .leftJoinAndSelect("es.packages", "pa")
-      .leftJoinAndSelect("pa.room", "pr");
+      .leftJoinAndSelect("pa.room", "pr")
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+  async findByUserAll(filterData) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Individual).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

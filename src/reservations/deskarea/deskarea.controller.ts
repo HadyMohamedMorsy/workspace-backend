@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   Post,
+  Req,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -36,6 +37,58 @@ export class DeskareaController {
     return this.deskareaService.findAll(filterQueryDto);
   }
 
+  @Post("/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findIndividuaDeskareaAll(@Body() filterQueryDto: any) {
+    return this.deskareaService.findDeskareaByIndividualAll(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyDeskareaAll(@Body() filterQueryDto: any) {
+    return this.deskareaService.findDeskareaByComapnyAll(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentDeskareaAll(@Body() filterQueryDto: any) {
+    return this.deskareaService.findDeskareaByStudentActivityAll(filterQueryDto);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findUserDeskareaAll(@Body() filterQueryDto: any) {
+    return this.deskareaService.findDeskareaByUserAll(filterQueryDto);
+  }
+
   @Post("/store")
   @EntityName("desarea")
   @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
@@ -45,8 +98,13 @@ export class DeskareaController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createDeskareaDto: CreateDeskAreaDto) {
-    return await this.deskareaService.create(createDeskareaDto);
+  async create(@Body() createDeskareaDto: CreateDeskAreaDto, @Req() req: Request) {
+    const customer = req["customer"];
+    const createdBy = req["createdBy"];
+    return await this.deskareaService.create(createDeskareaDto, {
+      customer,
+      createdBy,
+    });
   }
 
   @Post("/update")

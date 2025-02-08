@@ -26,17 +26,56 @@ import { UpdateAssignesMembershipDto } from "./dto/update-assignes-membership.dt
 export class AssignesMembershipController {
   constructor(private readonly assignesMembershipService: AssignesMembershipService) {}
 
-  @Post("/index")
+  @Post("/individual")
   @HttpCode(200)
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignesMembership,
+      resource: Resource.AssignGeneralOffer,
       actions: [Permission.INDEX],
     },
   ])
-  async findAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAll(filterQueryDto);
+  async findIndividualAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesMembershipService.findAssignesByIndividual(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesMembershipService.findAssignesByCompany(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentActivityAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesMembershipService.findAssignesByStudentActivity(filterQueryDto);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findUserAssigneslAll(@Body() filterQueryDto: any) {
+    return this.assignesMembershipService.findAssignesByUser(filterQueryDto);
   }
 
   @Post("/store")
@@ -53,7 +92,11 @@ export class AssignesMembershipController {
     @Req() req: Request,
   ) {
     const customer = req["customer"];
-    return await this.assignesMembershipService.create(createAssignesMembershipDto, customer);
+    const createdBy = req["createdBy"];
+    return await this.assignesMembershipService.create(createAssignesMembershipDto, {
+      customer,
+      createdBy,
+    });
   }
 
   @Post("/update")

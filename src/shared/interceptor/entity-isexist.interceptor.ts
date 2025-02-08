@@ -34,6 +34,6 @@ export class EntityIsExistInterceptor {
       return throwError(() => new NotFoundException(`this record is not found`));
     }
 
-    return next.handle().pipe();
+    return next.handle();
   }
 }

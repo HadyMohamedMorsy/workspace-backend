@@ -86,6 +86,5 @@ export enum TimeOfDay {
 export enum ReservationStatus {
   ACTIVE = "active",
   CANCELLED = "cancelled",
-  INACTIVE = "inactive",
   COMPLETE = "complete",
 }
