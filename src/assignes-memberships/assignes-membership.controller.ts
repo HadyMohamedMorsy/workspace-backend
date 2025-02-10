@@ -10,12 +10,10 @@ import {
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { AssignesMembershipService } from "./assignes-membership.service";
 import { CreateAssignesMembershipDto } from "./dto/create-assignes-membership.dto";
@@ -100,8 +98,7 @@ export class AssignesMembershipController {
   }
 
   @Post("/update")
-  @EntityName("assignesMembership")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -113,8 +110,8 @@ export class AssignesMembershipController {
   }
 
   @Delete("/delete")
-  @EntityName("assignesMembership")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,

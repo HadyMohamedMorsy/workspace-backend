@@ -9,12 +9,10 @@ import {
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
@@ -63,12 +61,7 @@ export class ProductController {
     "/api/v1/category",
     "/api/v1/dashboard",
   ])
-  @EntityName("product")
-  @UseInterceptors(
-    DeleteCacheInterceptor,
-    EntityIsExistInterceptor,
-    ClearCacheAnotherModulesIsnterceptor,
-  )
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Product,
@@ -80,13 +73,8 @@ export class ProductController {
   }
 
   @Delete("/delete")
-  @EntityName("product")
   @ClearCacheAnotherModules(["/api/v1/purchases", "/api/v1/returns", "/api/v1/category"])
-  @UseInterceptors(
-    DeleteCacheInterceptor,
-    EntityIsExistInterceptor,
-    ClearCacheAnotherModulesIsnterceptor,
-  )
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Product,

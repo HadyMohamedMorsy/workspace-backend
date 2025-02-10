@@ -9,11 +9,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
@@ -107,8 +105,7 @@ export class SharedController {
   }
 
   @Post("/update")
-  @EntityName("shared")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
@@ -120,8 +117,7 @@ export class SharedController {
   }
 
   @Delete("/delete")
-  @EntityName("shared")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Shared,

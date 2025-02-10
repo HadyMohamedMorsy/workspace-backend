@@ -83,6 +83,11 @@ export enum TimeOfDay {
   PM = "pm",
 }
 
+export enum TypeMember {
+  DeskaArea = "deskarea",
+  Shared = "shared",
+}
+
 export enum ReservationStatus {
   ACTIVE = "active",
   CANCELLED = "cancelled",

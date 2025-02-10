@@ -1,5 +1,7 @@
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
+import { TypeMember } from "src/shared/enum/global-enum";
+import { Column } from "typeorm";
 
 export enum DiscountType {
   PERCENTAGE = "percentage",
@@ -22,4 +24,7 @@ export class CreateCoWorkingSpaceDto {
   @Type(() => Number)
   @IsNotEmpty()
   days: number;
+
+  @Column({ type: "enum", enum: TypeMember })
+  type: TypeMember;
 }

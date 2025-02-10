@@ -9,11 +9,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
@@ -69,8 +67,7 @@ export class CategoryController {
   }
 
   @Post("/update")
-  @EntityName("category")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Category,
@@ -82,8 +79,7 @@ export class CategoryController {
   }
 
   @Delete("/delete")
-  @EntityName("category")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Category,

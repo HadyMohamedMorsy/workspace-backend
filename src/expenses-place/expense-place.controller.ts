@@ -8,11 +8,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateExpensePlaceDto } from "./dto/create-expense-place.dto";
 import { UpdateExpensePlaceDto } from "./dto/update-expense-place.dto";
@@ -49,8 +47,7 @@ export class ExpensesPlaceController {
   }
 
   @Post("/update")
-  @EntityName("ExpensePlace")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
@@ -62,8 +59,7 @@ export class ExpensesPlaceController {
   }
 
   @Delete("/delete")
-  @EntityName("ExpensePlace")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,

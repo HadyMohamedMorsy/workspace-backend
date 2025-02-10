@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
+import { TypeMember } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateCoWorkingSpaceDto } from "./dto/create-offer-co-working-space.dto";
@@ -37,8 +38,18 @@ export class OfferCoWorkingSpaceService {
     };
   }
 
-  async findList() {
-    const offers = await this.offerCoWorkingSpaceRepository.find({});
+  async findListShared() {
+    const offers = await this.offerCoWorkingSpaceRepository.find({
+      where: { type: TypeMember.Shared },
+    });
+    return {
+      data: offers,
+    };
+  }
+  async findListDeskArea() {
+    const offers = await this.offerCoWorkingSpaceRepository.find({
+      where: { type: TypeMember.DeskaArea },
+    });
     return {
       data: offers,
     };

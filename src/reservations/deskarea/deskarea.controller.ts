@@ -9,11 +9,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { DeskareaService } from "./deskarea.service";
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
@@ -90,8 +88,7 @@ export class DeskareaController {
   }
 
   @Post("/store")
-  @EntityName("desarea")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,
@@ -108,8 +105,7 @@ export class DeskareaController {
   }
 
   @Post("/update")
-  @EntityName("deskarea")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,
@@ -121,8 +117,7 @@ export class DeskareaController {
   }
 
   @Delete("/delete")
-  @EntityName("deskarea")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,

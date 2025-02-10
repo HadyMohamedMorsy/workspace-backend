@@ -9,11 +9,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
@@ -90,8 +88,7 @@ export class ReservationRoomController {
   }
 
   @Post("/store")
-  @EntityName("reservation-room")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -108,8 +105,7 @@ export class ReservationRoomController {
   }
 
   @Post("/update")
-  @EntityName("reservation-room")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -121,8 +117,7 @@ export class ReservationRoomController {
   }
 
   @Delete("/delete")
-  @EntityName("reservation-room")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,

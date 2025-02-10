@@ -1,4 +1,5 @@
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { TypeMember } from "src/shared/enum/global-enum";
 import {
   Column,
   CreateDateColumn,
@@ -21,6 +22,9 @@ export class CoWorkingSpace {
 
   @Column()
   days: number;
+
+  @Column({ type: "enum", enum: TypeMember, default: TypeMember.Shared })
+  type: TypeMember;
 
   @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.memeberShip, {
     onDelete: "CASCADE",

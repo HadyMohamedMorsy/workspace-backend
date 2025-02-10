@@ -92,46 +92,64 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
   },
   {
     resource: Resource.Order,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.GeneralOffer,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.OfferWorkingSpace,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.OfferPackages,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.Deals,
-    actions: [Permission.CREATE, Permission.VIEW, Permission.UPDATE, Permission.INDEX],
+    actions: [
+      Permission.CREATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.UPDATE,
+      Permission.INDEX,
+    ],
   },
   {
     resource: Resource.Shared,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.Deskarea,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.AssignesPackage,
-    actions: [Permission.CREATE, Permission.VIEW, Permission.UPDATE, Permission.INDEX],
+    actions: [
+      Permission.CREATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.UPDATE,
+      Permission.INDEX,
+    ],
   },
   {
     resource: Resource.ReservationRoom,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.AssignGeneralOffer,
-    actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
     resource: Resource.AssignesMembership,
-    actions: [Permission.CREATE, Permission.VIEW, Permission.UPDATE, Permission.INDEX],
+    actions: [
+      Permission.CREATE,
+      Permission.DELETE,
+      Permission.VIEW,
+      Permission.UPDATE,
+      Permission.INDEX,
+    ],
   },
 ];

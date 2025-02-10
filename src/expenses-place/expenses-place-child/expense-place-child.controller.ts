@@ -9,12 +9,10 @@ import {
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateExpensePlaceChildDto } from "./dto/create-expense-place-child.dto";
 import { UpdateExpensePlaceChildDto } from "./dto/update-expense-place-child.dto";
@@ -39,13 +37,8 @@ export class ExpensesPlaceChildController {
   }
 
   @Post("/store")
-  @EntityName("ExpensePlace", "expensePlace_id")
   @ClearCacheAnotherModules(["/api/v1/expenses-place"])
-  @UseInterceptors(
-    DeleteCacheInterceptor,
-    ClearCacheAnotherModulesIsnterceptor,
-    EntityIsExistInterceptor,
-  )
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
@@ -57,13 +50,8 @@ export class ExpensesPlaceChildController {
   }
 
   @Post("/update")
-  @EntityName("ExpensePlace", "expensePlace_id")
   @ClearCacheAnotherModules(["/api/v1/expenses-place"])
-  @UseInterceptors(
-    DeleteCacheInterceptor,
-    ClearCacheAnotherModulesIsnterceptor,
-    EntityIsExistInterceptor,
-  )
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
@@ -75,8 +63,7 @@ export class ExpensesPlaceChildController {
   }
 
   @Delete("/delete")
-  @EntityName("ExpensePlaceChild")
-  @UseInterceptors(DeleteCacheInterceptor, EntityIsExistInterceptor)
+  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,

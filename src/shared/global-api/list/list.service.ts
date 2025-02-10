@@ -75,7 +75,10 @@ export class ListService {
     if (module === "user") return await this.usersService.findList();
     if (module === "room") return await this.roomService.findList();
     if (module === "global-offer") return await this.generalOfferService.findList();
-    if (module === "membership-offer") return await this.offerCoWorkingSpaceService.findList();
+    if (module === "membership-offer-shared")
+      return await this.offerCoWorkingSpaceService.findListShared();
+    if (module === "membership-offer-deskarea")
+      return await this.offerCoWorkingSpaceService.findListDeskArea();
     if (module === "offer-package-offer") return await this.offerPackagesService.findList();
   }
 

@@ -9,12 +9,10 @@ import {
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { EntityName } from "src/shared/decorators/entity-name.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
-import { EntityIsExistInterceptor } from "src/shared/interceptor/entity-isexist.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateReturnsDto } from "./dto/create-returns.dto";
 import { UpdateReturnsDto } from "./dto/update-returns.dto";
@@ -40,12 +38,7 @@ export class ReturnsController {
 
   @Post("/store")
   @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category", "/api/v1/dashboard"])
-  @EntityName("product", "product_id")
-  @UseInterceptors(
-    DeleteCacheInterceptor,
-    ClearCacheAnotherModulesIsnterceptor,
-    EntityIsExistInterceptor,
-  )
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Returns,
@@ -58,12 +51,7 @@ export class ReturnsController {
 
   @Post("/update")
   @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category", "/api/v1/dashboard"])
-  @EntityName("returns")
-  @UseInterceptors(
-    DeleteCacheInterceptor,
-    ClearCacheAnotherModulesIsnterceptor,
-    EntityIsExistInterceptor,
-  )
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Returns,
@@ -76,12 +64,7 @@ export class ReturnsController {
 
   @Delete("/delete")
   @ClearCacheAnotherModules(["/api/v1/product", "/api/v1/category"])
-  @EntityName("returns")
-  @UseInterceptors(
-    DeleteCacheInterceptor,
-    ClearCacheAnotherModulesIsnterceptor,
-    EntityIsExistInterceptor,
-  )
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Returns,
