@@ -1,4 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
@@ -60,6 +61,11 @@ export class ReservationRoom {
     onDelete: "CASCADE",
   })
   assignesPackages: AssignesPackages;
+
+  @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.reservationRooms, {
+    onDelete: "CASCADE",
+  })
+  assignGeneralOffer: AssignGeneralOffer[];
 
   @ManyToOne(() => Room, room => room.reservationRoom, {
     onDelete: "CASCADE",

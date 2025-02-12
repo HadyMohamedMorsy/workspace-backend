@@ -47,7 +47,7 @@ export class AssignGeneralOfferservice {
   async findOne(id: number): Promise<AssignGeneralOffer> {
     const assignGeneralOffer = await this.assignGeneralOfferRepository.findOne({ where: { id } });
     if (!assignGeneralOffer) {
-      throw new NotFoundException(`AssignGeneralOffer with id ${id} not found`);
+      throw new NotFoundException(`AssignGeneralOffer  not found`);
     }
     return assignGeneralOffer;
   }
@@ -59,6 +59,9 @@ export class AssignGeneralOfferservice {
 
     queryBuilder
       .leftJoinAndSelect("e.generalOffer", "eg")
+      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.reservationRooms", "er")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
       .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
@@ -82,6 +85,9 @@ export class AssignGeneralOfferservice {
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.generalOffer", "eg")
+      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.reservationRooms", "er")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -105,6 +111,9 @@ export class AssignGeneralOfferservice {
     queryBuilder
       .leftJoinAndSelect("e.company", "ec")
       .leftJoinAndSelect("e.generalOffer", "eg")
+      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.reservationRooms", "er")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -128,6 +137,9 @@ export class AssignGeneralOfferservice {
     queryBuilder
       .leftJoinAndSelect("e.studentActivity", "es")
       .leftJoinAndSelect("e.generalOffer", "eg")
+      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.reservationRooms", "er")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
       })

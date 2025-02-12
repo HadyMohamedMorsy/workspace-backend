@@ -1,5 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
+import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
+import { AssignesMembershipService } from "src/assignes-memberships/assignes-membership.service";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
@@ -17,6 +20,8 @@ export class DeskareaService {
     @InjectRepository(Deskarea)
     private deskareaRepository: Repository<Deskarea>,
     protected readonly apiFeaturesService: APIFeaturesService,
+    protected readonly globalOffer: AssignGeneralOfferservice,
+    protected readonly membership: AssignesMembershipService,
   ) {}
 
   async create(
@@ -26,7 +31,7 @@ export class DeskareaService {
       createdBy: User;
     },
   ) {
-    const { customer_id, type_user } = createDeskareaDto;
+    const { customer_id, type_user, offer_id, membership_id } = createDeskareaDto;
     const isReservation = await this.findActiveOrInactiveReservationsForCustomer(
       customer_id,
       type_user,
@@ -35,8 +40,40 @@ export class DeskareaService {
       throw new BadRequestException(`u can't reservation again for this user`);
     }
 
+    let generalOffer = null;
+    let memberShip = null;
+
+    if (offer_id) {
+      const payload = {
+        customer_id,
+        offer_id,
+        type_user,
+      } as CreateAssignGeneralOfferDto;
+
+      await this.globalOffer.create(payload, reqBody);
+
+      const findOffer = await this.globalOffer.findOne(offer_id);
+      if (!findOffer) {
+        throw new BadRequestException(`u can't find global offer`);
+      }
+
+      generalOffer = findOffer;
+    }
+
+    if (membership_id) {
+      const memebership = await this.membership.findOne(membership_id);
+
+      if (!memebership) {
+        throw new BadRequestException(`u can't find Memeber ship`);
+      }
+
+      memberShip = memebership;
+    }
+
     const deskarea = this.deskareaRepository.create({
       ...createDeskareaDto,
+      assignGeneralOffer: generalOffer,
+      assignessMemebership: memberShip,
       createdBy: reqBody.createdBy,
       [type_user.toLowerCase()]: reqBody.customer,
     });
@@ -162,11 +199,43 @@ export class DeskareaService {
   }
 
   async update(updateDeskareaDto: UpdateDeskAreaDto) {
-    await this.deskareaRepository.update(updateDeskareaDto.id, updateDeskareaDto);
+    if (updateDeskareaDto.status === ReservationStatus.CANCELLED) {
+      await this.deskareaRepository.update(updateDeskareaDto.id, updateDeskareaDto);
+    } else {
+      const { start_hour, start_minute, start_time, end_hour, end_minute, end_time } =
+        updateDeskareaDto;
+
+      const startTotalMinutes = this.convertToMinutes(start_hour, start_minute, start_time);
+      const endTotalMinutes = this.convertToMinutes(end_hour, end_minute, end_time);
+      const durationMinutes = endTotalMinutes - startTotalMinutes;
+
+      const hours = Math.floor(durationMinutes / 60);
+      const minutes = durationMinutes % 60;
+
+      let totalPrice = hours * 10;
+      if (minutes >= 10) {
+        totalPrice += 10;
+      }
+      await this.deskareaRepository.update(updateDeskareaDto.id, {
+        ...updateDeskareaDto,
+        total_price: totalPrice,
+        status: ReservationStatus.COMPLETE,
+      });
+    }
     return this.deskareaRepository.findOne({ where: { id: updateDeskareaDto.id } });
   }
 
   async remove(deskareaId: number) {
     await this.deskareaRepository.delete(deskareaId);
+  }
+
+  convertToMinutes(hour, minute, period) {
+    if (period === "pm" && hour !== 12) {
+      hour += 12;
+    }
+    if (period === "am" && hour === 12) {
+      hour = 0;
+    }
+    return hour * 60 + minute;
   }
 }

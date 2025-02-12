@@ -29,9 +29,7 @@ export class OfferPackages {
   })
   room: Room;
 
-  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.packages, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.packages)
   assignesPackages: AssignesPackages;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })

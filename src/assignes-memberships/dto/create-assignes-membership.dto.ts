@@ -29,6 +29,11 @@ export class CreateAssignesMembershipDto {
   })
   type_user: TypeUser;
 
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  total_price: number;
+
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;

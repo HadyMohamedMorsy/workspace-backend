@@ -1,4 +1,5 @@
 import { IsEnum } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
@@ -57,6 +58,14 @@ export class Shared {
     onDelete: "CASCADE",
   })
   assignessMemebership: AssignesMembership[];
+
+  @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.shared, {
+    onDelete: "CASCADE",
+  })
+  assignGeneralOffer: AssignGeneralOffer[];
+
+  @Column({ nullable: true })
+  total_price: number;
 
   @Column()
   note: string;

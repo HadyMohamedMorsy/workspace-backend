@@ -1,8 +1,10 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -18,9 +20,7 @@ export class GeneralOffer {
   @Column({ unique: true })
   name: string;
 
-  @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.generalOffer, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.generalOffer)
   assignessOffers: AssignGeneralOffer;
 
   @Column({ type: "timestamp", nullable: true })
@@ -41,6 +41,11 @@ export class GeneralOffer {
 
   @Column({ type: "enum", enum: PRODUCT_TYPE, default: PRODUCT_TYPE.Room })
   product: PRODUCT_TYPE;
+
+  @ManyToOne(() => User, user => user.globalOffer, {
+    onDelete: "CASCADE",
+  })
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

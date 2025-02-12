@@ -43,9 +43,7 @@ export class AssignesPackages {
   })
   packages: OfferPackages;
 
-  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages)
   reservationRooms: ReservationRoom;
 
   @Column({ type: "timestamp", nullable: true })
@@ -59,6 +57,9 @@ export class AssignesPackages {
 
   @Column({ nullable: true })
   remaining: number;
+
+  @Column({ nullable: true })
+  total_price: number;
 
   @ManyToOne(() => User, user => user.createdByPackages, {
     onDelete: "CASCADE",

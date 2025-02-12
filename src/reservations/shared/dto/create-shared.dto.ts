@@ -28,6 +28,16 @@ export class CreateSharedDto {
   @Type(() => Number)
   customer_id: number;
 
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  offer_id: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  membership_id: number;
+
   @IsEnum(TypeUser, {
     message:
       "type order must be one of the following: individual or company or studentActivity or User",

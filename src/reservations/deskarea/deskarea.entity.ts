@@ -1,4 +1,5 @@
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
@@ -15,42 +16,40 @@ export class Deskarea {
   @Column()
   selected_day: string;
 
-  @Column({ type: "enum", enum: ReservationStatus })
-  status: ReservationStatus;
+  @Column()
+  start_hour: number;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
-  start_hour: string;
-
-  @Column()
-  start_minute: string;
+  start_minute: number;
 
   @Column({ type: "enum", enum: TimeOfDay })
   @IsEnum(TimeOfDay)
   start_time: TimeOfDay;
 
-  @Column()
-  end_hour: string;
+  @Column({ nullable: true })
+  end_hour: number;
 
-  @Column()
-  end_minute: string;
+  @Column({ nullable: true })
+  end_minute: number;
 
-  @Column({ type: "enum", enum: TimeOfDay })
+  @Column({ type: "enum", enum: ReservationStatus })
+  status: ReservationStatus;
+
+  @Column({ type: "enum", enum: TimeOfDay, nullable: true })
   @IsEnum(TimeOfDay)
   end_time: TimeOfDay;
 
-  @ManyToOne(() => Individual, individual => individual.deskarea, {
+  @ManyToOne(() => Individual, individual => individual.shared, {
     onDelete: "CASCADE",
   })
   individual: Individual;
 
-  @ManyToOne(() => Company, company => company.deskarea, {
+  @ManyToOne(() => Company, company => company.shared, {
     onDelete: "CASCADE",
   })
   company: Company;
 
-  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.deskarea, {
+  @ManyToOne(() => StudentActivity, studentActivity => studentActivity.shared, {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
@@ -58,12 +57,20 @@ export class Deskarea {
   @ManyToOne(() => AssignesMembership, assignesMembership => assignesMembership.deskarea, {
     onDelete: "CASCADE",
   })
-  assignessMemebership: AssignesMembership;
+  assignessMemebership: AssignesMembership[];
+
+  @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.deskarea, {
+    onDelete: "CASCADE",
+  })
+  assignGeneralOffer: AssignGeneralOffer[];
 
   @Column()
   note: string;
 
-  @ManyToOne(() => User, user => user.createdByDeskArea, {
+  @Column({ nullable: true })
+  total_price: number;
+
+  @ManyToOne(() => User, user => user.createdByShared, {
     onDelete: "CASCADE",
   })
   createdBy: User;

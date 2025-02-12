@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional } from "class-validator";
-import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { IsEnum, IsNotEmpty, IsNumber } from "class-validator";
+import { TypeUser } from "src/shared/enum/global-enum";
 
 export class CreateAssignGeneralOfferDto {
   @IsNumber()
@@ -18,8 +18,4 @@ export class CreateAssignGeneralOfferDto {
       "type order must be one of the following: individual or company or studentActivity or User",
   })
   type_user: TypeUser;
-
-  @IsEnum(ReservationStatus)
-  @IsOptional()
-  status: ReservationStatus = ReservationStatus.ACTIVE;
 }

@@ -29,6 +29,11 @@ export class CreateAssignesPackageDto {
   @IsNotEmpty()
   end_date: string;
 
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  total_price: number;
+
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;

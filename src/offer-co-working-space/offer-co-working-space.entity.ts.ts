@@ -26,9 +26,7 @@ export class CoWorkingSpace {
   @Column({ type: "enum", enum: TypeMember, default: TypeMember.Shared })
   type: TypeMember;
 
-  @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.memeberShip, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.memeberShip)
   assignessMemebership: AssignesMembership[];
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })

@@ -44,14 +44,10 @@ export class AssignesMembership {
   })
   memeberShip: CoWorkingSpace;
 
-  @OneToMany(() => Deskarea, deskarea => deskarea.assignessMemebership, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Deskarea, deskarea => deskarea.assignessMemebership)
   deskarea: Deskarea[];
 
-  @OneToMany(() => Deskarea, shared => shared.assignessMemebership, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Deskarea, shared => shared.assignessMemebership)
   shared: Shared[];
 
   @Column({ type: "timestamp", nullable: true })
@@ -65,6 +61,9 @@ export class AssignesMembership {
 
   @Column({ nullable: true })
   remaining: number;
+
+  @Column({ nullable: true })
+  total_price: number;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

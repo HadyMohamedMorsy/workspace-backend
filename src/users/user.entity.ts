@@ -4,6 +4,7 @@ import { AssignesPackages } from "src/assigness-packages-offers/assignes-package
 import { Company } from "src/companies/company.entity";
 import { Deals } from "src/deals/deals.entity";
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
+import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
@@ -105,6 +106,9 @@ export class User {
 
   @OneToMany(() => Shared, shared => shared.createdBy)
   createdByShared: Shared[];
+
+  @OneToMany(() => GeneralOffer, generalOffer => generalOffer.createdBy)
+  globalOffer: GeneralOffer[];
 
   @OneToMany(() => Deskarea, deskarea => deskarea.createdBy)
   createdByDeskArea: Deskarea[];

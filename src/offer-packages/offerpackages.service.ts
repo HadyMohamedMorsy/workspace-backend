@@ -46,7 +46,9 @@ export class OfferPackagesService {
   }
 
   async findList() {
-    const offers = await this.offerpackagesRepository.find({});
+    const offers = await this.offerpackagesRepository.find({
+      relations: ["room"],
+    });
     return {
       data: offers,
     };

@@ -1,7 +1,10 @@
 import { Company } from "src/companies/company.entity";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { Individual } from "src/individual/individual.entity";
-import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
+import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
+import { Shared } from "src/reservations/shared/shared.entity";
+import { TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
@@ -9,6 +12,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -39,9 +43,6 @@ export class AssignGeneralOffer {
   })
   type_user: TypeUser;
 
-  @Column({ type: "enum", enum: ReservationStatus })
-  status: ReservationStatus;
-
   @ManyToOne(() => GeneralOffer, generalOffer => generalOffer.assignessOffers, {
     onDelete: "CASCADE",
   })
@@ -51,6 +52,15 @@ export class AssignGeneralOffer {
     onDelete: "CASCADE",
   })
   createdBy: User;
+
+  @OneToMany(() => Shared, shared => shared.assignGeneralOffer)
+  shared: Shared;
+
+  @OneToMany(() => Deskarea, deskarea => deskarea.assignGeneralOffer)
+  deskarea: Deskarea;
+
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages)
+  reservationRooms: ReservationRoom;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

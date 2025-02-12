@@ -4,6 +4,7 @@ import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateGeneralOfferDto } from "./dto/create-general-offer.dto";
 import { UpdateGeneralOfferDto } from "./dto/update-general-offer.dto";
+import { PRODUCT_TYPE } from "./enum/product.enum";
 import { GeneralOffer } from "./generalOffer.entity";
 
 @Injectable()
@@ -20,8 +21,40 @@ export class GeneralOfferService {
     return await this.generalOfferRepository.save(generalOffer);
   }
 
-  async findList() {
-    const offers = await this.generalOfferRepository.find({});
+  async findShared() {
+    const now = new Date();
+
+    const offers = await this.generalOfferRepository
+      .createQueryBuilder("offer")
+      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Shared })
+      .andWhere("offer.start_date <= :now AND offer.end_date >= :now", { now })
+      .getMany();
+    return {
+      data: offers,
+    };
+  }
+  async findDeskArea() {
+    const now = new Date();
+
+    const offers = await this.generalOfferRepository
+      .createQueryBuilder("offer")
+      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Deskarea })
+      .andWhere("offer.start_date <= :now AND offer.end_date >= :now", { now })
+      .getMany();
+
+    return {
+      data: offers,
+    };
+  }
+  async findRooms() {
+    const now = new Date();
+
+    const offers = await this.generalOfferRepository
+      .createQueryBuilder("offer")
+      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Room })
+      .andWhere("offer.start_date <= :now AND offer.end_date >= :now", { now })
+      .getMany();
+
     return {
       data: offers,
     };

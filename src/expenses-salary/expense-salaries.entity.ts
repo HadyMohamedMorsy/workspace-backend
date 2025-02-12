@@ -26,7 +26,9 @@ export class ExpenseSalaries {
   @Column({ nullable: true })
   destination: string;
 
-  @ManyToOne(() => User, user => user.salaries)
+  @ManyToOne(() => User, user => user.salaries, {
+    onDelete: "CASCADE",
+  })
   user: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
