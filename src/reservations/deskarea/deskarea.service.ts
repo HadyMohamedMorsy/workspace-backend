@@ -12,7 +12,7 @@ import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import { Deskarea } from "./deskarea.entity"; // Changed from Company to Deskarea
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
-import { UpdateDeskAreaDto } from "./dto/update-returns.dto";
+import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
 
 @Injectable()
 export class DeskareaService {
@@ -199,26 +199,13 @@ export class DeskareaService {
   }
 
   async update(updateDeskareaDto: UpdateDeskAreaDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { customer_id, offer_id, type_user, ...reset } = updateDeskareaDto;
     if (updateDeskareaDto.status === ReservationStatus.CANCELLED) {
-      await this.deskareaRepository.update(updateDeskareaDto.id, updateDeskareaDto);
+      await this.deskareaRepository.update(updateDeskareaDto.id, reset);
     } else {
-      const { start_hour, start_minute, start_time, end_hour, end_minute, end_time } =
-        updateDeskareaDto;
-
-      const startTotalMinutes = this.convertToMinutes(start_hour, start_minute, start_time);
-      const endTotalMinutes = this.convertToMinutes(end_hour, end_minute, end_time);
-      const durationMinutes = endTotalMinutes - startTotalMinutes;
-
-      const hours = Math.floor(durationMinutes / 60);
-      const minutes = durationMinutes % 60;
-
-      let totalPrice = hours * 10;
-      if (minutes >= 10) {
-        totalPrice += 10;
-      }
       await this.deskareaRepository.update(updateDeskareaDto.id, {
-        ...updateDeskareaDto,
-        total_price: totalPrice,
+        ...reset,
         status: ReservationStatus.COMPLETE,
       });
     }

@@ -25,6 +25,6 @@ import { SharedService } from "./shared.service";
 })
 export class SharedModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CustomerMiddleware).forRoutes("shared/store");
+    consumer.apply(CustomerMiddleware).forRoutes("shared/store", "shared/store/reservation");
   }
 }

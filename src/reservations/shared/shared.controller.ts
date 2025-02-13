@@ -113,6 +113,72 @@ export class SharedController {
       createdBy,
     });
   }
+  @Post("/store/reservation")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/assign-general-offer/company",
+    "/api/v1/assign-general-offer/studentActivity",
+    "/api/v1/assign-general-offer/user",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.CREATE],
+    },
+  ])
+  async createReservationByMememberShip(
+    @Body() createSharedDto: CreateSharedDto,
+    @Req() req: Request,
+  ) {
+    const customer = req["customer"];
+    const createdBy = req["createdBy"];
+    return await this.sharedService.createReservationByMememberShip(createSharedDto, {
+      customer,
+      createdBy,
+    });
+  }
+
+  @Post("reservation/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findReservationIndividualAll(@Body() filterQueryDto: any) {
+    return this.sharedService.findReservationsByIndividual(filterQueryDto);
+  }
+
+  @Post("reservation/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findReservationCompanyAll(@Body() filterQueryDto: any) {
+    return this.sharedService.findReservationsByCompany(filterQueryDto);
+  }
+
+  @Post("reservation/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignGeneralOffer,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findReservationStudentActivityAll(@Body() filterQueryDto: any) {
+    return this.sharedService.findReservationsByStudentActivity(filterQueryDto);
+  }
 
   @Post("/update")
   @ClearCacheAnotherModules([

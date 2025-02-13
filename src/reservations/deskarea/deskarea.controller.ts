@@ -17,7 +17,7 @@ import { CachingInterceptor } from "src/shared/interceptor/caching-response.inte
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { DeskareaService } from "./deskarea.service";
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
-import { UpdateDeskAreaDto } from "./dto/update-returns.dto";
+import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
 
 @UseGuards(AuthorizationGuard)
 @Controller("deskarea")

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as moment from "moment";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { AssignesMembershipService } from "src/assignes-memberships/assignes-membership.service";
@@ -31,7 +32,7 @@ export class SharedService {
       createdBy: User;
     },
   ) {
-    const { customer_id, type_user, offer_id, membership_id } = createSharedDto;
+    const { customer_id, type_user, offer_id } = createSharedDto;
     const isReservation = await this.findActiveOrInactiveReservationsForCustomer(
       customer_id,
       type_user,
@@ -41,7 +42,6 @@ export class SharedService {
     }
 
     let generalOffer = null;
-    let memberShip = null;
 
     if (offer_id) {
       const payload = {
@@ -53,15 +53,9 @@ export class SharedService {
       generalOffer = await this.globalOffer.create(payload, reqBody);
     }
 
-    if (membership_id) {
-      const memebership = await this.membership.findOne(membership_id);
-      memberShip = memebership;
-    }
-
     const shared = this.sharedRepository.create({
       ...createSharedDto,
       assignGeneralOffer: generalOffer,
-      assignessMemebership: memberShip,
       createdBy: reqBody.createdBy,
       [type_user.toLowerCase()]: reqBody.customer,
     });
@@ -112,10 +106,83 @@ export class SharedService {
     return shared;
   }
 
+  async findReservationsByIndividual(filterData: any) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.individual", "ei")
+      .leftJoinAndSelect("e.assignessMemebership", "em")
+      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
+      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+  async findReservationsByCompany(filterData: any) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.company", "ec")
+      .leftJoinAndSelect("e.assignessMemebership", "em")
+      .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
+      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
+
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+  async findReservationsByStudentActivity(filterData: any) {
+    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect("e.studentActivity", "es")
+      .leftJoinAndSelect("e.assignessMemebership", "em")
+      .andWhere("es.id = :studentActivity_id", {
+        studentActivity_id: filterData.studentActivity_id,
+      })
+      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
+
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    const results = {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
+
+    return results;
+  }
+
   async findSharedByIndividualAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -133,6 +200,8 @@ export class SharedService {
     const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
     queryBuilder
       .leftJoinAndSelect("e.company", "ec")
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -150,6 +219,8 @@ export class SharedService {
     const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
     queryBuilder
       .leftJoinAndSelect("e.studentActivity", "es")
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
       })
@@ -169,6 +240,8 @@ export class SharedService {
     const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
     queryBuilder
       .leftJoin("e.createdBy", "ec")
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
       .andWhere("ec.id = :user_id", {
         user_id: filterData.user_id,
@@ -185,31 +258,72 @@ export class SharedService {
   }
 
   async update(updateSharedDto: UpdateSharedDto) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { customer_id, offer_id, type_user, ...reset } = updateSharedDto;
     if (updateSharedDto.status === ReservationStatus.CANCELLED) {
-      await this.sharedRepository.update(updateSharedDto.id, updateSharedDto);
+      await this.sharedRepository.update(updateSharedDto.id, reset);
     } else {
-      const { start_hour, start_minute, start_time, end_hour, end_minute, end_time } =
-        updateSharedDto;
-
-      const startTotalMinutes = this.convertToMinutes(start_hour, start_minute, start_time);
-      const endTotalMinutes = this.convertToMinutes(end_hour, end_minute, end_time);
-      const durationMinutes = endTotalMinutes - startTotalMinutes;
-
-      const hours = Math.floor(durationMinutes / 60);
-      const minutes = durationMinutes % 60;
-
-      let totalPrice = hours * 10;
-      if (minutes >= 10) {
-        totalPrice += 10;
-      }
-
       await this.sharedRepository.update(updateSharedDto.id, {
-        ...updateSharedDto,
-        total_price: totalPrice,
+        ...reset,
         status: ReservationStatus.COMPLETE,
       });
     }
     return this.sharedRepository.findOne({ where: { id: updateSharedDto.id } });
+  }
+
+  async createReservationByMememberShip(
+    createSharedDto: CreateSharedDto,
+    reqBody: {
+      customer: Individual | Company | StudentActivity;
+      createdBy: User;
+    },
+  ) {
+    const { customer_id, type_user, membership_id } = createSharedDto;
+    const isReservation = await this.findActiveOrInactiveReservationsForCustomer(
+      customer_id,
+      type_user,
+    );
+    if (isReservation && isReservation.length) {
+      throw new BadRequestException(`u can't reservation again for this user`);
+    }
+    let memberShip = null;
+
+    if (membership_id) {
+      memberShip = await this.membership.findOne(membership_id);
+    }
+
+    if (!memberShip) {
+      throw new BadRequestException(`u must have membership here`);
+    }
+
+    if (memberShip.used > memberShip.remaining) {
+      throw new BadRequestException(`u must have membership is done plese create new membership`);
+    }
+
+    const currentDate = moment();
+    const startDate = moment(memberShip.start_date);
+    const endDate = moment(memberShip.end_date);
+
+    if (!startDate.isBefore(currentDate) || !endDate.isAfter(currentDate)) {
+      throw new BadRequestException("The membership is not active for the current date");
+    }
+
+    const newUsed = (memberShip.used += 1);
+    const newRemaing = (memberShip.remaining -= 1);
+
+    await this.membership.update({
+      id: membership_id,
+      used: newUsed,
+      remaining: newRemaing,
+    });
+
+    const shared = this.sharedRepository.create({
+      ...createSharedDto,
+      assignessMemebership: memberShip,
+      createdBy: reqBody.createdBy,
+      [type_user.toLowerCase()]: reqBody.customer,
+    });
+    return await this.sharedRepository.save(shared);
   }
 
   async remove(sharedId: number) {

@@ -29,6 +29,14 @@ export class CreateAssignesMembershipDto {
   })
   type_user: TypeUser;
 
+  @IsOptional()
+  @Type(() => Number)
+  used: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  remaining: number;
+
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()

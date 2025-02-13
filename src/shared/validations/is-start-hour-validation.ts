@@ -3,26 +3,31 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from "class-validator";
-import { TimeOfDay } from "../enum/global-enum";
+import * as moment from "moment";
 
 @ValidatorConstraint({ name: "IsStartBeforeEnd", async: false })
 export class IsStartBeforeEndValidator implements ValidatorConstraintInterface {
   validate(value: any, args: ValidationArguments) {
-    const { startHour, startMinute, startTime, endHour, endMinute, endTime } = args.object as any;
+    const { selected_day, start_hour, start_minute, start_time, end_hour, end_minute, end_time } =
+      args.object as any;
 
-    const convertTo24HourFormat = (hour: string, minute: string, period: TimeOfDay) => {
-      const hourInt = parseInt(hour);
-      const adjustedHour = period === TimeOfDay.PM && hourInt < 12 ? hourInt + 12 : hourInt;
-      return adjustedHour * 60 + parseInt(minute);
-    };
+    const startMoment = moment(
+      `${selected_day} ${start_hour}:${start_minute} ${start_time}`,
+      "YYYY-MM-DD h:m a",
+    );
 
-    const startTotalMinutes = convertTo24HourFormat(startHour, startMinute, startTime);
-    const endTotalMinutes = convertTo24HourFormat(endHour, endMinute, endTime);
+    const endMoment = moment(
+      `${selected_day} ${end_hour}:${end_minute} ${end_time}`,
+      "YYYY-MM-DD h:m a",
+    );
 
-    return startTotalMinutes < endTotalMinutes && startTime === endTime;
+    const isStartBeforeEnd = startMoment.isBefore(endMoment);
+    const isSameDay = startMoment.isSame(endMoment, "day");
+
+    return isStartBeforeEnd && isSameDay;
   }
 
   defaultMessage(): string {
-    return "Start time must be before end time, and both should have the same AM/PM period.";
+    return "Start time must be before end time, and the selected day must be today.";
   }
 }

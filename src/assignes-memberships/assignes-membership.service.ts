@@ -114,8 +114,8 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.shared", "es")
       .leftJoinAndSelect("e.deskarea", "ed")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.createdBy", "eu")
+      .addSelect(["eu.id", "eu.firstName", "eu.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -128,6 +128,7 @@ export class AssignesMembershipService {
 
     return results;
   }
+
   async findAssignesByStudentActivity(filterData: any) {
     const queryBuilder = this.apiFeaturesService
       .setRepository(AssignesMembership)
@@ -136,7 +137,7 @@ export class AssignesMembershipService {
     queryBuilder
       .leftJoinAndSelect("e.studentActivity", "es")
       .leftJoinAndSelect("e.memeberShip", "em")
-      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.shared", "esh")
       .leftJoinAndSelect("e.deskarea", "ed")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
