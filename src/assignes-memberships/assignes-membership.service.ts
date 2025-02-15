@@ -37,6 +37,9 @@ export class AssignesMembershipService {
     const assignesMembership = this.assignesMembershipRepository.create({
       ...create,
       createdBy: reqBody.createdBy,
+      total_used: +memeberShip.days,
+      used: 0,
+      remaining: +memeberShip.days,
       [create.type_user.toLowerCase()]: reqBody.customer,
       memeberShip,
     });

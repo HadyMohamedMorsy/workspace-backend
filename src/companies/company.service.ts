@@ -18,7 +18,8 @@ export class CompanyService {
   // Create a new product
   async create(createCompanyDto: CreateCompanyDto) {
     const company = this.companyRepository.create(createCompanyDto);
-    return await this.companyRepository.save(company);
+    const newClient = await this.companyRepository.save(company);
+    return await this.findOne(newClient.id);
   }
 
   // Get all products
@@ -40,6 +41,7 @@ export class CompanyService {
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
+
     return {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,
@@ -69,7 +71,10 @@ export class CompanyService {
 
   // Get product by ID
   async findOne(id: number): Promise<Company> {
-    const company = await this.companyRepository.findOne({ where: { id } });
+    const company = await this.companyRepository.findOne({
+      where: { id },
+      relations: ["assignGeneralOffers", "assign_memberships", "assignesPackages", "createdBy"],
+    });
     if (!company) {
       throw new NotFoundException(`${company} with id ${id} not found`);
     }

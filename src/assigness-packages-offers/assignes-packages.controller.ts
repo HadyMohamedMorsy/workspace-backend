@@ -29,7 +29,7 @@ export class AssignesPackageController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignGeneralOffer,
+      resource: Resource.AssignesPackage,
       actions: [Permission.INDEX],
     },
   ])
@@ -42,7 +42,7 @@ export class AssignesPackageController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignGeneralOffer,
+      resource: Resource.AssignesPackage,
       actions: [Permission.INDEX],
     },
   ])
@@ -55,7 +55,7 @@ export class AssignesPackageController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignGeneralOffer,
+      resource: Resource.AssignesPackage,
       actions: [Permission.INDEX],
     },
   ])
@@ -68,7 +68,7 @@ export class AssignesPackageController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignGeneralOffer,
+      resource: Resource.AssignesPackage,
       actions: [Permission.INDEX],
     },
   ])
@@ -95,7 +95,8 @@ export class AssignesPackageController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesPackage,

@@ -28,7 +28,7 @@ export class Individual {
   @Column({ unique: true, length: 11 })
   number: string;
 
-  @Column({ unique: true, name: "whatsapp" })
+  @Column({ unique: true, nullable: true })
   whatsApp: string;
 
   @Column({ default: "freelancer" })

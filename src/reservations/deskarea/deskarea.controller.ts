@@ -94,9 +94,8 @@ export class DeskareaController {
     "/api/v1/individual",
     "/api/v1/company",
     "/api/v1/studentActivity",
-    "/api/v1/assign-general-offer/company",
-    "/api/v1/assign-general-offer/studentActivity",
-    "/api/v1/assign-general-offer/user",
+    "/api/v1/user",
+    "/api/v1/assign-general-offer",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
@@ -114,16 +113,80 @@ export class DeskareaController {
     });
   }
 
+  @Post("/store/reservation")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-membership",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.CREATE],
+    },
+  ])
+  async createReservationByMememberShip(
+    @Body() createSharedAreaDto: CreateDeskAreaDto,
+    @Req() req: Request,
+  ) {
+    const customer = req["customer"];
+    const createdBy = req["createdBy"];
+    return await this.deskareaService.createReservationByMememberShip(createSharedAreaDto, {
+      customer,
+      createdBy,
+    });
+  }
+
+  @Post("reservation/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findReservationIndividualAll(@Body() filterQueryDto: any) {
+    return this.deskareaService.findReservationsByIndividual(filterQueryDto);
+  }
+
+  @Post("reservation/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findReservationCompanyAll(@Body() filterQueryDto: any) {
+    return this.deskareaService.findReservationsByCompany(filterQueryDto);
+  }
+
+  @Post("reservation/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findReservationStudentActivityAll(@Body() filterQueryDto: any) {
+    return this.deskareaService.findReservationsByStudentActivity(filterQueryDto);
+  }
+
   @Post("/update")
   @ClearCacheAnotherModules([
     "/api/v1/individual",
     "/api/v1/company",
     "/api/v1/studentActivity",
     "/api/v1/user",
-    "/api/v1/assign-general-offer/company",
-    "/api/v1/assign-general-offer/studentActivity",
-    "/api/v1/assign-general-offer/individual",
-    "/api/v1/assign-general-offer/user",
+    "/api/v1/assign-general-offer",
+    "/api/v1/assignes-membership",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([

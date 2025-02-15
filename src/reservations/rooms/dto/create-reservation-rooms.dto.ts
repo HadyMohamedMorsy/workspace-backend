@@ -1,33 +1,37 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsString, Validate } from "class-validator";
-import { TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
-import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-hour-validation";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Validate } from "class-validator";
+import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { ValidateTimeReservationValidator } from "src/shared/validations/validate-time-reservation.validation";
 
 export class CreateReservationRoomDto {
   @IsString()
   @IsNotEmpty()
   selected_day: string;
 
-  @IsString()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
-  start_hour: string;
+  start_hour: number;
 
-  @IsString()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
-  start_minute: string;
+  start_minute: number;
 
   @IsString()
   @IsNotEmpty()
   @IsEnum(TimeOfDay)
   start_time: TimeOfDay;
 
-  @IsString()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
-  end_hour: string;
+  end_hour: number;
 
-  @IsString()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
-  end_minute: string;
+  end_minute: number;
 
   @IsString()
   @IsNotEmpty()
@@ -44,16 +48,40 @@ export class CreateReservationRoomDto {
   @Type(() => Number)
   room_id: number;
 
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  offer_id: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  deal_id: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  package_id: number;
+
   @IsEnum(TypeUser, {
     message:
       "type order must be one of the following: individual or company or studentActivity or User",
   })
   type_user: TypeUser;
 
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  total_price: number;
+
   @IsString()
   @IsNotEmpty()
   note: string;
 
-  @Validate(IsStartBeforeEndValidator)
+  @IsEnum(ReservationStatus)
+  @IsOptional()
+  status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  @Validate(ValidateTimeReservationValidator)
   validate_time: boolean;
 }

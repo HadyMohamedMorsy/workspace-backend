@@ -21,16 +21,13 @@ export class ClearCacheAnotherModulesIsnterceptor implements NestInterceptor {
         await this.clearCache(url);
       }
     }
-    // Continue with the request handler
     return next.handle();
   }
 
-  // Method to clear cache based on the URL
   private async clearCache(url: string): Promise<void> {
     const cacheFilters = this.apiFeaturesService.cacheFilters;
     const keys = cacheFilters.get(url);
     if (keys) {
-      // Loop over all keys related to the URL and delete them from the cache
       for (const key of keys) {
         await this.cacheManager.del(key); // Delete the cache
       }

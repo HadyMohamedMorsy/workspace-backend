@@ -23,8 +23,11 @@ export class DeleteCacheInterceptor implements NestInterceptor {
   }
 
   async clearCach(cacheFilters: Map<string, Set<string>>, prefix: string): Promise<void> {
-    const url = prefix.split("/").slice(0, -1).join("/");
-    const keys = cacheFilters.get(url);
+    const url = () => {
+      const parts = prefix.split("/");
+      return parts.slice(0, 4).join("/") as string;
+    };
+    const keys = cacheFilters.get(url());
     if (keys) {
       for (const key of keys) {
         await this.cacheManager.del(key);

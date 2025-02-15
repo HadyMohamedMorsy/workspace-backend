@@ -8,7 +8,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
+import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
@@ -35,7 +37,8 @@ export class RoomsController {
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/lists"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Rooms,
@@ -47,7 +50,8 @@ export class RoomsController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/lists"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Rooms,
@@ -59,7 +63,8 @@ export class RoomsController {
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/lists"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Rooms,

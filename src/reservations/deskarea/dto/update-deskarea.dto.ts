@@ -10,7 +10,7 @@ import {
   ValidateIf,
 } from "class-validator";
 import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
-import { IsStartBeforeEndValidator } from "src/shared/validations/is-start-hour-validation";
+import { ValidateTimeReservationValidator } from "src/shared/validations/validate-time-reservation.validation";
 import { CreateDeskAreaDto } from "./create-deskarea.dto";
 
 export class UpdateDeskAreaDto extends PartialType(CreateDeskAreaDto) {
@@ -38,6 +38,6 @@ export class UpdateDeskAreaDto extends PartialType(CreateDeskAreaDto) {
   end_time: TimeOfDay;
 
   @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
-  @Validate(IsStartBeforeEndValidator)
+  @Validate(ValidateTimeReservationValidator)
   validate_time: boolean;
 }

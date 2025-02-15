@@ -18,7 +18,9 @@ export class IndividualService {
   // Create a new record
   async create(createIndividualDto: CreateIndividualDto): Promise<Individual> {
     const individual = this.individualRepository.create(createIndividualDto);
-    return await this.individualRepository.save(individual);
+    const newClient = await this.individualRepository.save(individual);
+
+    return this.findOne(newClient.id);
   }
 
   // Get all records
@@ -70,7 +72,10 @@ export class IndividualService {
   }
 
   async findOne(id: number): Promise<Individual> {
-    const individual = await this.individualRepository.findOne({ where: { id } });
+    const individual = await this.individualRepository.findOne({
+      where: { id },
+      relations: ["assignGeneralOffers", "assign_memberships", "assignesPackages", "createdBy"],
+    });
     if (!individual) {
       throw new NotFoundException(`${individual} with id ${id} not found`);
     }

@@ -22,7 +22,7 @@ import { CheckActivePackagesMiddleware } from "./middleware/assigness-packages,m
   providers: [AssignesPackagesService],
   exports: [AssignesPackagesService],
 })
-export class assignesPackagesModule {
+export class AssignesPackagesModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(CheckActivePackagesMiddleware, CustomerMiddleware)

@@ -1,5 +1,6 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
+import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Room } from "src/rooms/room.entity";
 import { TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
@@ -9,6 +10,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -36,8 +38,17 @@ export class Deals {
   @Column()
   price_hour: number;
 
-  @Column()
-  total: number;
+  @Column({ nullable: true })
+  total_price: number;
+
+  @Column({ nullable: true })
+  used: number;
+
+  @Column({ nullable: true })
+  total_used: number;
+
+  @Column({ nullable: true })
+  remaining: number;
 
   @ManyToOne(() => Room, room => room.deal_room, {
     onDelete: "CASCADE",
@@ -58,6 +69,9 @@ export class Deals {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
+
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.deals)
+  reservationRooms: ReservationRoom;
 
   @ManyToOne(() => User, user => user.createdByDeal, {
     onDelete: "CASCADE",

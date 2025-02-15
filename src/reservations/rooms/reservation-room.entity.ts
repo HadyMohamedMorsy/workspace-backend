@@ -1,7 +1,8 @@
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum } from "class-validator";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Company } from "src/companies/company.entity";
+import { Deals } from "src/deals/deals.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
 import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
@@ -21,22 +22,20 @@ export class ReservationRoom {
   status: ReservationStatus;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
-  start_hour: string;
+  start_hour: number;
 
   @Column()
-  start_minute: string;
+  start_minute: number;
 
   @Column({ type: "enum", enum: TimeOfDay })
   @IsEnum(TimeOfDay)
   start_time: TimeOfDay;
 
   @Column()
-  end_hour: string;
+  end_hour: number;
 
   @Column()
-  end_minute: string;
+  end_minute: number;
 
   @Column({ type: "enum", enum: TimeOfDay })
   @IsEnum(TimeOfDay)
@@ -62,6 +61,11 @@ export class ReservationRoom {
   })
   assignesPackages: AssignesPackages;
 
+  @ManyToOne(() => Deals, deals => deals.reservationRooms, {
+    onDelete: "CASCADE",
+  })
+  deals: Deals;
+
   @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.reservationRooms, {
     onDelete: "CASCADE",
   })
@@ -71,6 +75,12 @@ export class ReservationRoom {
     onDelete: "CASCADE",
   })
   room: Room;
+
+  @Column({ nullable: true })
+  total_price: number;
+
+  @Column({ nullable: true })
+  total_time: number;
 
   @Column()
   note: string;

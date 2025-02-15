@@ -9,7 +9,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
+import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
@@ -88,7 +90,14 @@ export class ReservationRoomController {
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assign-general-offer",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -99,6 +108,59 @@ export class ReservationRoomController {
     const customer = req["customer"];
     const createdBy = req["createdBy"];
     return await this.reservationRoomService.create(createReservationRoomDto, {
+      customer,
+      createdBy,
+    });
+  }
+
+  @Post("/store/package")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-membership",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.CREATE],
+    },
+  ])
+  async createReservationByPackage(
+    @Body() createReservationRoomDto: CreateReservationRoomDto,
+    @Req() req: Request,
+  ) {
+    const customer = req["customer"];
+    const createdBy = req["createdBy"];
+    return await this.reservationRoomService.createReservationByPackage(createReservationRoomDto, {
+      customer,
+      createdBy,
+    });
+  }
+  @Post("/store/deal")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-membership",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.CREATE],
+    },
+  ])
+  async createReservationByDeal(
+    @Body() createReservationRoomDto: CreateReservationRoomDto,
+    @Req() req: Request,
+  ) {
+    const customer = req["customer"];
+    const createdBy = req["createdBy"];
+    return await this.reservationRoomService.createReservationByDeal(createReservationRoomDto, {
       customer,
       createdBy,
     });

@@ -56,6 +56,9 @@ export class AssignesPackages {
   used: number;
 
   @Column({ nullable: true })
+  total_used: number;
+
+  @Column({ nullable: true })
   remaining: number;
 
   @Column({ nullable: true })

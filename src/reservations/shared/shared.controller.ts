@@ -94,9 +94,8 @@ export class SharedController {
     "/api/v1/individual",
     "/api/v1/company",
     "/api/v1/studentActivity",
-    "/api/v1/assign-general-offer/company",
-    "/api/v1/assign-general-offer/studentActivity",
-    "/api/v1/assign-general-offer/user",
+    "/api/v1/user",
+    "/api/v1/assign-general-offer",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
@@ -118,9 +117,8 @@ export class SharedController {
     "/api/v1/individual",
     "/api/v1/company",
     "/api/v1/studentActivity",
-    "/api/v1/assign-general-offer/company",
-    "/api/v1/assign-general-offer/studentActivity",
-    "/api/v1/assign-general-offer/user",
+    "/api/v1/user",
+    "/api/v1/assignes-membership",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
@@ -146,7 +144,7 @@ export class SharedController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignGeneralOffer,
+      resource: Resource.Shared,
       actions: [Permission.INDEX],
     },
   ])
@@ -159,7 +157,7 @@ export class SharedController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignGeneralOffer,
+      resource: Resource.Shared,
       actions: [Permission.INDEX],
     },
   ])
@@ -172,7 +170,7 @@ export class SharedController {
   @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
-      resource: Resource.AssignGeneralOffer,
+      resource: Resource.Shared,
       actions: [Permission.INDEX],
     },
   ])
@@ -186,10 +184,8 @@ export class SharedController {
     "/api/v1/company",
     "/api/v1/studentActivity",
     "/api/v1/user",
-    "/api/v1/assign-general-offer/company",
-    "/api/v1/assign-general-offer/studentActivity",
-    "/api/v1/assign-general-offer/individual",
-    "/api/v1/assign-general-offer/user",
+    "/api/v1/assign-general-offer",
+    "/api/v1/assignes-membership",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([

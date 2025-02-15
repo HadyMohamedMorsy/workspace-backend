@@ -1,7 +1,6 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Validate } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
-import { IsNotPastTimeGroupValidator } from "src/shared/validations/is-current-time";
 
 export class CreateDeskAreaDto {
   @IsString()
@@ -52,7 +51,4 @@ export class CreateDeskAreaDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
-
-  @Validate(IsNotPastTimeGroupValidator)
-  validateStartTimeGroup: boolean;
 }

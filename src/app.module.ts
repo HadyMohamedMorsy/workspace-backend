@@ -10,7 +10,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AssignGeneralOfferModule } from "./assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "./assignes-memberships/assignes-membership.module";
-import { assignesPackagesModule } from "./assigness-packages-offers/assignes-packages.module";
+import { AssignesPackagesModule } from "./assigness-packages-offers/assignes-packages.module";
 import { AuthModule } from "./auth/auth.module";
 import jwtConfig from "./auth/config/jwt.config";
 import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard";
@@ -63,7 +63,7 @@ const ENV = process.env.NODE_ENV;
     GeneralOfferModule,
     GeneralSettingsModule,
     TaskModule,
-    assignesPackagesModule,
+    AssignesPackagesModule,
     DeskareaModule,
     ReservationRoomModule,
     SharedModule,

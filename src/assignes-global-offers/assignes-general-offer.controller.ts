@@ -99,7 +99,8 @@ export class AssignGeneralOfferController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignGeneralOffer,

@@ -70,6 +70,9 @@ export class Deskarea {
   @Column({ nullable: true })
   total_price: number;
 
+  @Column({ nullable: true })
+  total_time: number;
+
   @ManyToOne(() => User, user => user.createdByShared, {
     onDelete: "CASCADE",
   })

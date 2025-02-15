@@ -40,8 +40,11 @@ export class CachingInterceptor implements NestInterceptor {
 
   private generateCacheKey(request: any): { cacheKey: string; prefix: string } {
     const { method, url, body } = request;
-    const prefix = `${url.split("/").slice(0, -1).join("/")}`;
+    const prefix = () => {
+      const parts = url.split("/");
+      return parts.slice(0, 4).join("/") as string;
+    };
     const cacheKey = `${method}:${url}:${JSON.stringify(body)}`;
-    return { cacheKey, prefix };
+    return { cacheKey, prefix: prefix() };
   }
 }

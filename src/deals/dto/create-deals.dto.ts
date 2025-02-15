@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { TypeUser } from "src/shared/enum/global-enum";
 
 export class CreateDealsDto {
@@ -36,6 +36,18 @@ export class CreateDealsDto {
       "type order must be one of the following: individual or company or studentActivity or User",
   })
   type_user: TypeUser;
+
+  @IsOptional()
+  @Type(() => Number)
+  used: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  total_used: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  remaining: number;
 
   @IsNumber()
   @Type(() => Number)

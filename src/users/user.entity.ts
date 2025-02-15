@@ -30,8 +30,7 @@ export class User {
   @Column({
     type: "varchar",
     length: 96,
-    nullable: false,
-    name: "firstname",
+    nullable: true,
   })
   firstName: string;
 

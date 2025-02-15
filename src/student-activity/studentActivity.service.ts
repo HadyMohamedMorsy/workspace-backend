@@ -18,7 +18,8 @@ export class StudentActivityService {
   // Create a new record
   async create(createStudentActivityDto: CreateStudentActivityDto): Promise<StudentActivity> {
     const studentActivity = this.studentActivityRepository.create(createStudentActivityDto);
-    return await this.studentActivityRepository.save(studentActivity);
+    const newClient = await this.studentActivityRepository.save(studentActivity);
+    return await this.findOne(newClient.id);
   }
 
   // Get all records
@@ -43,11 +44,13 @@ export class StudentActivityService {
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
-    return {
+    const results = {
       data: filteredRecord,
       recordsFiltered: filteredRecord.length,
       totalRecords: +totalRecords,
     };
+
+    return results;
   }
 
   async findByUserAll(filterData) {
@@ -74,7 +77,10 @@ export class StudentActivityService {
 
   // Get record by ID
   async findOne(id: number): Promise<StudentActivity> {
-    const studentActivity = await this.studentActivityRepository.findOne({ where: { id } });
+    const studentActivity = await this.studentActivityRepository.findOne({
+      where: { id },
+      relations: ["assignGeneralOffers", "assign_memberships", "assignesPackages", "createdBy"],
+    });
     if (!studentActivity) {
       throw new NotFoundException(`${studentActivity} with id ${id} not found`);
     }
