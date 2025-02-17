@@ -44,12 +44,6 @@ export class CategoryController {
   @Post("/show")
   @HttpCode(200)
   @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Category,
-      actions: [Permission.VIEW],
-    },
-  ])
   async findRelList(@Body() filterQueryDto: any) {
     return this.categoryService.findOne(filterQueryDto);
   }

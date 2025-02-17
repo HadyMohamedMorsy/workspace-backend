@@ -1,16 +1,7 @@
 import { PartialType } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import {
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Validate,
-  ValidateIf,
-} from "class-validator";
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsString, ValidateIf } from "class-validator";
 import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
-import { ValidateTimeReservationValidator } from "src/shared/validations/validate-time-reservation.validation";
 import { CreateDeskAreaDto } from "./create-deskarea.dto";
 
 export class UpdateDeskAreaDto extends PartialType(CreateDeskAreaDto) {
@@ -37,7 +28,7 @@ export class UpdateDeskAreaDto extends PartialType(CreateDeskAreaDto) {
   @IsEnum(TimeOfDay)
   end_time: TimeOfDay;
 
-  @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
-  @Validate(ValidateTimeReservationValidator)
-  validate_time: boolean;
+  // @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
+  // @Validate(ValidateTimeReservationValidator)
+  // validate_time: boolean;
 }

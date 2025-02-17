@@ -89,6 +89,84 @@ export class ReservationRoomController {
     return this.reservationRoomService.findRoomsByUserAll(filterQueryDto);
   }
 
+  @Post("/packages/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findIndividuaPackageRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findIndividuaPackageRoomAll(filterQueryDto);
+  }
+
+  @Post("/packages/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyPackageRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findCompanyPackageRoomAll(filterQueryDto);
+  }
+
+  @Post("/packages/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentActivityPackageRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findStudentActivityPackageRoomAll(filterQueryDto);
+  }
+
+  @Post("/deals/individual")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findIndividualDealAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findIndividualDealAll(filterQueryDto);
+  }
+
+  @Post("/deals/company")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyDealAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findCompanyDealAll(filterQueryDto);
+  }
+
+  @Post("/deals/studentActivity")
+  @HttpCode(200)
+  @UseInterceptors(CachingInterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findStudentActivityDealAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findStudentActivityDealAll(filterQueryDto);
+  }
+
   @Post("/store")
   @ClearCacheAnotherModules([
     "/api/v1/individual",
@@ -119,7 +197,7 @@ export class ReservationRoomController {
     "/api/v1/company",
     "/api/v1/studentActivity",
     "/api/v1/user",
-    "/api/v1/assignes-membership",
+    "/api/v1/assignes-package",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
@@ -145,7 +223,7 @@ export class ReservationRoomController {
     "/api/v1/company",
     "/api/v1/studentActivity",
     "/api/v1/user",
-    "/api/v1/assignes-membership",
+    "/api/v1/deals",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
@@ -167,7 +245,15 @@ export class ReservationRoomController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-package",
+    "/api/v1/deals",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,

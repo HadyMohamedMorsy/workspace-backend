@@ -1,7 +1,6 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Validate } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
-import { ValidateTimeReservationValidator } from "src/shared/validations/validate-time-reservation.validation";
 
 export class CreateReservationRoomDto {
   @IsString()
@@ -82,6 +81,6 @@ export class CreateReservationRoomDto {
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
 
-  @Validate(ValidateTimeReservationValidator)
-  validate_time: boolean;
+  // @Validate(ValidateTimeReservationValidator)
+  // validate_time: boolean;
 }

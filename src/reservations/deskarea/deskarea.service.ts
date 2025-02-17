@@ -264,7 +264,7 @@ export class DeskareaService {
       createdBy: User;
     },
   ) {
-    const { customer_id, type_user, membership_id } = createDeskareaDto;
+    const { customer_id, type_user, membership_id, selected_day } = createDeskareaDto;
 
     await this.validateCustomerReservation(customer_id, type_user);
 
@@ -272,7 +272,7 @@ export class DeskareaService {
 
     this.validateMembershipUsage(memberShip);
 
-    this.validateMembershipDateRange(memberShip);
+    this.validateMembershipDateRange(memberShip, selected_day);
 
     await this.updateMembershipUsage(memberShip);
 
@@ -314,7 +314,7 @@ export class DeskareaService {
     return memberShip;
   }
 
-  private validateMembershipUsage(memberShip: any) {
+  private validateMembershipUsage(memberShip: AssignesMembership) {
     if (memberShip.used == memberShip.total_used) {
       throw new BadRequestException(
         `Your membership quota is exhausted. Please create a new membership.`,
@@ -322,13 +322,13 @@ export class DeskareaService {
     }
   }
 
-  private validateMembershipDateRange(memberShip: any) {
-    const currentDate = moment();
+  private validateMembershipDateRange(memberShip: AssignesMembership, selectedDay: string) {
+    const selectedDate = moment(selectedDay, "DD/MM/YYYY");
     const startDate = moment(memberShip.start_date);
     const endDate = moment(memberShip.end_date);
 
-    if (!startDate.isBefore(currentDate) || !endDate.isAfter(currentDate)) {
-      throw new BadRequestException(`The membership is not active for the current date.`);
+    if (!startDate.isSameOrBefore(selectedDate) || !endDate.isSameOrAfter(selectedDate)) {
+      throw new BadRequestException(`The memberShip is not active for the selected date.`);
     }
   }
   private async updateMembershipUsage(memberShip: AssignesMembership, operator = "plus") {

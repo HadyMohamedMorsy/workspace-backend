@@ -308,12 +308,12 @@ export class SharedService {
       createdBy: User;
     },
   ) {
-    const { customer_id, type_user, membership_id } = createSharedDto;
+    const { customer_id, type_user, membership_id, selected_day } = createSharedDto;
     await this.validateCustomerReservation(customer_id, type_user);
 
     const memberShip = await this.validateMembership(membership_id);
     this.validateMembershipUsage(memberShip);
-    this.validateMembershipDateRange(memberShip);
+    this.validateMembershipDateRange(memberShip, selected_day);
     await this.updateMembershipUsage(memberShip);
     return await this.createAndSaveSharedReservation(createSharedDto, reqBody, memberShip);
   }
@@ -336,7 +336,7 @@ export class SharedService {
     return memberShip;
   }
 
-  private validateMembershipUsage(memberShip: any) {
+  private validateMembershipUsage(memberShip: AssignesMembership) {
     if (memberShip.used == memberShip.total_used) {
       throw new BadRequestException(
         `Your membership quota is exhausted. Please create a new membership.`,
@@ -344,13 +344,13 @@ export class SharedService {
     }
   }
 
-  private validateMembershipDateRange(memberShip: any) {
-    const currentDate = moment();
+  private validateMembershipDateRange(memberShip: AssignesMembership, selectedDay: string) {
+    const selectedDate = moment(selectedDay, "DD/MM/YYYY");
     const startDate = moment(memberShip.start_date);
     const endDate = moment(memberShip.end_date);
 
-    if (!startDate.isBefore(currentDate) || !endDate.isAfter(currentDate)) {
-      throw new BadRequestException(`The membership is not active for the current date.`);
+    if (!startDate.isSameOrBefore(selectedDate) || !endDate.isSameOrAfter(selectedDate)) {
+      throw new BadRequestException(`The memberShip is not active for the selected date.`);
     }
   }
 

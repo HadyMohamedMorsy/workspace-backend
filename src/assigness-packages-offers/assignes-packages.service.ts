@@ -35,6 +35,9 @@ export class AssignesPackagesService {
 
     const assignes_packages = this.assignesPackagesRepository.create({
       ...create,
+      total_used: +packages.hours,
+      used: 0,
+      remaining: +packages.hours,
       createdBy: reqBody.createdBy,
       [create.type_user.toLowerCase()]: reqBody.customer,
       packages,

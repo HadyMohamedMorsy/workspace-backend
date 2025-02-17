@@ -29,9 +29,12 @@ export class ValidateTimeReservationValidator implements ValidatorConstraintInte
     );
 
     const now = moment();
-    return (
-      startDateTime.isAfter(now) && endDateTime.isAfter(now) && startDateTime.isBefore(endDateTime)
-    );
+
+    if (startDateTime.isBefore(now, "day")) {
+      return false;
+    }
+
+    return startDateTime.isBefore(endDateTime);
   }
 
   private createMomentFromTimeComponents(
@@ -42,8 +45,10 @@ export class ValidateTimeReservationValidator implements ValidatorConstraintInte
   ): moment.Moment {
     const [dayOfMonth, month, year] = day.split("/");
     let adjustedHour = hour;
+
     if (timeOfDay === TimeOfDay.PM && hour !== 12) adjustedHour += 12;
     if (timeOfDay === TimeOfDay.AM && hour === 12) adjustedHour = 0;
+
     return moment(`${year}-${month}-${dayOfMonth} ${adjustedHour}:${minute}`, "YYYY-MM-DD HH:mm");
   }
 
