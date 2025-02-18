@@ -47,7 +47,24 @@ export class ReservationRoomService {
   }
 
   async findAll(filterData: any) {
-    return this.executePaginatedQuery(this.buildBaseQuery(filterData));
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(ReservationRoom)
+      .buildQuery(filterData);
+
+    if (filterData?.roomId) {
+      queryBuilder
+        .leftJoinAndSelect("r.room", "rr")
+        .andWhere("rr.id = :roomId", { roomId: filterData.roomId });
+    }
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
   }
 
   async findRoomsByUserType(filterData: any, userType: string) {
