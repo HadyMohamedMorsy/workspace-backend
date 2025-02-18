@@ -46,24 +46,63 @@ export class ReservationRoomService {
     return this.handleReservationCreation(createDto, reqBody, "deal");
   }
 
-  async findAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
+  async getReservationsForThisWeek(filterData: any) {
+    const queryBuilder = this.reservationRoomRepository.createQueryBuilder("r");
+    const weekStartDate = moment(filterData.weekStartDate);
+    const startOfWeek = weekStartDate.clone().startOf("week").startOf("day");
+    const endOfWeek = weekStartDate.clone().endOf("week").endOf("day");
 
-    if (filterData?.roomId) {
-      queryBuilder
-        .leftJoinAndSelect("r.room", "rr")
-        .andWhere("rr.id = :roomId", { roomId: filterData.roomId });
+    const formattedStartOfWeek = startOfWeek.format("DD/MM/YYYY");
+    const formattedEndOfWeek = endOfWeek.format("DD/MM/YYYY");
+
+    queryBuilder
+      .leftJoinAndSelect("r.room", "rr")
+      .where(
+        `TO_DATE(r.selected_day, 'DD/MM/YYYY') 
+        BETWEEN TO_DATE(:startOfWeek, 'DD/MM/YYYY') 
+        AND TO_DATE(:endOfWeek, 'DD/MM/YYYY')`,
+        {
+          startOfWeek: formattedStartOfWeek,
+          endOfWeek: formattedEndOfWeek,
+        },
+      )
+      .leftJoinAndSelect("r.individual", "individual")
+      .leftJoinAndSelect("r.company", "company")
+      .leftJoinAndSelect("r.studentActivity", "studentActivity").addSelect(`
+    COALESCE(individual.name, company.name, studentActivity.name, 'Unknown Client') AS "clientName"
+  `);
+
+    if (filterData?.roomIds) {
+      queryBuilder.andWhere("rr.id IN (:...roomIds)", {
+        roomIds: filterData.roomIds.map(id => String(id)),
+      });
     }
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
+    const reservations = await queryBuilder.getRawMany();
+    const formattedReservations = reservations.map(reservation => {
+      const start = moment(reservation.r_selected_day, "DD/MM/YYYY")
+        .set("hour", reservation.r_start_hour)
+        .set("minute", reservation.r_start_minute)
+        .toDate();
+
+      const end = moment(reservation.r_selected_day, "DD/MM/YYYY")
+        .set("hour", reservation.r_end_hour)
+        .set("minute", reservation.r_end_minute)
+        .toDate();
+
+      return {
+        id: String(reservation.r_id),
+        title: reservation.clientName,
+        start: start.toISOString().replace(/\.\d+Z$/, ""),
+        end: end.toISOString().replace(/\.\d+Z$/, ""),
+        extendedProps: {
+          roomName: reservation.rr_name,
+        },
+      };
+    });
 
     return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
+      data: formattedReservations,
     };
   }
 

@@ -34,7 +34,7 @@ export class ReservationRoomController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomService.findAll(filterQueryDto);
+    return this.reservationRoomService.getReservationsForThisWeek(filterQueryDto);
   }
 
   @Post("/individual")

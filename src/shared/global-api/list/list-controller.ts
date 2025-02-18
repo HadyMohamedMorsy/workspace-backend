@@ -21,8 +21,18 @@ export class ListController {
   }
 
   @Get("/permission-list-tree")
+  @UseInterceptors(CachingInterceptor)
   async getPermissionsTree() {
     const result = await this.listsService.getPermissionTree(PERMISSIONS_TREE);
+    return {
+      data: result,
+    };
+  }
+
+  @Get("/rooms-filters-calender")
+  @UseInterceptors(CachingInterceptor)
+  async roomsCalender() {
+    const result = await this.listsService.filterRoomsCalender();
     return {
       data: result,
     };

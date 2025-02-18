@@ -84,6 +84,15 @@ export class ListService {
     if (module === "offer-package-offer") return await this.offerPackagesService.findList();
   }
 
+  async filterRoomsCalender() {
+    const rooms = await this.roomService.findList();
+    return rooms.data.map((room, index) => ({
+      key: index.toString(),
+      label: room.name.charAt(0).toUpperCase() + room.name.slice(1),
+      value: room.id,
+    }));
+  }
+
   async getPermissionTree(permissions: { resource: string; actions: string[] }[]) {
     return permissions.map((permission, resourceIndex) => ({
       key: resourceIndex.toString(),
