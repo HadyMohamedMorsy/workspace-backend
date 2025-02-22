@@ -62,6 +62,7 @@ export enum TypeSallary {
 }
 
 export enum Role {
+  TECHNICAL_SUPPORT = "technical-support",
   GENERAL_MANAGER = "general-manager",
   OPERATION_MANAGER = "operation-manager",
   COMMUNITY_OFFICER = "community-officer",
@@ -76,6 +77,7 @@ export enum Permission {
   DELETE = "delete",
   VIEW = "view",
   INDEX = "index",
+  UPDATE_PERMISSION = "update-permissions",
 }
 
 export enum TimeOfDay {

@@ -44,12 +44,16 @@ export class AssignesMembershipService {
       memeberShip,
     });
 
-    return await this.assignesMembershipRepository.save(assignesMembership);
+    const newMember = await this.assignesMembershipRepository.save(assignesMembership);
+    return await this.findOne(newMember.id);
   }
 
   // Get a single record by ID
   async findOne(id: number): Promise<AssignesMembership> {
-    const assignesMembership = await this.assignesMembershipRepository.findOne({ where: { id } });
+    const assignesMembership = await this.assignesMembershipRepository.findOne({
+      where: { id },
+      relations: ["memeberShip"],
+    });
     if (!assignesMembership) {
       throw new NotFoundException(`AssignesMembership with id ${id} not found`);
     }

@@ -77,6 +77,7 @@ export class OrdersService {
   // Get all records
   async findAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+
     queryBuilder
       .leftJoin("e.individual", "ep")
       .addSelect(["ep.id", "ep.name", "ep.whatsApp"])
@@ -84,8 +85,27 @@ export class OrdersService {
       .addSelect(["ec.id", "ec.phone", "ec.name"])
       .leftJoin("e.studentActivity", "es")
       .addSelect(["es.id", "es.name", "es.unviresty"])
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.createdBy", "ecr")
+      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"]);
+
+    if (filterData.search.value) {
+      queryBuilder.andWhere(
+        `ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name OR ecr.firstName LIKE :name`,
+        {
+          name: `%${filterData.search.value}%`,
+        },
+      );
+      queryBuilder.andWhere(`ec.whatsApp LIKE :number OR ep.whatsApp LIKE :number`, {
+        number: `%${filterData.search.value}%`,
+      });
+    }
+
+    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filterData.customFilters.start_date,
+        end_date: filterData.customFilters.end_date,
+      });
+    }
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -135,8 +155,8 @@ export class OrdersService {
     queryBuilder
       .leftJoinAndSelect("e.company", "ec")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.createdBy", "ecr")
+      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

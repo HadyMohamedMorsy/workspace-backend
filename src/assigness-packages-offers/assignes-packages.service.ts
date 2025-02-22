@@ -42,12 +42,16 @@ export class AssignesPackagesService {
       [create.type_user.toLowerCase()]: reqBody.customer,
       packages,
     });
-    return await this.assignesPackagesRepository.save(assignes_packages);
+    const newPackage = await this.assignesPackagesRepository.save(assignes_packages);
+    return this.findOne(newPackage.id);
   }
 
   // Get a single record by ID
   async findOne(id: number): Promise<AssignesPackages> {
-    const assignes_packages = await this.assignesPackagesRepository.findOne({ where: { id } });
+    const assignes_packages = await this.assignesPackagesRepository.findOne({
+      where: { id },
+      relations: ["packages"],
+    });
     if (!assignes_packages) {
       throw new NotFoundException(`assignes_packages with id ${id} not found`);
     }

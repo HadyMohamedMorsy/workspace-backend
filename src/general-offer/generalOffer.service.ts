@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as moment from "moment";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateGeneralOfferDto } from "./dto/create-general-offer.dto";
@@ -22,24 +23,28 @@ export class GeneralOfferService {
   }
 
   async findShared() {
-    const now = new Date();
+    const now = moment();
 
     const offers = await this.generalOfferRepository
       .createQueryBuilder("offer")
       .where("offer.product = :productType", { productType: PRODUCT_TYPE.Shared })
-      .andWhere("offer.start_date <= :now AND offer.end_date >= :now", { now })
+      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
+        now: now.toDate(),
+      })
       .getMany();
     return {
       data: offers,
     };
   }
   async findDeskArea() {
-    const now = new Date();
+    const now = moment();
 
     const offers = await this.generalOfferRepository
       .createQueryBuilder("offer")
       .where("offer.product = :productType", { productType: PRODUCT_TYPE.Deskarea })
-      .andWhere("offer.start_date <= :now AND offer.end_date >= :now", { now })
+      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
+        now: now.toDate(),
+      })
       .getMany();
 
     return {
@@ -47,12 +52,14 @@ export class GeneralOfferService {
     };
   }
   async findRooms() {
-    const now = new Date();
+    const now = moment();
 
     const offers = await this.generalOfferRepository
       .createQueryBuilder("offer")
       .where("offer.product = :productType", { productType: PRODUCT_TYPE.Room })
-      .andWhere("offer.start_date <= :now AND offer.end_date >= :now", { now })
+      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
+        now: now.toDate(),
+      })
       .getMany();
 
     return {

@@ -1,5 +1,5 @@
 export const LIST_CITY_EN = [
-  { value: "all", label: "All" },
+  { value: null, label: "All" },
   { value: "alexandria", label: "Alexandria" },
   { value: "aswan", label: "Aswan" },
   { value: "asyut", label: "Asyut" },
@@ -26,7 +26,7 @@ export const LIST_CITY_EN = [
 ];
 
 export const LIST_CITY_AR = [
-  { value: "all", label: "الكل" },
+  { value: null, label: "الكل" },
   { value: "alexandria", label: "الإسكندرية" },
   { value: "aswan", label: "أسوان" },
   { value: "asyut", label: "أسيوط" },

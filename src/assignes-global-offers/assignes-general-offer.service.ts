@@ -45,7 +45,10 @@ export class AssignGeneralOfferservice {
 
   // Get a single record by ID
   async findOne(id: number): Promise<AssignGeneralOffer> {
-    const assignGeneralOffer = await this.assignGeneralOfferRepository.findOne({ where: { id } });
+    const assignGeneralOffer = await this.assignGeneralOfferRepository.findOne({
+      where: { id },
+      relations: ["generalOffer"],
+    });
     if (!assignGeneralOffer) {
       throw new NotFoundException(`AssignGeneralOffer  not found`);
     }

@@ -9,9 +9,14 @@ import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
+import {
+  calculateTimeDifferenceInHours,
+  convertTo24HourDate,
+  formatDate,
+} from "src/shared/helpers/utilities";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import { Repository } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { Shared } from "./shared.entity";
@@ -104,163 +109,40 @@ export class SharedService {
     return shared;
   }
 
+  // Original controller methods (unchanged signatures)
   async findReservationsByIndividual(filterData: any) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .leftJoinAndSelect("e.assignessMemebership", "em")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findReservationsByUserType(filterData, "individual", "individual_id");
   }
+
   async findReservationsByCompany(filterData: any) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .leftJoinAndSelect("e.assignessMemebership", "em")
-      .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
-      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
-
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findReservationsByUserType(filterData, "company", "company_id");
   }
+
   async findReservationsByStudentActivity(filterData: any) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .leftJoinAndSelect("e.assignessMemebership", "em")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
-
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findReservationsByUserType(filterData, "studentActivity", "studentActivity_id");
   }
-  async findSharedByIndividualAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .leftJoinAndSelect("e.assignGeneralOffer", "es")
-      .leftJoinAndSelect("es.generalOffer", "eg")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+  async findSharedByIndividualAll(filterData: any) {
+    return this.findSharedByUserTypeAll(filterData, "individual", "individual_id");
   }
-  async findSharedByComapnyAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .leftJoinAndSelect("e.assignGeneralOffer", "es")
-      .leftJoinAndSelect("es.generalOffer", "eg")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+  async findSharedByComapnyAll(filterData: any) {
+    return this.findSharedByUserTypeAll(filterData, "company", "company_id");
   }
-  async findSharedByStudentActivityAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .leftJoinAndSelect("e.assignGeneralOffer", "es")
-      .leftJoinAndSelect("es.generalOffer", "eg")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+  async findSharedByStudentActivityAll(filterData: any) {
+    return this.findSharedByUserTypeAll(filterData, "studentActivity", "studentActivity_id");
   }
-  async findSharedByUserAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
-    queryBuilder
-      .leftJoin("e.createdBy", "ec")
-      .leftJoinAndSelect("e.assignGeneralOffer", "es")
-      .leftJoinAndSelect("es.generalOffer", "eg")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
-      .andWhere("ec.id = :user_id", {
-        user_id: filterData.user_id,
-      });
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
+  async findSharedByUserAll(filterData: any) {
+    const queryBuilder = this.buildBaseQuery(filterData).andWhere("ec.id = :user_id", {
+      user_id: filterData.user_id,
+    });
 
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    this.addGeneralOfferJoin(queryBuilder);
+    return this.getPaginatedResults(queryBuilder);
   }
+
   async update(updateSharedDto: UpdateSharedDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { customer_id, offer_id, membership_id, type_user, ...rest } = updateSharedDto;
@@ -290,9 +172,9 @@ export class SharedService {
     updateSharedDto: UpdateSharedDto,
     rest: Partial<UpdateSharedDto>,
   ) {
-    const startDate = this.convertTo24HourDate(rest.start_hour, rest.start_minute, rest.start_time);
-    const endDate = this.convertTo24HourDate(rest.end_hour, rest.end_minute, rest.end_time);
-    const diffInHours = this.calculateTimeDifferenceInHours(startDate, endDate);
+    const startDate = convertTo24HourDate(rest.start_hour, rest.start_minute, rest.start_time);
+    const endDate = convertTo24HourDate(rest.end_hour, rest.end_minute, rest.end_time);
+    const diffInHours = calculateTimeDifferenceInHours(startDate, endDate);
     const totalPrice = diffInHours ? 20 * +diffInHours : 20;
     await this.sharedRepository.update(updateSharedDto.id, {
       ...rest,
@@ -310,10 +192,10 @@ export class SharedService {
   ) {
     const { customer_id, type_user, membership_id, selected_day } = createSharedDto;
     await this.validateCustomerReservation(customer_id, type_user);
-
     const memberShip = await this.validateMembership(membership_id);
+    const selectedDay = formatDate(selected_day);
     this.validateMembershipUsage(memberShip);
-    this.validateMembershipDateRange(memberShip, selected_day);
+    this.validateMembershipDateRange(memberShip, selectedDay);
     await this.updateMembershipUsage(memberShip);
     return await this.createAndSaveSharedReservation(createSharedDto, reqBody, memberShip);
   }
@@ -348,7 +230,6 @@ export class SharedService {
     const selectedDate = moment(selectedDay, "DD/MM/YYYY");
     const startDate = moment(memberShip.start_date);
     const endDate = moment(memberShip.end_date);
-
     if (!startDate.isSameOrBefore(selectedDate) || !endDate.isSameOrAfter(selectedDate)) {
       throw new BadRequestException(`The memberShip is not active for the selected date.`);
     }
@@ -386,19 +267,63 @@ export class SharedService {
     await this.sharedRepository.delete(sharedId);
   }
 
-  private calculateTimeDifferenceInHours(startDate: Date, endDate: Date) {
-    const diffInMillis = endDate.getTime() - startDate.getTime();
-    return Math.abs(Math.round(diffInMillis / (1000 * 60 * 60)));
+  private buildBaseQuery(filterData: any) {
+    return this.apiFeaturesService
+      .setRepository(Shared)
+      .buildQuery(filterData)
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
   }
 
-  private convertTo24HourDate(hour: number, minute: number, period: string): Date {
-    const currentDate = new Date();
-    let hour24 = hour;
+  private async getPaginatedResults(queryBuilder: SelectQueryBuilder<Shared>) {
+    const [data, totalRecords] = await Promise.all([
+      queryBuilder.getMany(),
+      queryBuilder.getCount(),
+    ]);
 
-    if (period === "pm" && hour < 12) hour24 += 12;
-    if (period === "am" && hour === 12) hour24 = 0;
+    return {
+      data,
+      recordsFiltered: data.length,
+      totalRecords: +totalRecords,
+    };
+  }
 
-    currentDate.setHours(hour24, minute, 0, 0);
-    return currentDate;
+  private addMembershipJoin(queryBuilder: SelectQueryBuilder<Shared>, membershipId: number) {
+    return queryBuilder
+      .leftJoinAndSelect("e.assignessMemebership", "em")
+      .andWhere("em.id = :membership_id", { membership_id: membershipId });
+  }
+
+  private addGeneralOfferJoin(queryBuilder: SelectQueryBuilder<Shared>) {
+    return queryBuilder
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg");
+  }
+
+  async findReservationsByUserType(
+    filterData: any,
+    userType: "individual" | "company" | "studentActivity",
+    idKey: string,
+  ) {
+    const queryBuilder = this.buildBaseQuery(filterData)
+      .leftJoinAndSelect(`e.${userType}`, "user")
+      .andWhere(`user.id = :${idKey}`, { [idKey]: filterData[idKey] });
+
+    this.addMembershipJoin(queryBuilder, filterData.membership_id);
+    return this.getPaginatedResults(queryBuilder);
+  }
+
+  async findSharedByUserTypeAll(
+    filterData: any,
+    userType: "individual" | "company" | "studentActivity",
+    idKey: string,
+  ) {
+    const queryBuilder = this.buildBaseQuery(filterData)
+      .leftJoinAndSelect(`e.${userType}`, "user")
+      .andWhere(`user.id = :${idKey}`, { [idKey]: filterData[idKey] })
+      .andWhere("e.assignessMemebership IS NULL");
+
+    this.addGeneralOfferJoin(queryBuilder);
+    return this.getPaginatedResults(queryBuilder);
   }
 }

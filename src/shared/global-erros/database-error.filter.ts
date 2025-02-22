@@ -20,6 +20,7 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
       UQ_5b43f77b200fd08d92dbf00c5f3: "Linkedin is already registered.",
       UQ_99c39b067cfa73c783f0fc49a61: "The code is already taken.",
       UQ_8e1f623798118e629b46a9e6299: "The phone number is already taken.",
+      UQ_2adbece51b154348b42ae313f7e: "The name offer is already taken.",
     };
 
     // Check if the constraint is in the errorMessages object

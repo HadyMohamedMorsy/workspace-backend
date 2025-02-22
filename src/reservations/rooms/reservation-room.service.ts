@@ -12,6 +12,7 @@ import { Room } from "src/rooms/room.entity";
 import { RoomsService } from "src/rooms/rooms.service";
 import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
+import { convertTo24HourDate } from "src/shared/helpers/utilities";
 import { Repository } from "typeorm";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
@@ -731,22 +732,9 @@ export class ReservationRoomService {
   }
 
   private calculateHours(details: any) {
-    const start = this.convertTo24hDate(
-      details.start_hour,
-      details.start_minute,
-      details.start_time,
-    );
-    const end = this.convertTo24hDate(details.end_hour, details.end_minute, details.end_time);
+    const start = convertTo24HourDate(details.start_hour, details.start_minute, details.start_time);
+    const end = convertTo24HourDate(details.end_hour, details.end_minute, details.end_time);
     return Math.abs(Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60)));
-  }
-
-  private convertTo24hDate(hour: number, minute: number, period: string) {
-    const date = new Date();
-    let h = hour;
-    if (period === "pm" && h < 12) h += 12;
-    if (period === "am" && h === 12) h = 0;
-    date.setHours(h, minute, 0, 0);
-    return date;
   }
 
   private async handleCancellation(dto: UpdateReservationRoomDto) {

@@ -1,5 +1,5 @@
 export const LIST_TYOE_WORK_EN = [
-  { value: "all", label: "All" },
+  { value: null, label: "All" },
   { value: "freelancer", label: "Freelancer" },
   { value: "student", label: "Student" },
   { value: "employed", label: "Employed" },
@@ -7,7 +7,7 @@ export const LIST_TYOE_WORK_EN = [
 ];
 
 export const LIST_TYOE_WORK_AR = [
-  { value: "all", label: "الكل" },
+  { value: null, label: "الكل" },
   { value: "freelancer", label: "مستقل" },
   { value: "student", label: "طالب" },
   { value: "employed", label: "موظف" },

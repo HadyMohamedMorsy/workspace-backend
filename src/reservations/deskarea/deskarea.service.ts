@@ -9,9 +9,14 @@ import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
+import {
+  calculateTimeDifferenceInHours,
+  convertTo24HourDate,
+  formatDate,
+} from "src/shared/helpers/utilities";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import { Repository } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { Deskarea } from "./deskarea.entity"; // Changed from Company to Deskarea
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
 import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
@@ -106,155 +111,41 @@ export class DeskareaService {
     return deskarea;
   }
 
-  async findDeskareaByIndividualAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+  async findDeskareaByIndividualAll(filterData: any) {
+    return this.findByUserType(filterData, Deskarea, "individual", "individual_id");
   }
-  async findDeskareaByComapnyAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+  async findDeskareaByComapnyAll(filterData: any) {
+    return this.findByUserType(filterData, Deskarea, "company", "company_id");
   }
-  async findDeskareaByStudentActivityAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+  async findDeskareaByStudentActivityAll(filterData: any) {
+    return this.findByUserType(filterData, Deskarea, "studentActivity", "studentActivity_id");
   }
-  async findDeskareaByUserAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-    queryBuilder
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
-      .andWhere("ec.id = :user_id", {
-        user_id: filterData.user_id,
-      });
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
+  async findDeskareaByUserAll(filterData: any) {
+    const queryBuilder = this.buildBaseQuery(filterData, Deskarea).andWhere("ec.id = :user_id", {
+      user_id: filterData.user_id,
+    });
 
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.getPaginatedResults(queryBuilder);
   }
 
   async findReservationsByIndividual(filterData: any) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .leftJoinAndSelect("e.assignessMemebership", "em")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findReservationsByUserType(filterData, Deskarea, "individual", "individual_id");
   }
+
   async findReservationsByCompany(filterData: any) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .leftJoinAndSelect("e.assignessMemebership", "em")
-      .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
-      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
-
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findReservationsByUserType(filterData, Deskarea, "company", "company_id");
   }
+
   async findReservationsByStudentActivity(filterData: any) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .leftJoinAndSelect("e.assignessMemebership", "em")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .andWhere("em.id = :membership_id", { membership_id: filterData.membership_id })
-
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findReservationsByUserType(
+      filterData,
+      Deskarea,
+      "studentActivity",
+      "studentActivity_id",
+    );
   }
 
   async createReservationByMememberShip(
@@ -269,11 +160,10 @@ export class DeskareaService {
     await this.validateCustomerReservation(customer_id, type_user);
 
     const memberShip = await this.validateMembership(membership_id);
+    const selectedDay = formatDate(selected_day);
 
     this.validateMembershipUsage(memberShip);
-
-    this.validateMembershipDateRange(memberShip, selected_day);
-
+    this.validateMembershipDateRange(memberShip, selectedDay);
     await this.updateMembershipUsage(memberShip);
 
     return await this.createAndSaveDeskareaReservation(createDeskareaDto, reqBody, memberShip);
@@ -372,9 +262,9 @@ export class DeskareaService {
     updateDeskareaDto: UpdateDeskAreaDto,
     rest: Partial<UpdateDeskAreaDto>,
   ) {
-    const startDate = this.convertTo24HourDate(rest.start_hour, rest.start_minute, rest.start_time);
-    const endDate = this.convertTo24HourDate(rest.end_hour, rest.end_minute, rest.end_time);
-    const diffInHours = this.calculateTimeDifferenceInHours(startDate, endDate);
+    const startDate = convertTo24HourDate(rest.start_hour, rest.start_minute, rest.start_time);
+    const endDate = convertTo24HourDate(rest.end_hour, rest.end_minute, rest.end_time);
+    const diffInHours = calculateTimeDifferenceInHours(startDate, endDate);
     const totalPrice = diffInHours ? 20 * +diffInHours : 20;
     await this.deskareaRepository.update(updateDeskareaDto.id, {
       ...rest,
@@ -388,19 +278,59 @@ export class DeskareaService {
     await this.deskareaRepository.delete(deskareaId);
   }
 
-  private calculateTimeDifferenceInHours(startDate: Date, endDate: Date) {
-    const diffInMillis = endDate.getTime() - startDate.getTime();
-    return Math.abs(Math.round(diffInMillis / (1000 * 60 * 60)));
+  private buildBaseQuery(filterData: any, repository: any) {
+    return this.apiFeaturesService
+      .setRepository(repository)
+      .buildQuery(filterData)
+      .leftJoin("e.createdBy", "ec")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
   }
 
-  private convertTo24HourDate(hour: number, minute: number, period: string): Date {
-    const currentDate = new Date();
-    let hour24 = hour;
+  private async getPaginatedResults(queryBuilder: SelectQueryBuilder<any>) {
+    const [data, totalRecords] = await Promise.all([
+      queryBuilder.getMany(),
+      queryBuilder.getCount(),
+    ]);
 
-    if (period === "pm" && hour < 12) hour24 += 12;
-    if (period === "am" && hour === 12) hour24 = 0;
+    return {
+      data,
+      recordsFiltered: data.length,
+      totalRecords: +totalRecords,
+    };
+  }
 
-    currentDate.setHours(hour24, minute, 0, 0);
-    return currentDate;
+  private addMembershipJoin(queryBuilder: SelectQueryBuilder<any>, membershipId: number) {
+    return queryBuilder
+      .leftJoinAndSelect("e.assignessMemebership", "em")
+      .andWhere("em.id = :membership_id", { membership_id: membershipId });
+  }
+
+  // Generic query methods
+  private async findByUserType(
+    filterData: any,
+    repository: any,
+    userType: "individual" | "company" | "studentActivity",
+    idKey: string,
+  ) {
+    const queryBuilder = this.buildBaseQuery(filterData, repository)
+      .leftJoinAndSelect(`e.${userType}`, "user")
+      .andWhere(`user.id = :${idKey}`, { [idKey]: filterData[idKey] })
+      .andWhere("e.assignessMemebership IS NULL");
+
+    return this.getPaginatedResults(queryBuilder);
+  }
+
+  private async findReservationsByUserType(
+    filterData: any,
+    repository: any,
+    userType: "individual" | "company" | "studentActivity",
+    idKey: string,
+  ) {
+    const queryBuilder = this.buildBaseQuery(filterData, repository)
+      .leftJoinAndSelect(`e.${userType}`, "user")
+      .andWhere(`user.id = :${idKey}`, { [idKey]: filterData[idKey] });
+
+    this.addMembershipJoin(queryBuilder, filterData.membership_id);
+    return this.getPaginatedResults(queryBuilder);
   }
 }

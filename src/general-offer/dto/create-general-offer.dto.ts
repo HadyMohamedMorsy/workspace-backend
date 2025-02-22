@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
-import * as moment from "moment";
+import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
 import { PRODUCT_TYPE } from "../enum/product.enum";
 import { IsMaxDiscount } from "./custom/ismax-discount";
 
@@ -21,11 +21,12 @@ export class CreateGeneralOfferDto {
 
   @IsString()
   @IsNotEmpty()
-  start_date = moment().utc().startOf("day").toDate();
+  start_date;
 
   @IsString()
   @IsNotEmpty()
-  end_date = moment().utc().endOf("day").toDate();
+  @IsAfter("start_date")
+  end_date: string;
 
   @IsEnum(DiscountType, { message: 'discount_type must be either "percentage" or "amount"' })
   type_discount: DiscountType;

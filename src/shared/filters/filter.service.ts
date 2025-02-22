@@ -64,9 +64,14 @@ export class APIFeaturesService {
       const customFilters = this.#applyCustomFilters(filterData.customFilters);
 
       if (customFilters) {
-        Object.entries(customFilters).forEach(([key, value]) => {
-          queryBuilder.andWhere(`e.${key} = :${key}`, { [key]: value });
-        });
+        Object.entries(customFilters)
+          .filter(
+            ([key, value]) =>
+              !["start_date", "end_date"].includes(key) && value != null && value !== "",
+          )
+          .forEach(([key, value]) => {
+            queryBuilder.andWhere(`e.${key} = :${key}`, { [key]: value });
+          });
       }
     }
   }

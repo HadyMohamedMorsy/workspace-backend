@@ -44,6 +44,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
       Permission.VIEW,
       Permission.DELETE,
       Permission.INDEX,
+      Permission.UPDATE_PERMISSION,
     ],
   },
   {
