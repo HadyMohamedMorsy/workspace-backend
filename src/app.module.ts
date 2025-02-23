@@ -49,6 +49,7 @@ import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
 import { TaskModule } from "./tasks/tasks.module";
 import { UsersModule } from "./users/users.module";
+import { VacationModule } from "./vacation/vacation.module";
 
 const ENV = process.env.NODE_ENV;
 @Module({
@@ -66,6 +67,7 @@ const ENV = process.env.NODE_ENV;
     AssignesPackagesModule,
     DeskareaModule,
     ReservationRoomModule,
+    VacationModule,
     SharedModule,
     AssignGeneralOfferModule,
     AssignesMembershipModule,
