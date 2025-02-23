@@ -2,12 +2,6 @@ import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
 import { TypeMember } from "src/shared/enum/global-enum";
 import { Column } from "typeorm";
-
-export enum DiscountType {
-  PERCENTAGE = "percentage",
-  AMOUNT = "amount",
-}
-
 export class CreateCoWorkingSpaceDto {
   @IsString()
   @IsNotEmpty()

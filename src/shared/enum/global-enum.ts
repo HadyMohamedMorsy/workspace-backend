@@ -101,3 +101,8 @@ export enum UserStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",
 }
+
+export enum DiscountType {
+  PERCENTAGE = "percentage",
+  AMOUNT = "amount",
+}
