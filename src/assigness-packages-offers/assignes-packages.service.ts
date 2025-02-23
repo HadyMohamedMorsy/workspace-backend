@@ -65,7 +65,8 @@ export class AssignesPackagesService {
 
     queryBuilder
       .leftJoinAndSelect("e.packages", "ep")
-      .leftJoinAndSelect("e.reservationRooms", "er")
+      .leftJoinAndSelect("e.packages", "ep")
+      .leftJoinAndSelect("ep.room", "epr")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
       .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
@@ -89,7 +90,7 @@ export class AssignesPackagesService {
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.packages", "ep")
-      .leftJoinAndSelect("e.reservationRooms", "er")
+      .leftJoinAndSelect("ep.room", "epr")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -113,7 +114,7 @@ export class AssignesPackagesService {
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.packages", "ep")
-      .leftJoinAndSelect("e.reservationRooms", "er")
+      .leftJoinAndSelect("ep.room", "epr")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -137,7 +138,7 @@ export class AssignesPackagesService {
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.packages", "ep")
-      .leftJoinAndSelect("e.reservationRooms", "er")
+      .leftJoinAndSelect("ep.room", "epr")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
       })

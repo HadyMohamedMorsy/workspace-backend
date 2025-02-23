@@ -45,7 +45,6 @@ export class CreateSharedDto {
 
   @IsString()
   @IsOptional()
-  @IsNotEmpty()
   note: string;
 
   @IsEnum(ReservationStatus)

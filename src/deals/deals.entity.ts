@@ -2,7 +2,7 @@ import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Room } from "src/rooms/room.entity";
-import { TypeUser } from "src/shared/enum/global-enum";
+import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
@@ -19,6 +19,9 @@ import {
 export class Deals {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: "enum", enum: ReservationStatus, nullable: true })
+  status: ReservationStatus;
 
   @Column({
     type: "enum",

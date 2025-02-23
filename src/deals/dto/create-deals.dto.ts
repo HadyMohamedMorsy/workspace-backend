@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
-import { TypeUser } from "src/shared/enum/global-enum";
+import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
 
 export class CreateDealsDto {
@@ -55,4 +55,8 @@ export class CreateDealsDto {
   @Type(() => Number)
   @IsNotEmpty()
   customer_id: number;
+
+  @IsEnum(ReservationStatus)
+  @IsOptional()
+  status: ReservationStatus = ReservationStatus.ACTIVE;
 }

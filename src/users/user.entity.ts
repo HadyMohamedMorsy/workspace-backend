@@ -10,7 +10,7 @@ import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
-import { Permission, Role } from "src/shared/enum/global-enum";
+import { Permission, Role, UserStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { Task } from "src/tasks/tasks.entity";
 import {
@@ -117,6 +117,9 @@ export class User {
 
   @OneToMany(() => ExpenseSalaries, salary => salary.user)
   salaries: User[];
+
+  @Column({ type: "enum", enum: UserStatus, nullable: true })
+  status: UserStatus;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

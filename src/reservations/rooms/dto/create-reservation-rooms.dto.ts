@@ -69,18 +69,15 @@ export class CreateReservationRoomDto {
   type_user: TypeUser;
 
   @IsNumber()
+  @IsOptional()
   @Type(() => Number)
-  @IsNotEmpty()
   total_price: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   note: string;
 
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
-
-  // @Validate(ValidateTimeReservationValidator)
-  // validate_time: boolean;
 }

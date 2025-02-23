@@ -1,5 +1,3 @@
-import * as moment from "moment";
-
 export function convertTo24HourDate(hour: number, minute: number, period: string): Date {
   const currentDate = new Date();
   let hour24 = hour;
@@ -9,10 +7,6 @@ export function convertTo24HourDate(hour: number, minute: number, period: string
 
   currentDate.setHours(hour24, minute, 0, 0);
   return currentDate;
-}
-
-export function formatDate(date: string): string {
-  return moment(date).format("DD/MM/YYYY");
 }
 
 export function calculateTimeDifferenceInHours(startDate: Date, endDate: Date) {

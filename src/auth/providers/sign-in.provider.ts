@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
   forwardRef,
 } from "@nestjs/common";
+import { UserStatus } from "src/shared/enum/global-enum";
 import { UserService } from "src/users/user.service";
 import { SignInDto } from "../dtos/signin.dto";
 import { GenerateTokensProvider } from "./generate-tokens.provider";
@@ -29,15 +30,13 @@ export class SignInProvider {
   ) {}
 
   public async signIn(signInDto: SignInDto) {
-    // find user by email ID
     const user = await this.usersService.findOneByEmail(signInDto.email);
-    // Throw exception if user is not found
-    // Above | Taken care by the findInByEmail method
-
-    let isEqual: boolean = false;
+    let isEqual = false;
+    if (!user || user.status !== UserStatus.ACTIVE) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
 
     try {
-      // Compare the password to hash
       isEqual = await this.hashingProvider.comparePassword(signInDto.password, user.password);
     } catch (error) {
       throw new RequestTimeoutException(error, {

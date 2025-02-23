@@ -432,10 +432,6 @@ export class ReservationRoomService {
 
   // ==================== HELPER METHODS ====================
 
-  private formatDate(date: string): string {
-    return moment(date).format("DD/MM/YYYY");
-  }
-
   private calculateTimes(details: any, selectedDay: string) {
     return {
       startTime: this.createMoment(
@@ -475,8 +471,9 @@ export class ReservationRoomService {
       throw new BadRequestException("End time must be after start time.");
     }
 
-    const startOfDay = moment(day).startOf("day");
-    const endOfDay = moment(day).endOf("day");
+    const parsedDay = moment(day, "DD/MM/YYYY");
+    const startOfDay = parsedDay.clone().startOf("day");
+    const endOfDay = parsedDay.clone().endOf("day");
 
     if (end.isBefore(startOfDay) || end.isAfter(endOfDay)) {
       throw new BadRequestException("End time must be within the same day.");
@@ -768,5 +765,9 @@ export class ReservationRoomService {
     }
 
     await this.reservationRoomRepository.update(dto.id, rest);
+  }
+
+  formatDate(date: string): string {
+    return moment(date).format("DD/MM/YYYY");
   }
 }

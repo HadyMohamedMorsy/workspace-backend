@@ -45,7 +45,6 @@ export class CreateDeskAreaDto {
 
   @IsString()
   @IsOptional()
-  @IsNotEmpty()
   note: string;
 
   @IsEnum(ReservationStatus)
