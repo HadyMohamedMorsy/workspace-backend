@@ -6,6 +6,7 @@ import { Individual } from "src/individual/individual.entity";
 import { Order } from "src/orders/order.entity";
 import { Purchases } from "src/purchases/purchases.entity";
 import { Returns } from "src/returns/returns.entity";
+import { RevenueChild } from "src/revenue/revenue-child/revenue-child.entity";
 import { DahboredService } from "./dahsbored.service";
 import { DashboredController } from "./dashbored.controller";
 
@@ -15,6 +16,7 @@ import { DashboredController } from "./dashbored.controller";
       Order,
       Individual,
       ExpensePlaceChild,
+      RevenueChild,
       ExpenseSalaries,
       Purchases,
       Returns,

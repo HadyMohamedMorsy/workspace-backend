@@ -17,6 +17,7 @@ export enum Resource {
   GeneralSettings = "settings-general",
   User = "settings-user",
   Vacation = "settings-vacation",
+  Revenue = "settings-revenue",
   ExpensesPlace = "settings-expenses-place",
   ExpensesSalaries = "settings-expenses-salaries",
   Rooms = "settings-Room",

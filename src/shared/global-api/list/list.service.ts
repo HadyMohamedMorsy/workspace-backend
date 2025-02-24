@@ -5,6 +5,8 @@ import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
 import { RoomsService } from "src/rooms/rooms.service";
 import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
+import { LISTS_EXPENSES_AR, LISTS_EXPENSES_EN } from "./lists/expenses/expenses";
+import { LISTS_REVENUE_AR, LISTS_REVENUE_EN } from "./lists/revenue/revenue";
 import { LISTS_ROLES_AR, LISTS_ROLES_EN } from "./lists/roles/roles";
 import { LISTS_TYPE_COMPANY_AR, LISTS_TYPE_COMPANY_EN } from "./lists/type-company/type-company";
 import { LIST_TYPE_DISCOUNT_AR, LIST_TYPE_DISCOUNT_EN } from "./lists/type-discount/type-discount";
@@ -59,6 +61,14 @@ export class ListService {
     type_product: {
       en: LIST_TYPE_PRODUCT_EN,
       ar: LIST_TYPE_PRODUCT_AR,
+    },
+    expenses: {
+      en: LISTS_EXPENSES_EN,
+      ar: LISTS_EXPENSES_AR,
+    },
+    revenue: {
+      en: LISTS_REVENUE_EN,
+      ar: LISTS_REVENUE_AR,
     },
   };
 

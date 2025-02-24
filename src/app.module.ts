@@ -34,6 +34,8 @@ import { DeskareaModule } from "./reservations/deskarea/deskarea.module";
 import { ReservationRoomModule } from "./reservations/rooms/reservation-room.module";
 import { SharedModule } from "./reservations/shared/shared.module";
 import { ReturnsModule } from "./returns/returns.module";
+import { RevenueChildModule } from "./revenue/revenue-child/revenue-child.module";
+import { RevenueModule } from "./revenue/revenue.module";
 import { RoomsModule } from "./rooms/rooms.module";
 import appConfig from "./shared/config/app.config";
 import databaseConfig from "./shared/config/database.config";
@@ -43,7 +45,7 @@ import { listModule } from "./shared/global-api/list/list.module";
 import { SearchModule } from "./shared/global-api/search-list/search-list.module";
 import { UploadsModule } from "./shared/global-api/uploads/uploads.module";
 import { TransformInterceptor } from "./shared/interceptor/transform-response.interceptor";
-import { CreatedByMiddleware } from "./shared/middleware/createdby.middleware";
+import { UserMiddleware } from "./shared/middleware/user.middleware";
 import { LanMiddleware } from "./shared/middleware/lang.middleware";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
@@ -64,6 +66,8 @@ const ENV = process.env.NODE_ENV;
     GeneralOfferModule,
     GeneralSettingsModule,
     TaskModule,
+    RevenueModule,
+    RevenueChildModule,
     AssignesPackagesModule,
     DeskareaModule,
     ReservationRoomModule,
@@ -141,6 +145,6 @@ const ENV = process.env.NODE_ENV;
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
-    consumer.apply(CreatedByMiddleware).exclude("auth/login").forRoutes("*");
+    consumer.apply(UserMiddleware).exclude("auth/login").forRoutes("*");
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Post, Req, UseInterceptors } from "@nestjs/common";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { DahboredService } from "./dahsbored.service";
 import { FiltersDashboredDto } from "./dto/filter-dashbored.dto";
@@ -9,97 +9,194 @@ export class DashboredController {
 
   @Post("analytics")
   @UseInterceptors(CachingInterceptor)
-  async getAnalytics(@Body() filterQueryDto: FiltersDashboredDto) {
-    const totalSallary = await this.dashboredService.getAllExapsesSallary(filterQueryDto);
-    const totalExpanses = await this.dashboredService.getAllExapsesPlace(filterQueryDto);
-    const totalCountPurshase = await this.dashboredService.getAllCountPurshases(filterQueryDto);
-    const totalCountReturns = await this.dashboredService.getAllCountReturns(filterQueryDto);
-    const totalPurshase = await this.dashboredService.getTotalPurshases(filterQueryDto);
-    const totalReturns = await this.dashboredService.getTotalReturns(filterQueryDto);
-    const totalCountOrderPaid = await this.dashboredService.getCountPaidOrders(filterQueryDto);
-    const totalCountOrderCost = await this.dashboredService.getCountCostOrders(filterQueryDto);
-    const totalCountOrderFree = await this.dashboredService.getCountFreeOrders(filterQueryDto);
-    const totalCountOrderHold = await this.dashboredService.getCountHoldOrders(filterQueryDto);
-    const totalOrderPaid = await this.dashboredService.getTotalPaidOrders(filterQueryDto);
-    const totalOrderCost = await this.dashboredService.getTotalCostOrders(filterQueryDto);
-    const totalOrderHold = await this.dashboredService.getTotalHoldOrders(filterQueryDto);
-    const totalOrderPrice = await this.dashboredService.getTotalOrderPriceOrders(filterQueryDto);
+  async getAnalytics(@Body() filterQueryDto: FiltersDashboredDto, @Req() req: Request) {
+    const user = req["user"];
+    const allowedRoles = ["founder", "general-manager", "accountant"];
+    const hasAccess = allowedRoles.includes(user.role);
+
+    const [
+      // Salary related
+      [totalInternalSallary, totalExternalSallary, totalExpanses],
+
+      // Expenses related
+      expensesResults,
+
+      // revenueResults related
+      revenueResults,
+
+      // Purchase/Return related
+      [totalCountPurshase, totalCountReturns, totalPurshase, totalReturns],
+
+      // Orders related
+      orderCounts,
+      orderTotals,
+
+      // Order price
+      [totalOrderPrice],
+    ] = await Promise.all([
+      // Salary group
+      Promise.all([
+        this.dashboredService.getAllExapsesInternalSallary(filterQueryDto),
+        this.dashboredService.getAllExapsesExternalSallary(filterQueryDto),
+        this.dashboredService.getAllExapsesPlace(filterQueryDto),
+      ]),
+
+      // Expenses group
+      Promise.all([
+        this.dashboredService.getAllExapsesInsurance(filterQueryDto),
+        this.dashboredService.getAllExapsesSystemFees(filterQueryDto),
+        this.dashboredService.getAllExapsesRents(filterQueryDto),
+        this.dashboredService.getAllExapsesElectricityBills(filterQueryDto),
+        this.dashboredService.getAllExapsesBonuses(filterQueryDto),
+        this.dashboredService.getAllExapsesAssetsPurchased(filterQueryDto),
+        this.dashboredService.getAllExapsesKitchenCost(filterQueryDto),
+        this.dashboredService.getAllExapsesCoursesCost(filterQueryDto),
+        this.dashboredService.getAllExapsesCharteredAccountantFees(filterQueryDto),
+        this.dashboredService.getAllExapsesLoans(filterQueryDto),
+        this.dashboredService.getAllExapsesOther(filterQueryDto),
+      ]),
+
+      // Revenue group
+      Promise.all([
+        this.dashboredService.getAllRevenueVirtualOfficeIncome(filterQueryDto),
+        this.dashboredService.getAllRevenueOfficesIncome(filterQueryDto),
+        this.dashboredService.getAllRevenueStoresIncome(filterQueryDto),
+        this.dashboredService.getAllRevenuePrintIncome(filterQueryDto),
+        this.dashboredService.getAllRevenueLockerIncome(filterQueryDto),
+        this.dashboredService.getAllRevenueExtraInternetIncome(filterQueryDto),
+        this.dashboredService.getAllRevenueCoursesIncome(filterQueryDto),
+        this.dashboredService.getAllRevenueCoursesNetProfit(filterQueryDto),
+        this.dashboredService.getAllRevenueElectronicIncomeInvoices(filterQueryDto),
+        this.dashboredService.getAllRevenueElectronicExpensesInvoices(filterQueryDto),
+        this.dashboredService.getAllRevenueOther(filterQueryDto),
+      ]),
+
+      // Purchase/Return group
+      Promise.all([
+        this.dashboredService.getAllCountPurshases(filterQueryDto),
+        this.dashboredService.getAllCountReturns(filterQueryDto),
+        this.dashboredService.getTotalPurshases(filterQueryDto),
+        this.dashboredService.getTotalReturns(filterQueryDto),
+      ]),
+
+      // Order counts group
+      Promise.all([
+        this.dashboredService.getCountPaidOrders(filterQueryDto),
+        this.dashboredService.getCountCostOrders(filterQueryDto),
+        this.dashboredService.getCountFreeOrders(filterQueryDto),
+        this.dashboredService.getCountHoldOrders(filterQueryDto),
+      ]),
+
+      // Order totals group
+      Promise.all([
+        this.dashboredService.getTotalPaidOrders(filterQueryDto),
+        this.dashboredService.getTotalCostOrders(filterQueryDto),
+        this.dashboredService.getTotalHoldOrders(filterQueryDto),
+      ]),
+
+      // Order price group
+      Promise.all([this.dashboredService.getTotalOrderPriceOrders(filterQueryDto)]),
+    ]);
+
+    // Helper function to safely get values
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    // Structured result construction
     return [
-      {
-        title: "Total Sallary Cost",
-        value: totalSallary.totalCost ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Expenses Cost",
-        value: totalExpanses.totalCost ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Count Purshase",
-        value: totalCountPurshase.count ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Count Returns",
-        value: totalCountReturns.count ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Purshase",
-        value: totalPurshase.total ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Returns",
-        value: totalReturns.total ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Count Orders Paid",
-        value: totalCountOrderPaid.count ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Count Orders Cost",
-        value: totalCountOrderCost.count ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Count Orders Free",
-        value: totalCountOrderFree.count ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Count Orders Hold",
-        value: totalCountOrderHold.count ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Orders Paid",
-        value: totalOrderPaid.total ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Orders Cost",
-        value: totalOrderCost.total ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Orders Hold",
-        value: totalOrderHold.total ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Amount Orders kitchen",
-        value: totalOrderPrice.total ?? 0,
-        icon: "pi pi-home",
-      },
-      {
-        title: "Total Orders kitchen",
-        value: totalOrderPaid.total + totalOrderCost.total || 0,
-        icon: "pi pi-home",
-      },
+      // Salary section
+      ...this.createMetrics(
+        [
+          ["Total Salary internal salaries", getValue(totalInternalSallary, "totalCost")],
+          ["Total Salary external salaries", getValue(totalExternalSallary, "totalCost")],
+          ["Total Expenses Cost", getValue(totalExpanses, "totalCost")],
+        ],
+        "pi pi-wallet",
+      ),
+
+      // Expenses section
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              ["Total Insurance Cost", getValue(expensesResults[0], "totalCost")],
+              ["Total System Fees Cost", getValue(expensesResults[1], "totalCost")],
+              ["Total Rent Cost", getValue(expensesResults[2], "totalCost")],
+              ["Total Electricity Bills Cost", getValue(expensesResults[3], "totalCost")],
+              ["Total Bonus Cost", getValue(expensesResults[4], "totalCost")],
+              ["Total Assets Purchased", getValue(expensesResults[5], "totalCost")],
+              ["Total Kitchen Cost", getValue(expensesResults[6], "totalCost")],
+              ["Total Courses Cost", getValue(expensesResults[7], "totalCost")],
+              ["Total Chartered Accountant Fees", getValue(expensesResults[8], "totalCost")],
+              ["Total Loans Cost", getValue(expensesResults[9], "totalCost")],
+              ["Total Other Cost", getValue(expensesResults[10], "totalCost")],
+            ],
+            "pi pi-wallet",
+          )
+        : []),
+
+      // revenue
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              ["Total virtual office income", getValue(revenueResults[0], "totalRevenue")],
+              ["Total offices income", getValue(revenueResults[1], "totalRevenue")],
+              ["Total stores income", getValue(revenueResults[3], "totalRevenue")],
+              ["Total print income", getValue(revenueResults[4], "totalRevenue")],
+              ["Total locker income", getValue(revenueResults[5], "totalRevenue")],
+              ["Total extra internet income", getValue(revenueResults[6], "totalRevenue")],
+              ["Total courses income", getValue(revenueResults[7], "totalRevenue")],
+              ["Total courses net profit", getValue(revenueResults[8], "totalRevenue")],
+              ["Total electronic income invoices", getValue(revenueResults[9], "totalRevenue")],
+              ["Total electronic expenses invoices", getValue(revenueResults[10], "totalRevenue")],
+            ],
+            "pi pi-money-bill",
+          )
+        : []),
+
+      // Purchase/Return section
+      ...this.createMetrics(
+        [
+          ["Total Count Purchase", getValue(totalCountPurshase, "count")],
+          ["Total Count Returns", getValue(totalCountReturns, "count")],
+          ["Total Purchase", getValue(totalPurshase, "total")],
+          ["Total Returns", getValue(totalReturns, "total")],
+        ],
+        "pi pi-barcode",
+      ),
+
+      // Order counts
+      ...this.createMetrics(
+        [
+          ["Count Orders Paid", getValue(orderCounts[0], "count")],
+          ["Count Orders Cost", getValue(orderCounts[1], "count")],
+          ["Count Orders Free", getValue(orderCounts[2], "count")],
+          ["Count Orders Hold", getValue(orderCounts[3], "count")],
+        ],
+        "pi pi-inbox",
+      ),
+
+      // Order totals
+      ...this.createMetrics(
+        [
+          ["Total Orders Paid", getValue(orderTotals[0], "total")],
+          ["Total Orders Cost", getValue(orderTotals[1], "total")],
+          ["Total Orders Hold", getValue(orderTotals[2], "total")],
+          ["Amount Orders Kitchen", getValue(totalOrderPrice, "total")],
+          [
+            "Total Orders Kitchen",
+            getValue(orderTotals[0], "total") + getValue(orderTotals[1], "total"),
+          ],
+        ],
+        "pi pi-inbox",
+      ),
     ];
+  }
+
+  // Helper method to create metric arrays
+  private createMetrics(items: Array<[string, number]>, icon: string) {
+    return items.map(([title, value]) => ({
+      title,
+      value: value || 0,
+      icon,
+    }));
   }
 }

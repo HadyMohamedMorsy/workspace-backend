@@ -3,6 +3,10 @@ import { PermissionsUser } from "./user.entity";
 
 export const TECHNICALSUPPORT: PermissionsUser[] = [
   {
+    resource: Resource.Revenue,
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
+  },
+  {
     resource: Resource.Individual,
     actions: [
       Permission.CREATE,
@@ -226,6 +230,10 @@ export const TECHNICALSUPPORT: PermissionsUser[] = [
 ];
 
 export const GENERALMANGER: PermissionsUser[] = [
+  {
+    resource: Resource.Revenue,
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
+  },
   {
     resource: Resource.Individual,
     actions: [
