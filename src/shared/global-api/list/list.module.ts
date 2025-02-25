@@ -1,4 +1,5 @@
 import { Global, Module } from "@nestjs/common";
+import { CategoryModule } from "src/categories/category.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { OfferCoWorkingSpaceModule } from "src/offer-co-working-space/offer-co-working-space.module";
 import { OfferPackageModule } from "src/offer-packages/offerpackages.module";
@@ -12,6 +13,7 @@ import { ListService } from "./list.service";
   imports: [
     UsersModule,
     OfferPackageModule,
+    CategoryModule,
     OfferCoWorkingSpaceModule,
     GeneralOfferModule,
     RoomsModule,

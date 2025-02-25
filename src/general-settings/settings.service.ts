@@ -26,12 +26,9 @@ export class GeneralSettingsService {
       .buildQuery(filterData);
 
     const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
 
     const results = {
       data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
     };
 
     return results;

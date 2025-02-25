@@ -14,13 +14,12 @@ export class UserMiddleware implements NestMiddleware {
     }
 
     const user = await this.userService.findOneById(+userId);
-
     if (!user) {
       throw new BadRequestException(`User with ID ${userId} not found`);
     }
 
     req["createdBy"] = user;
-    req["user"] = user;
+    req["userData"] = user;
 
     next();
   }

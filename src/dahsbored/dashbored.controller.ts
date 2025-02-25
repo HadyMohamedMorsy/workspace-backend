@@ -10,10 +10,9 @@ export class DashboredController {
   @Post("analytics")
   @UseInterceptors(CachingInterceptor)
   async getAnalytics(@Body() filterQueryDto: FiltersDashboredDto, @Req() req: Request) {
-    const user = req["user"];
+    const user = req["userData"];
     const allowedRoles = ["founder", "general-manager", "accountant"];
     const hasAccess = allowedRoles.includes(user.role);
-
     const [
       // Salary related
       [totalInternalSallary, totalExternalSallary, totalExpanses],
@@ -160,7 +159,7 @@ export class DashboredController {
           ["Total Purchase", getValue(totalPurshase, "total")],
           ["Total Returns", getValue(totalReturns, "total")],
         ],
-        "pi pi-barcode",
+        "pi pi-box",
       ),
 
       // Order counts

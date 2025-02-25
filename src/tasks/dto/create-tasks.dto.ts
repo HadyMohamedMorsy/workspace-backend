@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { TasksStatus } from "src/shared/enum/global-enum";
 
 export class CreateTaskDto {
   @IsNumber()
@@ -14,4 +15,8 @@ export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
   note: string;
+
+  @IsEnum(TasksStatus)
+  @IsOptional()
+  status: TasksStatus = TasksStatus.ACTIVE;
 }

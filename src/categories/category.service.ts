@@ -56,6 +56,13 @@ export class CategoryService {
     return await this.productService.getProductsRelatedCategory(filterData);
   }
 
+  public async findList() {
+    const categories = await this.categoryRepository.find({});
+    return {
+      data: categories,
+    };
+  }
+
   async findMany(ids: number[]): Promise<Category[]> {
     const categories = await this.categoryRepository.find({
       where: {

@@ -51,6 +51,7 @@ export class RevenueService {
 
   async update(updateRevenueDto: UpdateRevenueDto) {
     await this.revenueRepository.update(updateRevenueDto.id, updateRevenueDto);
+    return this.revenueRepository.findOne({ where: { id: updateRevenueDto.id } });
   }
 
   async remove(id: number) {

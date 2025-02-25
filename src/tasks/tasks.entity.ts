@@ -1,3 +1,4 @@
+import { TasksStatus } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import {
   Column,
@@ -18,6 +19,9 @@ export class Task {
     onDelete: "CASCADE",
   })
   user: User;
+
+  @Column({ type: "enum", enum: TasksStatus })
+  status: TasksStatus;
 
   @ManyToOne(() => User, user => user.createdByTasks, {
     onDelete: "CASCADE",

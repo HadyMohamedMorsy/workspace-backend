@@ -19,7 +19,7 @@ import { UpdateRevenueChildDto } from "./dto/update-revenue-child.dto";
 import { RevenueChildService } from "./revenue-child.service";
 
 @UseGuards(AuthorizationGuard)
-@Controller("revenue-child-place")
+@Controller("revenue-child")
 export class RevenueChildController {
   constructor(private readonly revenueChildService: RevenueChildService) {}
 

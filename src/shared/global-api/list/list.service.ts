@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { CategoryService } from "src/categories/category.service";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
 import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
@@ -22,6 +23,7 @@ export class ListService {
     private readonly usersService: UserService,
     private readonly roomService: RoomsService,
     private readonly generalOfferService: GeneralOfferService,
+    private readonly categoryService: CategoryService,
     private readonly offerPackagesService: OfferPackagesService,
     private readonly offerCoWorkingSpaceService: OfferCoWorkingSpaceService,
   ) {}
@@ -84,6 +86,7 @@ export class ListService {
   async getEntityList(module: string) {
     if (module === "user") return await this.usersService.findList();
     if (module === "room") return await this.roomService.findList();
+    if (module === "categories") return await this.categoryService.findList();
     if (module === "global-offer-shared") return await this.generalOfferService.findShared();
     if (module === "global-offer-deskarea") return await this.generalOfferService.findDeskArea();
     if (module === "global-offer-rooms") return await this.generalOfferService.findRooms();

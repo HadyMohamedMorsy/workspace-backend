@@ -20,7 +20,7 @@ export class TaskService {
     const newTask = await this.taskRepository.save(task);
     return this.taskRepository.findOne({
       where: { id: newTask.id },
-      relations: ["user"],
+      relations: ["user", "createdBy"],
     });
   }
 

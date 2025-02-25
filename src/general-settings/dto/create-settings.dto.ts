@@ -5,16 +5,6 @@ export class CreateGeneralSettingsDto {
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
-  shift_start: number;
-
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  shift_end: number;
-
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
   price_shared: number;
 
   @IsNumber()

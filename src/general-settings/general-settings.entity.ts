@@ -12,12 +12,6 @@ export class GeneralSettings {
   id: number;
 
   @Column()
-  shift_start: number;
-
-  @Column()
-  shift_end: number;
-
-  @Column()
   price_shared: number;
 
   @Column()
