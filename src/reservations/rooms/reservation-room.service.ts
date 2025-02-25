@@ -12,7 +12,7 @@ import { Room } from "src/rooms/room.entity";
 import { RoomsService } from "src/rooms/rooms.service";
 import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { convertTo24HourDate } from "src/shared/helpers/utilities";
+import { calculateHours, formatDate } from "src/shared/helpers/utilities";
 import { Repository } from "typeorm";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
@@ -412,7 +412,7 @@ export class ReservationRoomService {
     type: ReservationType,
   ) {
     const { room_id, selected_day, ...rest } = dto;
-    const selectedDay = this.formatDate(selected_day);
+    const selectedDay = formatDate(selected_day);
 
     const { startTime, endTime } = this.calculateTimes(rest, selectedDay);
     await this.validateTimeSlot(room_id, selectedDay, startTime, endTime);
@@ -515,7 +515,7 @@ export class ReservationRoomService {
     additionalData: any,
     reqBody: any,
   ) {
-    const diffHours = this.calculateHours({
+    const diffHours = calculateHours({
       start_hour: dto.start_hour,
       start_minute: dto.start_minute,
       start_time: dto.start_time,
@@ -580,10 +580,10 @@ export class ReservationRoomService {
 
   private async processPackage(packageId: number, dto: CreateReservationRoomDto) {
     const packageRoom = await this.validatePackage(packageId);
-    this.validatePackageRange(packageRoom, this.formatDate(dto.selected_day));
+    this.validatePackageRange(packageRoom, formatDate(dto.selected_day));
 
     // Calculate time difference from DTO
-    const diffHours = this.calculateHours({
+    const diffHours = calculateHours({
       start_hour: dto.start_hour,
       start_minute: dto.start_minute,
       start_time: dto.start_time,
@@ -592,18 +592,16 @@ export class ReservationRoomService {
       end_time: dto.end_time,
     });
 
-    // Add missing package usage update
     await this.updatePackageUsage(diffHours, packageRoom);
-
     return { assignesPackages: packageRoom };
   }
 
   private async processDeal(dealId: number, dto: CreateReservationRoomDto) {
     const deal = await this.validateDeal(dealId);
-    this.validateDealRange(deal, this.formatDate(dto.selected_day));
+    this.validateDealRange(deal, formatDate(dto.selected_day));
 
     // Calculate time difference from DTO
-    const diffHours = this.calculateHours({
+    const diffHours = calculateHours({
       start_hour: dto.start_hour,
       start_minute: dto.start_minute,
       start_time: dto.start_time,
@@ -722,22 +720,16 @@ export class ReservationRoomService {
   }
 
   private calculatePrice(offer: any, basePrice: number, details: any) {
-    const diffHours = this.calculateHours(details);
+    const diffHours = calculateHours(details);
     let price = diffHours ? basePrice * diffHours : basePrice;
     if (offer?.discount) price = Math.max(0, price - offer.discount);
     return price;
   }
 
-  private calculateHours(details: any) {
-    const start = convertTo24HourDate(details.start_hour, details.start_minute, details.start_time);
-    const end = convertTo24HourDate(details.end_hour, details.end_minute, details.end_time);
-    return Math.abs(Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60)));
-  }
-
   private async handleCancellation(dto: UpdateReservationRoomDto) {
     const { start_hour, start_minute, start_time, end_hour, end_minute, end_time, ...rest } = dto;
 
-    const diffHours = this.calculateHours({
+    const diffHours = calculateHours({
       start_hour,
       start_minute,
       start_time,
@@ -765,9 +757,5 @@ export class ReservationRoomService {
     }
 
     await this.reservationRoomRepository.update(dto.id, rest);
-  }
-
-  formatDate(date: string): string {
-    return moment(date).format("DD/MM/YYYY");
   }
 }

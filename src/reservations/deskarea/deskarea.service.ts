@@ -9,7 +9,7 @@ import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { calculateTimeDifferenceInHours, convertTo24HourDate } from "src/shared/helpers/utilities";
+import { calculateHours, formatDate } from "src/shared/helpers/utilities";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import { Repository, SelectQueryBuilder } from "typeorm";
@@ -156,7 +156,7 @@ export class DeskareaService {
     await this.validateCustomerReservation(customer_id, type_user);
 
     const memberShip = await this.validateMembership(membership_id);
-    const selectedDay = this.formatDate(selected_day);
+    const selectedDay = formatDate(selected_day);
 
     this.validateMembershipUsage(memberShip);
     this.validateMembershipDateRange(memberShip, selectedDay);
@@ -258,9 +258,14 @@ export class DeskareaService {
     updateDeskareaDto: UpdateDeskAreaDto,
     rest: Partial<UpdateDeskAreaDto>,
   ) {
-    const startDate = convertTo24HourDate(rest.start_hour, rest.start_minute, rest.start_time);
-    const endDate = convertTo24HourDate(rest.end_hour, rest.end_minute, rest.end_time);
-    const diffInHours = calculateTimeDifferenceInHours(startDate, endDate);
+    const diffInHours = calculateHours({
+      start_hour: rest.start_hour,
+      start_minute: rest.start_minute,
+      start_time: rest.start_time,
+      end_hour: rest.end_hour,
+      end_minute: rest.end_minute,
+      end_time: rest.end_time,
+    });
     const totalPrice = diffInHours ? 20 * +diffInHours : 20;
     await this.deskareaRepository.update(updateDeskareaDto.id, {
       ...rest,
@@ -328,9 +333,5 @@ export class DeskareaService {
 
     this.addMembershipJoin(queryBuilder, filterData.membership_id);
     return this.getPaginatedResults(queryBuilder);
-  }
-
-  formatDate(date: string): string {
-    return moment(date).format("DD/MM/YYYY");
   }
 }
