@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
+import { ReservationRoomService } from "src/reservations/rooms/reservation-room.service";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
@@ -18,6 +20,8 @@ export class AssignesPackagesService {
     private assignesPackagesRepository: Repository<AssignesPackages>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly offerPackagesService: OfferPackagesService,
+    @Inject(forwardRef(() => ReservationRoomService))
+    private readonly reservationRoom: ReservationRoomService,
   ) {}
 
   // Create a new record
@@ -158,13 +162,25 @@ export class AssignesPackagesService {
   }
 
   // Update a record
-  async update(updateassignes_packagesDto: UpdateAssignesPackageDto) {
-    await this.assignesPackagesRepository.update(
-      updateassignes_packagesDto.id,
-      updateassignes_packagesDto,
-    );
+  async update(updateassignesPackagesDto: UpdateAssignesPackageDto) {
+    const { status, user_id, type_user } = updateassignesPackagesDto;
+    await this.handleStatusValidation(status, user_id, type_user);
+    return this.assignesPackagesRepository.update(updateassignesPackagesDto.id, { status });
+  }
+
+  private async handleStatusValidation(
+    status: ReservationStatus,
+    userId?: number,
+    typeUser?: string,
+  ) {
+    if (status === ReservationStatus.COMPLETE && userId) {
+      await this.reservationRoom.findActiveOrInactiveReservationsForCustomer(userId, typeUser);
+    }
+  }
+
+  private async fetchUpdatedPackage(id: number) {
     return this.assignesPackagesRepository.findOne({
-      where: { id: updateassignes_packagesDto.id },
+      where: { id },
     });
   }
 

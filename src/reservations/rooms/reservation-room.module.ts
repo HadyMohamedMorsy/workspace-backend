@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesPackagesModule } from "src/assigness-packages-offers/assignes-packages.module";
@@ -23,7 +23,7 @@ import { ReservationRoomService } from "./reservation-room.service";
     RoomsModule,
     AssignGeneralOfferModule,
     GeneralOfferModule,
-    AssignesPackagesModule,
+    forwardRef(() => AssignesPackagesModule),
     DealsModule,
     TypeOrmModule.forFeature([ReservationRoom]),
   ],

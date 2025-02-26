@@ -1,8 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
+import { DeskareaService } from "src/reservations/deskarea/deskarea.service";
+import { SharedService } from "src/reservations/shared/shared.service";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
@@ -18,6 +21,11 @@ export class AssignesMembershipService {
     private assignesMembershipRepository: Repository<AssignesMembership>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly offerCoWorkingSpaceService: OfferCoWorkingSpaceService,
+    @Inject(forwardRef(() => SharedService))
+    private readonly shared: SharedService,
+
+    @Inject(forwardRef(() => DeskareaService))
+    private readonly deskarea: DeskareaService,
   ) {}
 
   // Create a new record
@@ -166,16 +174,30 @@ export class AssignesMembershipService {
 
   // Update a record
   async update(updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
-    await this.assignesMembershipRepository.update(
-      updateAssignesMembershipDto.id,
-      updateAssignesMembershipDto,
-    );
-    return this.assignesMembershipRepository.findOne({
-      where: { id: updateAssignesMembershipDto.id },
-    });
+    const { type, type_user, user_id, status, id } = updateAssignesMembershipDto;
+    if (status === ReservationStatus.COMPLETE) {
+      await this.handleValidationIfNeeded(user_id, type, type_user);
+    }
+    await this.assignesMembershipRepository.update(id, { status });
+    return this.getUpdatedEntity(id);
   }
 
-  // Delete a record
+  private async handleValidationIfNeeded(user_id: number, type?: string, type_user?: string) {
+    if (!type && !type_user) return;
+
+    const validationService = this.getValidationService(type);
+    await validationService?.validateCustomerReservation(user_id, type_user);
+  }
+
+  private getValidationService(type?: string) {
+    return type === "shared" ? this.shared : this.deskarea;
+  }
+
+  private async getUpdatedEntity(id: number) {
+    return this.assignesMembershipRepository.findOne({
+      where: { id },
+    });
+  }
   async remove(id: number) {
     await this.assignesMembershipRepository.delete(id);
   }

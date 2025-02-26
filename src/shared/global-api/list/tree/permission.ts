@@ -34,7 +34,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
   },
   {
     resource: Resource.GeneralSettings,
-    actions: [Permission.UPDATE, Permission.INDEX],
+    actions: [Permission.UPDATE, Permission.CREATE, Permission.INDEX],
   },
   {
     resource: Resource.User,

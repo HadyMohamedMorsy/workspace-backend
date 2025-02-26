@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
 
@@ -28,6 +28,15 @@ export class CreateAssignesMembershipDto {
       "type order must be one of the following: individual or company or studentActivity or User",
   })
   type_user: TypeUser;
+
+  @IsString()
+  @IsOptional()
+  type?: string;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  user_id?: number;
 
   @IsOptional()
   @Type(() => Number)

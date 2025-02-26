@@ -1,8 +1,10 @@
-import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CompanyModule } from "src/companies/company.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { OfferCoWorkingSpaceModule } from "src/offer-co-working-space/offer-co-working-space.module";
+import { DeskareaModule } from "src/reservations/deskarea/deskarea.module";
+import { SharedModule } from "src/reservations/shared/shared.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { AssignesMembershipController } from "./assignes-membership.controller";
@@ -13,6 +15,8 @@ import { CheckActiveMembershipMiddleware } from "./middleware/check-active-assig
 @Module({
   imports: [
     OfferCoWorkingSpaceModule,
+    forwardRef(() => SharedModule),
+    forwardRef(() => DeskareaModule),
     IndividualModule,
     CompanyModule,
     StudentActivityModule,

@@ -43,12 +43,12 @@ export class AuthorizationGuard implements CanActivate {
           perm => perm.resource === routePermission.resource,
         );
 
-        if (!userPermission) throw new ForbiddenException();
+        if (!userPermission) throw new ForbiddenException("Not authorized");
 
         const allActionsAvailable = routePermission.actions.every(requiredAction =>
           userPermission.actions.includes(requiredAction),
         );
-        if (!allActionsAvailable) throw new ForbiddenException();
+        if (!allActionsAvailable) throw new ForbiddenException("Not authorized");
       }
     } catch (e) {
       throw new ForbiddenException(e.message);

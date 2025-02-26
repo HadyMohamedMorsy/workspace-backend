@@ -5,6 +5,7 @@ import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-re
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateGeneralSettingsDto } from "./dto/create-settings.dto";
+import { UpdateGeneralSettingsDto } from "./dto/update-settings-packages.dto";
 import { GeneralSettingsService } from "./settings.service";
 
 @UseGuards(AuthorizationGuard)
@@ -35,5 +36,17 @@ export class GeneralSettingsController {
   ])
   async create(@Body() createGeneralSettingsDto: CreateGeneralSettingsDto) {
     return await this.generalSettingsService.create(createGeneralSettingsDto);
+  }
+
+  @Post("/update")
+  @UseInterceptors(DeleteCacheInterceptor)
+  @Permissions([
+    {
+      resource: Resource.GeneralSettings,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async update(@Body() updateGeneralSettingsDto: UpdateGeneralSettingsDto) {
+    return await this.generalSettingsService.update(updateGeneralSettingsDto);
   }
 }

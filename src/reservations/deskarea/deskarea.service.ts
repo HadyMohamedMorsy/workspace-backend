@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as moment from "moment";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
@@ -6,6 +12,7 @@ import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/crea
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesMembershipService } from "src/assignes-memberships/assignes-membership.service";
 import { Company } from "src/companies/company.entity";
+import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -24,6 +31,8 @@ export class DeskareaService {
     private deskareaRepository: Repository<Deskarea>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly assignGlobalOffer: AssignGeneralOfferservice,
+    protected readonly settings: GeneralSettingsService,
+    @Inject(forwardRef(() => AssignesMembershipService))
     protected readonly membership: AssignesMembershipService,
   ) {}
 
@@ -49,10 +58,11 @@ export class DeskareaService {
 
       assignGeneralOffer = await this.assignGlobalOffer.create(payload, reqBody);
     }
-
+    const settings = await this.findSetting(createDeskareaDto.setting_id);
     const deskarea = this.deskareaRepository.create({
       ...createDeskareaDto,
       assignGeneralOffer,
+      settings,
       createdBy: reqBody.createdBy,
       [type_user.toLowerCase()]: reqBody.customer,
     });
@@ -178,11 +188,10 @@ export class DeskareaService {
       [type_user.toLowerCase()]: reqBody.customer,
     });
     await this.deskareaRepository.save(shared);
-
     return this.membership.findOne(memberShip.id);
   }
 
-  private async validateCustomerReservation(customerId: number, typeUser: string) {
+  async validateCustomerReservation(customerId: number, typeUser: string) {
     const existingReservations = await this.findActiveOrInactiveReservationsForCustomer(
       customerId,
       typeUser,
@@ -258,20 +267,36 @@ export class DeskareaService {
     updateDeskareaDto: UpdateDeskAreaDto,
     rest: Partial<UpdateDeskAreaDto>,
   ) {
-    const diffInHours = calculateHours({
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { setting_id, ...updateDto } = rest;
+    const totalPrice = await this.calculateCoWrokingSpaceTotalPrice(rest);
+    const diffInHours = this.diffrentHour(rest);
+    await this.deskareaRepository.update(updateDeskareaDto.id, {
+      ...updateDto,
+      total_time: diffInHours,
+      total_price: totalPrice,
+      status: ReservationStatus.COMPLETE,
+    });
+  }
+
+  async findSetting(settingId: number) {
+    return await this.settings.findOne(settingId);
+  }
+
+  async calculateCoWrokingSpaceTotalPrice(rest: Partial<UpdateDeskAreaDto>) {
+    const diffInHours = this.diffrentHour(rest);
+    const settings = await this.findSetting(rest.setting_id);
+    return diffInHours ? settings.price_deskarea * +diffInHours : settings.price_deskarea;
+  }
+
+  diffrentHour(rest: Partial<UpdateDeskAreaDto>) {
+    return calculateHours({
       start_hour: rest.start_hour,
       start_minute: rest.start_minute,
       start_time: rest.start_time,
       end_hour: rest.end_hour,
       end_minute: rest.end_minute,
       end_time: rest.end_time,
-    });
-    const totalPrice = diffInHours ? 20 * +diffInHours : 20;
-    await this.deskareaRepository.update(updateDeskareaDto.id, {
-      ...rest,
-      total_time: diffInHours,
-      total_price: totalPrice,
-      status: ReservationStatus.COMPLETE,
     });
   }
 
@@ -329,6 +354,7 @@ export class DeskareaService {
   ) {
     const queryBuilder = this.buildBaseQuery(filterData, repository)
       .leftJoinAndSelect(`e.${userType}`, "user")
+      .leftJoinAndSelect("e.settings", "settings")
       .andWhere(`user.id = :${idKey}`, { [idKey]: filterData[idKey] });
 
     this.addMembershipJoin(queryBuilder, filterData.membership_id);

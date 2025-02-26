@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as moment from "moment";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
@@ -29,6 +35,7 @@ export class ReservationRoomService {
     private readonly assignGlobalOffer: AssignGeneralOfferservice,
     private readonly globalOffer: GeneralOfferService,
     private readonly room: RoomsService,
+    @Inject(forwardRef(() => AssignesPackagesService))
     private readonly packageRooms: AssignesPackagesService,
     private readonly deal: DealsService,
   ) {}
@@ -684,6 +691,29 @@ export class ReservationRoomService {
   }
 
   // ==================== UTILITY METHODS ====================
+
+  async findActiveOrInactiveReservationsForCustomer(customer_id: number, customer_type: string) {
+    const customerRelationMap = {
+      individual: "individual",
+      company: "company",
+      studentActivity: "studentActivity",
+    };
+
+    const customerRelationField = customerRelationMap[customer_type];
+    const customerCondition = { [customerRelationField]: { id: customer_id } };
+
+    const existingReservations = await this.reservationRoomRepository.find({
+      relations: [customerRelationField],
+      where: [
+        {
+          status: ReservationStatus.ACTIVE,
+          ...customerCondition,
+        },
+      ],
+    });
+
+    return existingReservations;
+  }
 
   private async getActiveReservations(roomId: number, day: string) {
     return this.reservationRoomRepository

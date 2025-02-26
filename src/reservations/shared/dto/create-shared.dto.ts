@@ -32,6 +32,11 @@ export class CreateSharedDto {
   @Type(() => Number)
   offer_id: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  setting_id: number;
+
   @IsOptional()
   @IsNumber()
   @Type(() => Number)

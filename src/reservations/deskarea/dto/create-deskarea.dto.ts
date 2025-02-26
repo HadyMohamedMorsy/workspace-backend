@@ -27,6 +27,11 @@ export class CreateDeskAreaDto {
   @Type(() => Number)
   customer_id: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  setting_id: number;
+
   @IsOptional()
   @IsNumber()
   @Type(() => Number)

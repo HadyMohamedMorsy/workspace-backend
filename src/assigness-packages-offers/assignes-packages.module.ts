@@ -1,8 +1,9 @@
-import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CompanyModule } from "src/companies/company.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { OfferPackageModule } from "src/offer-packages/offerpackages.module";
+import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { AssignesPackageController } from "./assignes-packages.controller";
@@ -13,6 +14,7 @@ import { CheckActivePackagesMiddleware } from "./middleware/assigness-packages,m
 @Module({
   imports: [
     CompanyModule,
+    forwardRef(() => ReservationRoomModule),
     IndividualModule,
     StudentActivityModule,
     OfferPackageModule,

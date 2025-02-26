@@ -2,6 +2,7 @@ import { IsEnum } from "class-validator";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { Company } from "src/companies/company.entity";
+import { GeneralSettings } from "src/general-settings/general-settings.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
@@ -58,6 +59,11 @@ export class Shared {
     onDelete: "CASCADE",
   })
   assignessMemebership: AssignesMembership[];
+
+  @ManyToOne(() => GeneralSettings, settings => settings.shared, {
+    onDelete: "CASCADE",
+  })
+  settings: GeneralSettings;
 
   @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.shared, {
     onDelete: "CASCADE",
