@@ -35,6 +35,11 @@ export class DashboredController {
       [totalOrderPrice],
 
       // Packages related
+      [totalCompletedHourShared, totalCompletedHourDesk, totalCompletedHourRooms],
+
+      // Packages related
+      [totalCompletedDeal, totalCancelledDeal, totalActiveDeal],
+      // Packages related
       [totalCompletedPackages, totalCancelledPackages, totalActivePackages],
 
       // Shared related
@@ -114,6 +119,20 @@ export class DashboredController {
 
       // Order price group
       Promise.all([this.dashboredService.getTotalOrderPriceOrders(filterQueryDto)]),
+
+      // Hours group
+      Promise.all([
+        this.dashboredService.getAllTotalHourSharedCompleted(filterQueryDto),
+        this.dashboredService.getAllTotalHourDeskareaCompleted(filterQueryDto),
+        this.dashboredService.getAllTotalHourReservationRoomCompleted(filterQueryDto),
+      ]),
+
+      // Deals group
+      Promise.all([
+        this.dashboredService.getAllTotalDeal(filterQueryDto),
+        this.dashboredService.getAllTotalCancelledDeal(filterQueryDto),
+        this.dashboredService.getAllTotalActiveDeal(filterQueryDto),
+      ]),
 
       // Packages group
       Promise.all([
@@ -233,84 +252,130 @@ export class DashboredController {
       ),
 
       // Order totals
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              ["Total Orders Paid", getValue(orderTotals[0], "total")],
+              ["Total Orders Cost", getValue(orderTotals[1], "total")],
+              ["Total Orders Hold", getValue(orderTotals[2], "total")],
+              ["Amount Orders Kitchen", getValue(totalOrderPrice, "total")],
+              [
+                "Total Orders Kitchen",
+                getValue(orderTotals[0], "total") + getValue(orderTotals[1], "total"),
+              ],
+            ],
+            "pi pi-inbox",
+          )
+        : []),
+
+      // Hours section
       ...this.createMetrics(
         [
-          ["Total Orders Paid", getValue(orderTotals[0], "total")],
-          ["Total Orders Cost", getValue(orderTotals[1], "total")],
-          ["Total Orders Hold", getValue(orderTotals[2], "total")],
-          ["Amount Orders Kitchen", getValue(totalOrderPrice, "total")],
-          [
-            "Total Orders Kitchen",
-            getValue(orderTotals[0], "total") + getValue(orderTotals[1], "total"),
-          ],
+          ["Total Completed Hours Shared", getValue(totalCompletedHourShared, "totalHour")],
+          ["Total Completed Hours Deskarea", getValue(totalCompletedHourDesk, "totalHour")],
+          ["Total Completed Hours Rooms", getValue(totalCompletedHourRooms, "totalHour")],
         ],
-        "pi pi-inbox",
+        "pi pi-box",
       ),
+
+      // Deal section
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              ["Total Completed Deal Revenue", getValue(totalCompletedDeal, "totalRevenue")],
+              ["Total Cancelled Deal Revenue", getValue(totalCancelledDeal, "totalRevenue")],
+              ["Total Active Deal Revenue", getValue(totalActiveDeal, "totalRevenue")],
+            ],
+            "pi pi-box",
+          )
+        : []),
 
       // Packages section
-      ...this.createMetrics(
-        [
-          ["Total Completed Packages Revenue", getValue(totalCompletedPackages, "totalRevenue")],
-          ["Total Cancelled Packages Revenue", getValue(totalCancelledPackages, "totalRevenue")],
-          ["Total Active Packages Revenue", getValue(totalActivePackages, "totalRevenue")],
-        ],
-        "pi pi-box",
-      ),
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              [
+                "Total Completed Packages Revenue",
+                getValue(totalCompletedPackages, "totalRevenue"),
+              ],
+              [
+                "Total Cancelled Packages Revenue",
+                getValue(totalCancelledPackages, "totalRevenue"),
+              ],
+              ["Total Active Packages Revenue", getValue(totalActivePackages, "totalRevenue")],
+            ],
+            "pi pi-box",
+          )
+        : []),
 
       // Shared section
-      ...this.createMetrics(
-        [
-          ["Total Completed Shared Revenue", getValue(totalCompletedShared, "totalRevenue")],
-          ["Total Cancelled Shared Revenue", getValue(totalCancelledShared, "totalRevenue")],
-          ["Total Active Shared Revenue", getValue(totalActiveShared, "totalRevenue")],
-        ],
-        "pi pi-box",
-      ),
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              ["Total Completed Shared Revenue", getValue(totalCompletedShared, "totalRevenue")],
+              ["Total Cancelled Shared Revenue", getValue(totalCancelledShared, "totalRevenue")],
+              ["Total Active Shared Revenue", getValue(totalActiveShared, "totalRevenue")],
+            ],
+            "pi pi-box",
+          )
+        : []),
 
       // Desk Area section
-      ...this.createMetrics(
-        [
-          ["Total Completed Desk Area Revenue", getValue(totalCompletedDeskArea, "totalRevenue")],
-          ["Total Cancelled Desk Area Revenue", getValue(totalCancelledDeskArea, "totalRevenue")],
-          ["Total Active Desk Area Revenue", getValue(totalActiveDeskArea, "totalRevenue")],
-        ],
-        "pi pi-box",
-      ),
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              [
+                "Total Completed Desk Area Revenue",
+                getValue(totalCompletedDeskArea, "totalRevenue"),
+              ],
+              [
+                "Total Cancelled Desk Area Revenue",
+                getValue(totalCancelledDeskArea, "totalRevenue"),
+              ],
+              ["Total Active Desk Area Revenue", getValue(totalActiveDeskArea, "totalRevenue")],
+            ],
+            "pi pi-box",
+          )
+        : []),
 
       // Reservation Room section
-      ...this.createMetrics(
-        [
-          [
-            "Total Completed Reservation Room Revenue",
-            getValue(totalCompletedReservationRoom, "totalRevenue"),
-          ],
-          [
-            "Total Cancelled Reservation Room Revenue",
-            getValue(totalCancelledReservationRoom, "totalRevenue"),
-          ],
-          [
-            "Total Active Reservation Room Revenue",
-            getValue(totalActiveReservationRoom, "totalRevenue"),
-          ],
-        ],
-        "pi pi-box",
-      ),
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              [
+                "Total Completed Reservation Room Revenue",
+                getValue(totalCompletedReservationRoom, "totalRevenue"),
+              ],
+              [
+                "Total Cancelled Reservation Room Revenue",
+                getValue(totalCancelledReservationRoom, "totalRevenue"),
+              ],
+              [
+                "Total Active Reservation Room Revenue",
+                getValue(totalActiveReservationRoom, "totalRevenue"),
+              ],
+            ],
+            "pi pi-box",
+          )
+        : []),
 
       // Membership section
-      ...this.createMetrics(
-        [
-          [
-            "Total Completed Membership Revenue",
-            getValue(totalCompletedMembership, "totalRevenue"),
-          ],
-          [
-            "Total Cancelled Membership Revenue",
-            getValue(totalCancelledMembership, "totalRevenue"),
-          ],
-          ["Total Active Membership Revenue", getValue(totalActiveMembership, "totalRevenue")],
-        ],
-        "pi pi-box",
-      ),
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              [
+                "Total Completed Membership Revenue",
+                getValue(totalCompletedMembership, "totalRevenue"),
+              ],
+              [
+                "Total Cancelled Membership Revenue",
+                getValue(totalCancelledMembership, "totalRevenue"),
+              ],
+              ["Total Active Membership Revenue", getValue(totalActiveMembership, "totalRevenue")],
+            ],
+            "pi pi-box",
+          )
+        : []),
 
       // Offer section
       ...this.createMetrics([["Total Offers", getValue(totalOffer, "count")]], "pi pi-box"),

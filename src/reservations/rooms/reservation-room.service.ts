@@ -37,6 +37,7 @@ export class ReservationRoomService {
     private readonly room: RoomsService,
     @Inject(forwardRef(() => AssignesPackagesService))
     private readonly packageRooms: AssignesPackagesService,
+    @Inject(forwardRef(() => DealsService))
     private readonly deal: DealsService,
   ) {}
 

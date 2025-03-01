@@ -14,6 +14,11 @@ export class CreateDealsDto {
   @IsOptional()
   offer_id?: number;
 
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  user_id?: number;
+
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()

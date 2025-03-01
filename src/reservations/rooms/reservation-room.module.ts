@@ -26,7 +26,7 @@ import { ReservationRoomService } from "./reservation-room.service";
     GeneralOfferModule,
     UsersModule,
     forwardRef(() => AssignesPackagesModule),
-    DealsModule,
+    forwardRef(() => DealsModule),
     TypeOrmModule.forFeature([ReservationRoom]),
   ],
   controllers: [ReservationRoomController],

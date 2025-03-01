@@ -428,6 +428,36 @@ export class DahboredService {
       .getRawOne();
   }
 
+  async getAllTotalHours(
+    repository: any,
+    status: string,
+    filter: FiltersDashboredDto,
+    entityName: string,
+  ) {
+    return await repository
+      .createQueryBuilder(entityName)
+      .select(`SUM(${entityName}.total_time)`, "totalHour")
+      .where(`${entityName}.total_time > 0`)
+      .andWhere(`${entityName}.status = :status`, { status })
+      .andWhere(`${entityName}.created_at BETWEEN :startFrom AND :startTo`, {
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
+      })
+      .getRawOne();
+  }
+
+  async getAllTotalHourSharedCompleted(filter: FiltersDashboredDto) {
+    return this.getAllTotalHours(this.sharedRepository, "complete", filter, "shared");
+  }
+
+  async getAllTotalHourDeskareaCompleted(filter: FiltersDashboredDto) {
+    return this.getAllTotalHours(this.deskAreaRepository, "complete", filter, "deskarea");
+  }
+
+  async getAllTotalHourReservationRoomCompleted(filter: FiltersDashboredDto) {
+    return this.getAllTotalHours(this.reservationRoomRepository, "complete", filter, "deskarea");
+  }
+
   async getAllTotalPackages(filter: FiltersDashboredDto) {
     return this.getTotalRevenueByStatus(this.packagesRepository, "complete", filter, "shared");
   }
@@ -438,6 +468,18 @@ export class DahboredService {
 
   async getAllTotalActivePackages(filter: FiltersDashboredDto) {
     return this.getTotalRevenueByStatus(this.packagesRepository, "active", filter, "shared");
+  }
+
+  async getAllTotalDeal(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.deskAreaRepository, "complete", filter, "shared");
+  }
+
+  async getAllTotalCancelledDeal(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.deskAreaRepository, "cancelled", filter, "shared");
+  }
+
+  async getAllTotalActiveDeal(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.deskAreaRepository, "active", filter, "shared");
   }
 
   async getAllTotalShared(filter: FiltersDashboredDto) {

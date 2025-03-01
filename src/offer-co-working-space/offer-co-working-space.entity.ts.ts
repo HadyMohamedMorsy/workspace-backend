@@ -14,7 +14,7 @@ export class CoWorkingSpace {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   name: string;
 
   @Column()
