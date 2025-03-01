@@ -38,6 +38,11 @@ export class CreateAssignesMembershipDto {
   @IsOptional()
   user_id?: number;
 
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  offer_id?: number;
+
   @IsOptional()
   @Type(() => Number)
   used: number;

@@ -71,7 +71,7 @@ export class CreateReservationRoomDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  total_price: number;
+  price: number;
 
   @IsString()
   @IsOptional()

@@ -1,6 +1,9 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
+import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { Company } from "src/companies/company.entity";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
 import { ReservationRoomService } from "src/reservations/rooms/reservation-room.service";
@@ -19,6 +22,8 @@ export class AssignesPackagesService {
     @InjectRepository(AssignesPackages)
     private assignesPackagesRepository: Repository<AssignesPackages>,
     protected readonly apiFeaturesService: APIFeaturesService,
+    protected readonly assignGlobalOffer: AssignGeneralOfferservice,
+    protected readonly offer: GeneralOfferService,
     protected readonly offerPackagesService: OfferPackagesService,
     @Inject(forwardRef(() => ReservationRoomService))
     private readonly reservationRoom: ReservationRoomService,
@@ -37,13 +42,30 @@ export class AssignesPackagesService {
       throw new NotFoundException(`packages with  not found`);
     }
 
+    const { customer_id, type_user, offer_id } = create;
+    let assignGeneralOffer = null;
+
+    if (offer_id) {
+      const payload = {
+        customer_id,
+        offer_id,
+        type_user,
+      } as CreateAssignGeneralOfferDto;
+
+      assignGeneralOffer = await this.assignGlobalOffer.create(payload, reqBody);
+    }
+
+    const totalPrice = await this.calculatePackagePrice(offer_id, packages.price, packages.hours);
+
     const assignes_packages = this.assignesPackagesRepository.create({
       ...create,
       total_used: +packages.hours,
       used: 0,
+      assignGeneralOffer,
+      total_price: totalPrice,
       remaining: +packages.hours,
       createdBy: reqBody.createdBy,
-      [create.type_user.toLowerCase()]: reqBody.customer,
+      [create.type_user]: reqBody.customer,
       packages,
     });
     const newPackage = await this.assignesPackagesRepository.save(assignes_packages);
@@ -54,7 +76,7 @@ export class AssignesPackagesService {
   async findOne(id: number): Promise<AssignesPackages> {
     const assignes_packages = await this.assignesPackagesRepository.findOne({
       where: { id },
-      relations: ["packages"],
+      relations: ["packages", "packages.room"],
     });
     if (!assignes_packages) {
       throw new NotFoundException(`assignes_packages with id ${id} not found`);
@@ -69,8 +91,9 @@ export class AssignesPackagesService {
 
     queryBuilder
       .leftJoinAndSelect("e.packages", "ep")
-      .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("ep.room", "epr")
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
       .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
@@ -95,6 +118,8 @@ export class AssignesPackagesService {
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("ep.room", "epr")
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -116,10 +141,12 @@ export class AssignesPackagesService {
       .buildQuery(filterData);
 
     queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
+      .leftJoinAndSelect("e.company", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("ep.room", "epr")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
+      .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
@@ -140,10 +167,12 @@ export class AssignesPackagesService {
       .buildQuery(filterData);
 
     queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
+      .leftJoinAndSelect("e.studentActivity", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("ep.room", "epr")
-      .andWhere("es.id = :studentActivity_id", {
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
+      .andWhere("ei.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
       })
       .leftJoin("e.createdBy", "ec")
@@ -163,9 +192,13 @@ export class AssignesPackagesService {
 
   // Update a record
   async update(updateassignesPackagesDto: UpdateAssignesPackageDto) {
-    const { status, user_id, type_user } = updateassignesPackagesDto;
+    const { status, user_id, type_user, id, ...rest } = updateassignesPackagesDto;
     await this.handleStatusValidation(status, user_id, type_user);
-    return this.assignesPackagesRepository.update(updateassignesPackagesDto.id, { status });
+    await this.assignesPackagesRepository.update(id, {
+      status,
+      ...rest,
+    });
+    return await this.fetchUpdatedPackage(id);
   }
 
   private async handleStatusValidation(
@@ -173,8 +206,11 @@ export class AssignesPackagesService {
     userId?: number,
     typeUser?: string,
   ) {
-    if (status === ReservationStatus.COMPLETE && userId) {
-      await this.reservationRoom.findActiveOrInactiveReservationsForCustomer(userId, typeUser);
+    if ((status === ReservationStatus.COMPLETE || ReservationStatus.CANCELLED) && userId) {
+      return await this.reservationRoom.findActiveOrInactiveReservationsForCustomer(
+        userId,
+        typeUser,
+      );
     }
   }
 
@@ -187,5 +223,18 @@ export class AssignesPackagesService {
   // Delete a record
   async remove(id: number) {
     await this.assignesPackagesRepository.delete(id);
+  }
+
+  async calculatePackagePrice(offerId: number, basePrice: number, hours: number) {
+    let discount = 0;
+    const totalPrice = basePrice * hours;
+
+    if (offerId) {
+      const offer = await this.offer.findOne(offerId);
+      const typeDiscount = offer.type_discount;
+      const discountAmount = offer.discount;
+      discount = typeDiscount === "amount" ? discountAmount : totalPrice * (discountAmount / 100);
+    }
+    return totalPrice - discount;
   }
 }

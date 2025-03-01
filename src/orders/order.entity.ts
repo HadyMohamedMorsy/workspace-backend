@@ -47,6 +47,11 @@ export class Order {
   })
   studentActivity: StudentActivity;
 
+  @ManyToOne(() => User, users => users.orders, {
+    onDelete: "CASCADE",
+  })
+  employed: User;
+
   @Column({ nullable: true })
   order_price: number;
 

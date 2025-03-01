@@ -15,7 +15,7 @@ import { LIST_TYPE_ORDER_AR, LIST_TYPE_ORDER_EN } from "./lists/type-order/type-
 import { LIST_TYPE_PRODUCT_AR, LIST_TYPE_PRODUCT_EN } from "./lists/type-product/type-product";
 import { LIST_TYPE_SALLARY_AR, LIST_TYPE_SALLARY_EN } from "./lists/type-sallary/type-sallary";
 import { LIST_TYPE_USER_AR, LIST_TYPE_USER_EN } from "./lists/type-user/type-user";
-import { LIST_TYOE_WORK_AR, LIST_TYOE_WORK_EN } from "./lists/type-wrok/type-work";
+import { LIST_TYOE_WORK_AR, LIST_TYOE_WORK_EN } from "./lists/type-work/type-work";
 
 @Injectable()
 export class ListService {
@@ -89,6 +89,10 @@ export class ListService {
     if (module === "categories") return await this.categoryService.findList();
     if (module === "global-offer-shared") return await this.generalOfferService.findShared();
     if (module === "global-offer-deskarea") return await this.generalOfferService.findDeskArea();
+    if (module === "global-offer-membership")
+      return await this.generalOfferService.findMembership();
+    if (module === "global-offer-deals") return await this.generalOfferService.findDeals();
+    if (module === "global-offer-packages") return await this.generalOfferService.findPackages();
     if (module === "global-offer-rooms") return await this.generalOfferService.findRooms();
     if (module === "membership-offer-shared")
       return await this.offerCoWorkingSpaceService.findListShared();

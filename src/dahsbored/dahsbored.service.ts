@@ -1,9 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { ExpensePlaceChild } from "src/expenses-place/expenses-place-child/expense-place-child.entity";
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
 import { Order } from "src/orders/order.entity";
 import { Purchases } from "src/purchases/purchases.entity";
+import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
+import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
+import { Shared } from "src/reservations/shared/shared.entity";
 import { Returns } from "src/returns/returns.entity";
 import { RevenueChild } from "src/revenue/revenue-child/revenue-child.entity";
 import { TypeSallary } from "src/shared/enum/global-enum";
@@ -30,6 +36,24 @@ export class DahboredService {
 
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
+
+    @InjectRepository(AssignesPackages)
+    private readonly packagesRepository: Repository<AssignesPackages>,
+
+    @InjectRepository(AssignesMembership)
+    private readonly membershipRepository: Repository<AssignesMembership>,
+
+    @InjectRepository(AssignGeneralOffer)
+    private readonly generalOfferRepository: Repository<AssignGeneralOffer>,
+
+    @InjectRepository(Shared)
+    private readonly sharedRepository: Repository<Shared>,
+
+    @InjectRepository(Deskarea)
+    private readonly deskAreaRepository: Repository<Deskarea>,
+
+    @InjectRepository(ReservationRoom)
+    private readonly reservationRoomRepository: Repository<ReservationRoom>,
   ) {}
 
   async getAllExapsesInternalSallary(filter: FiltersDashboredDto) {
@@ -383,6 +407,120 @@ export class DahboredService {
       })
       .leftJoin("revenueChild.revenue", "ee")
       .andWhere("ee.name = :name", { name: "other" })
+      .getRawOne();
+  }
+
+  async getTotalRevenueByStatus(
+    repository: any,
+    status: string,
+    filter: FiltersDashboredDto,
+    entityName: string,
+  ) {
+    return await repository
+      .createQueryBuilder(entityName)
+      .select(`SUM(${entityName}.total_price)`, "totalRevenue")
+      .where(`${entityName}.total_price > 0`)
+      .andWhere(`${entityName}.status = :status`, { status })
+      .andWhere(`${entityName}.created_at BETWEEN :startFrom AND :startTo`, {
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
+      })
+      .getRawOne();
+  }
+
+  async getAllTotalPackages(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.packagesRepository, "complete", filter, "shared");
+  }
+
+  async getAllTotalCancelledPackages(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.packagesRepository, "cancelled", filter, "shared");
+  }
+
+  async getAllTotalActivePackages(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.packagesRepository, "active", filter, "shared");
+  }
+
+  async getAllTotalShared(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.sharedRepository, "complete", filter, "shared");
+  }
+
+  async getAllTotalCancelledShared(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.sharedRepository, "cancelled", filter, "shared");
+  }
+
+  async getAllTotalActiveShared(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.sharedRepository, "active", filter, "shared");
+  }
+
+  async getAllTotalDeskArea(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.deskAreaRepository, "complete", filter, "deskarea");
+  }
+
+  async getAllTotalCancelledDeskArea(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.deskAreaRepository, "cancelled", filter, "deskarea");
+  }
+
+  async getAllTotalActiveDeskArea(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.deskAreaRepository, "active", filter, "deskarea");
+  }
+
+  async getAllTotalReservationRoom(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(
+      this.reservationRoomRepository,
+      "complete",
+      filter,
+      "reservationRoom",
+    );
+  }
+
+  async getAllTotalCancelledReservationRoom(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(
+      this.reservationRoomRepository,
+      "cancelled",
+      filter,
+      "reservationRoom",
+    );
+  }
+
+  async getAllTotalActiveReservationRoom(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(
+      this.reservationRoomRepository,
+      "active",
+      filter,
+      "reservationRoom",
+    );
+  }
+
+  async getAllTotalMemberShip(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(
+      this.membershipRepository,
+      "complete",
+      filter,
+      "membership",
+    );
+  }
+
+  async getAllTotalCancelledMemberShip(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(
+      this.membershipRepository,
+      "cancelled",
+      filter,
+      "membership",
+    );
+  }
+
+  async getAllTotalActiveMemberShip(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.membershipRepository, "active", filter, "membership");
+  }
+
+  async getAllTotalOffer(filter: FiltersDashboredDto) {
+    return await this.generalOfferRepository
+      .createQueryBuilder("offer")
+      .select("COUNT(offer.id)", "count")
+      .andWhere("offer.created_at BETWEEN :startFrom AND :startTo", {
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
+      })
       .getRawOne();
   }
 

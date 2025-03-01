@@ -6,6 +6,7 @@ import { ProductsModule } from "src/products/products.module";
 import { FilterDateModule } from "src/shared/filters/filter-date.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
+import { UsersModule } from "src/users/users.module";
 import { OrderController } from "./order.controller";
 import { Order } from "./order.entity";
 import { OrdersService } from "./orders.service";
@@ -15,6 +16,7 @@ import { OrdersService } from "./orders.service";
     CompanyModule,
     IndividualModule,
     StudentActivityModule,
+    UsersModule,
     ProductsModule,
     FilterDateModule,
     TypeOrmModule.forFeature([Order]),

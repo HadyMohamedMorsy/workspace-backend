@@ -104,6 +104,15 @@ export enum TasksStatus {
   COMPLETE = "complete",
 }
 
+export enum PRODUCT_TYPE {
+  Shared = "shared",
+  Deskarea = "deskarea",
+  Room = "rooms",
+  Membership = "membership",
+  Deals = "deals",
+  Packages = "packages",
+}
+
 export enum UserStatus {
   ACTIVE = "active",
   INACTIVE = "inactive",

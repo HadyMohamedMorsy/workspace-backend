@@ -12,14 +12,16 @@ import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/crea
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesMembershipService } from "src/assignes-memberships/assignes-membership.service";
 import { Company } from "src/companies/company.entity";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { calculateHours, formatDate } from "src/shared/helpers/utilities";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import { Repository, SelectQueryBuilder } from "typeorm";
+import { diffrentHour, formatDate } from "../helpers/utitlties";
+import { Shared } from "../shared/shared.entity";
 import { Deskarea } from "./deskarea.entity"; // Changed from Company to Deskarea
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
 import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
@@ -32,6 +34,7 @@ export class DeskareaService {
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly assignGlobalOffer: AssignGeneralOfferservice,
     protected readonly settings: GeneralSettingsService,
+    protected readonly offer: GeneralOfferService,
     @Inject(forwardRef(() => AssignesMembershipService))
     protected readonly membership: AssignesMembershipService,
   ) {}
@@ -64,7 +67,7 @@ export class DeskareaService {
       assignGeneralOffer,
       settings,
       createdBy: reqBody.createdBy,
-      [type_user.toLowerCase()]: reqBody.customer,
+      [type_user]: reqBody.customer,
     });
     return await this.deskareaRepository.save(deskarea);
   }
@@ -118,19 +121,19 @@ export class DeskareaService {
   }
 
   async findDeskareaByIndividualAll(filterData: any) {
-    return this.findByUserType(filterData, Deskarea, "individual", "individual_id");
+    return this.findDeskareaByUserType(filterData, "individual", "individual_id");
   }
 
   async findDeskareaByComapnyAll(filterData: any) {
-    return this.findByUserType(filterData, Deskarea, "company", "company_id");
+    return this.findDeskareaByUserType(filterData, "company", "company_id");
   }
 
   async findDeskareaByStudentActivityAll(filterData: any) {
-    return this.findByUserType(filterData, Deskarea, "studentActivity", "studentActivity_id");
+    return this.findDeskareaByUserType(filterData, "studentActivity", "studentActivity_id");
   }
 
   async findDeskareaByUserAll(filterData: any) {
-    const queryBuilder = this.buildBaseQuery(filterData, Deskarea).andWhere("ec.id = :user_id", {
+    const queryBuilder = this.buildBaseQuery(filterData).andWhere("ec.id = :user_id", {
       user_id: filterData.user_id,
     });
 
@@ -138,20 +141,15 @@ export class DeskareaService {
   }
 
   async findReservationsByIndividual(filterData: any) {
-    return this.findReservationsByUserType(filterData, Deskarea, "individual", "individual_id");
+    return this.findReservationsByUserType(filterData, "individual", "individual_id");
   }
 
   async findReservationsByCompany(filterData: any) {
-    return this.findReservationsByUserType(filterData, Deskarea, "company", "company_id");
+    return this.findReservationsByUserType(filterData, "company", "company_id");
   }
 
   async findReservationsByStudentActivity(filterData: any) {
-    return this.findReservationsByUserType(
-      filterData,
-      Deskarea,
-      "studentActivity",
-      "studentActivity_id",
-    );
+    return this.findReservationsByUserType(filterData, "studentActivity", "studentActivity_id");
   }
 
   async createReservationByMememberShip(
@@ -185,7 +183,7 @@ export class DeskareaService {
       ...createSharedDto,
       assignessMemebership: memberShip,
       createdBy: reqBody.createdBy,
-      [type_user.toLowerCase()]: reqBody.customer,
+      [type_user]: reqBody.customer,
     });
     await this.deskareaRepository.save(shared);
     return this.membership.findOne(memberShip.id);
@@ -245,7 +243,7 @@ export class DeskareaService {
     if (updateDeskareaDto.status === ReservationStatus.CANCELLED) {
       await this.handleCancelledStatus(updateDeskareaDto, membership_id, rest);
     } else {
-      await this.handleCompletedStatus(updateDeskareaDto, rest);
+      await this.handleCompletedStatus(updateDeskareaDto, offer_id, rest);
     }
 
     return this.deskareaRepository.findOne({ where: { id: updateDeskareaDto.id } });
@@ -265,12 +263,12 @@ export class DeskareaService {
 
   private async handleCompletedStatus(
     updateDeskareaDto: UpdateDeskAreaDto,
+    offerId: number,
     rest: Partial<UpdateDeskAreaDto>,
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { setting_id, ...updateDto } = rest;
-    const totalPrice = await this.calculateCoWrokingSpaceTotalPrice(rest);
-    const diffInHours = this.diffrentHour(rest);
+    const totalPrice = await this.calculateCoWrokingSpaceTotalPrice(rest, setting_id, offerId);
+    const diffInHours = diffrentHour(rest);
     await this.deskareaRepository.update(updateDeskareaDto.id, {
       ...updateDto,
       total_time: diffInHours,
@@ -283,30 +281,36 @@ export class DeskareaService {
     return await this.settings.findOne(settingId);
   }
 
-  async calculateCoWrokingSpaceTotalPrice(rest: Partial<UpdateDeskAreaDto>) {
-    const diffInHours = this.diffrentHour(rest);
-    const settings = await this.findSetting(rest.setting_id);
-    return diffInHours ? settings.price_deskarea * +diffInHours : settings.price_deskarea;
-  }
+  async calculateCoWrokingSpaceTotalPrice(
+    rest: Partial<UpdateDeskAreaDto>,
+    settingId: number,
+    offerId: number,
+  ) {
+    const diffInHours = diffrentHour(rest);
+    const settings = await this.findSetting(settingId);
+    let discount = 0;
 
-  diffrentHour(rest: Partial<UpdateDeskAreaDto>) {
-    return calculateHours({
-      start_hour: rest.start_hour,
-      start_minute: rest.start_minute,
-      start_time: rest.start_time,
-      end_hour: rest.end_hour,
-      end_minute: rest.end_minute,
-      end_time: rest.end_time,
-    });
+    const totalPrice = diffInHours
+      ? settings.price_deskarea * +diffInHours
+      : settings.price_deskarea;
+
+    if (offerId) {
+      const offer = await this.offer.findOne(offerId);
+      const typeDiscount = offer.type_discount;
+      const discountAmount = offer.discount;
+
+      discount = typeDiscount === "amount" ? discountAmount : totalPrice * (discountAmount / 100);
+    }
+    return totalPrice - discount;
   }
 
   async remove(deskareaId: number) {
     await this.deskareaRepository.delete(deskareaId);
   }
 
-  private buildBaseQuery(filterData: any, repository: any) {
+  private buildBaseQuery(filterData: any) {
     return this.apiFeaturesService
-      .setRepository(repository)
+      .setRepository(Deskarea)
       .buildQuery(filterData)
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -331,30 +335,35 @@ export class DeskareaService {
       .andWhere("em.id = :membership_id", { membership_id: membershipId });
   }
 
+  private addGeneralOfferJoin(queryBuilder: SelectQueryBuilder<Shared>) {
+    return queryBuilder
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg");
+  }
+
   // Generic query methods
-  private async findByUserType(
+  private async findDeskareaByUserType(
     filterData: any,
-    repository: any,
     userType: "individual" | "company" | "studentActivity",
     idKey: string,
   ) {
-    const queryBuilder = this.buildBaseQuery(filterData, repository)
+    const queryBuilder = this.buildBaseQuery(filterData)
       .leftJoinAndSelect(`e.${userType}`, "user")
+      .leftJoinAndSelect("e.settings", "settings")
       .andWhere(`user.id = :${idKey}`, { [idKey]: filterData[idKey] })
       .andWhere("e.assignessMemebership IS NULL");
 
+    this.addGeneralOfferJoin(queryBuilder);
     return this.getPaginatedResults(queryBuilder);
   }
 
   private async findReservationsByUserType(
     filterData: any,
-    repository: any,
     userType: "individual" | "company" | "studentActivity",
     idKey: string,
   ) {
-    const queryBuilder = this.buildBaseQuery(filterData, repository)
+    const queryBuilder = this.buildBaseQuery(filterData)
       .leftJoinAndSelect(`e.${userType}`, "user")
-      .leftJoinAndSelect("e.settings", "settings")
       .andWhere(`user.id = :${idKey}`, { [idKey]: filterData[idKey] });
 
     this.addMembershipJoin(queryBuilder, filterData.membership_id);

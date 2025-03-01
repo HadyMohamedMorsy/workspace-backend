@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
+import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { Company } from "src/companies/company.entity";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Individual } from "src/individual/individual.entity";
 import { RoomsService } from "src/rooms/rooms.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -17,6 +20,8 @@ export class DealsService {
     @InjectRepository(Deals)
     private dealsRepository: Repository<Deals>,
     protected readonly apiFeaturesService: APIFeaturesService,
+    protected readonly assignGlobalOffer: AssignGeneralOfferservice,
+    protected readonly offer: GeneralOfferService,
     protected readonly roomService: RoomsService,
   ) {}
 
@@ -27,14 +32,27 @@ export class DealsService {
       createdBy: User;
     },
   ): Promise<Deals> {
-    const { type_user } = createDealsDto;
     const room = await this.roomService.findOne(createDealsDto.room_id);
+
+    const { customer_id, type_user, offer_id } = createDealsDto;
+    let assignGeneralOffer = null;
+
+    if (offer_id) {
+      const payload = {
+        customer_id,
+        offer_id,
+        type_user,
+      } as CreateAssignGeneralOfferDto;
+
+      assignGeneralOffer = await this.assignGlobalOffer.create(payload, reqBody);
+    }
 
     const deals = this.dealsRepository.create({
       ...createDealsDto,
       room,
+      assignGeneralOffer,
       createdBy: reqBody.createdBy,
-      [type_user.toLowerCase()]: reqBody.customer,
+      [type_user]: reqBody.customer,
     });
 
     return await this.dealsRepository.save(deals);
@@ -82,8 +100,8 @@ export class DealsService {
       .leftJoinAndSelect("e.company", "ec")
       .leftJoinAndSelect("e.room", "er")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.createdBy", "ecc")
+      .addSelect(["ecc.id", "ecc.firstName", "ecc.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

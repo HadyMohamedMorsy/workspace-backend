@@ -37,7 +37,7 @@ export class AssignGeneralOfferservice {
     const assignGeneralOffer = this.assignGeneralOfferRepository.create({
       ...create,
       createdBy: reqBody.createdBy,
-      [create.type_user.toLowerCase()]: reqBody.customer,
+      [create.type_user]: reqBody.customer,
       generalOffer,
     });
     return await this.assignGeneralOfferRepository.save(assignGeneralOffer);
@@ -118,8 +118,8 @@ export class AssignGeneralOfferservice {
       .leftJoinAndSelect("e.deskarea", "ed")
       .leftJoinAndSelect("e.reservationRooms", "er")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.createdBy", "ecr")
+      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"]);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -140,7 +140,7 @@ export class AssignGeneralOfferservice {
     queryBuilder
       .leftJoinAndSelect("e.studentActivity", "es")
       .leftJoinAndSelect("e.generalOffer", "eg")
-      .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.shared", "ess")
       .leftJoinAndSelect("e.deskarea", "ed")
       .leftJoinAndSelect("e.reservationRooms", "er")
       .andWhere("es.id = :studentActivity_id", {

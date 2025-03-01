@@ -18,8 +18,10 @@ export class CompanyService {
   // Create a new product
   async create(createCompanyDto: CreateCompanyDto) {
     const company = this.companyRepository.create(createCompanyDto);
-    const newClient = await this.companyRepository.save(company);
-    return await this.findOne(newClient.id);
+    if (company) {
+      const newClient = await this.companyRepository.save(company);
+      return await this.findOne(newClient.id);
+    }
   }
 
   // Get all products
@@ -37,7 +39,10 @@ export class CompanyService {
       .leftJoinAndSelect("es.packages", "pa")
       .leftJoinAndSelect("pa.room", "pr")
       .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
+        typeOrder: "HOLD",
+      });
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

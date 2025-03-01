@@ -79,6 +79,9 @@ export class User {
   @OneToMany(() => Task, task => task.createdBy)
   createdByTasks: Task[];
 
+  @OneToMany(() => Order, order => order.employed)
+  orders: Order[];
+
   @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.createdBy)
   createdByPackages: AssignesPackages[];
 

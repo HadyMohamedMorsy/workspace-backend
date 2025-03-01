@@ -2,10 +2,12 @@ import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
+import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
+import { UsersModule } from "src/users/users.module";
 import { CompanyModule } from "./../../companies/company.module";
 import { SharedController } from "./shared.controller";
 import { Shared } from "./shared.entity";
@@ -19,6 +21,8 @@ import { SharedService } from "./shared.service";
     GeneralSettingsModule,
     StudentActivityModule,
     AssignGeneralOfferModule,
+    GeneralOfferModule,
+    UsersModule,
     TypeOrmModule.forFeature([Shared]),
   ],
   controllers: [SharedController],

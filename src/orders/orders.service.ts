@@ -47,7 +47,7 @@ export class OrdersService {
       total_order: totalOrder,
       order_price: orderPrice,
       createdBy: reqBody.createdBy,
-      [createOrderDto.type_user.toLowerCase()]: reqBody.customer,
+      [createOrderDto.type_user]: reqBody.customer,
       order_items: createOrderDto.order_items.map(item => {
         return {
           product: item.product.id,

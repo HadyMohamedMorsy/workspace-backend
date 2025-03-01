@@ -18,9 +18,10 @@ export class IndividualService {
   // Create a new record
   async create(createIndividualDto: CreateIndividualDto): Promise<Individual> {
     const individual = this.individualRepository.create(createIndividualDto);
-    const newClient = await this.individualRepository.save(individual);
-
-    return this.findOne(newClient.id);
+    if (individual) {
+      const newClient = await this.individualRepository.save(individual);
+      return this.findOne(newClient.id);
+    }
   }
 
   // Get all records
@@ -38,7 +39,10 @@ export class IndividualService {
       .leftJoinAndSelect("es.packages", "pa")
       .leftJoinAndSelect("pa.room", "pr")
       .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
+        typeOrder: "HOLD",
+      });
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

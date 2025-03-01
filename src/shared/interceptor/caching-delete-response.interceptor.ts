@@ -34,5 +34,7 @@ export class DeleteCacheInterceptor implements NestInterceptor {
       }
       cacheFilters.delete(prefix);
     }
+    cacheFilters.delete("/api/v1/dashboard/analytics");
+    await this.cacheManager.del("/api/v1/dashboard/analytics");
   }
 }

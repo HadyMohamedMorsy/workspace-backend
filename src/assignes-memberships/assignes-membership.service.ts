@@ -1,6 +1,9 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
+import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { Company } from "src/companies/company.entity";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Individual } from "src/individual/individual.entity";
 import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
 import { DeskareaService } from "src/reservations/deskarea/deskarea.service";
@@ -20,6 +23,8 @@ export class AssignesMembershipService {
     @InjectRepository(AssignesMembership)
     private assignesMembershipRepository: Repository<AssignesMembership>,
     protected readonly apiFeaturesService: APIFeaturesService,
+    protected readonly assignGlobalOffer: AssignGeneralOfferservice,
+    protected readonly offer: GeneralOfferService,
     protected readonly offerCoWorkingSpaceService: OfferCoWorkingSpaceService,
     @Inject(forwardRef(() => SharedService))
     private readonly shared: SharedService,
@@ -42,13 +47,30 @@ export class AssignesMembershipService {
       throw new NotFoundException(`${memeberShip} with  not found`);
     }
 
+    const { customer_id, type_user, offer_id } = create;
+    let assignGeneralOffer = null;
+
+    if (offer_id) {
+      const payload = {
+        customer_id,
+        offer_id,
+        type_user,
+      } as CreateAssignGeneralOfferDto;
+
+      assignGeneralOffer = await this.assignGlobalOffer.create(payload, reqBody);
+    }
+
+    const totalPrice = await this.calculateCoWrokingSpaceTotalPrice(offer_id, memeberShip.price);
+
     const assignesMembership = this.assignesMembershipRepository.create({
       ...create,
       createdBy: reqBody.createdBy,
       total_used: +memeberShip.days,
+      total_price: totalPrice,
+      assignGeneralOffer,
       used: 0,
       remaining: +memeberShip.days,
-      [create.type_user.toLowerCase()]: reqBody.customer,
+      [create.type_user]: reqBody.customer,
       memeberShip,
     });
 
@@ -77,6 +99,8 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.memeberShip", "em")
       .leftJoinAndSelect("e.shared", "es")
       .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
       .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
@@ -103,6 +127,8 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.memeberShip", "em")
       .leftJoinAndSelect("e.shared", "es")
       .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -128,6 +154,8 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.memeberShip", "em")
       .leftJoinAndSelect("e.shared", "es")
       .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
       .leftJoin("e.createdBy", "eu")
       .addSelect(["eu.id", "eu.firstName", "eu.lastName"]);
@@ -154,6 +182,8 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.memeberShip", "em")
       .leftJoinAndSelect("e.shared", "esh")
       .leftJoinAndSelect("e.deskarea", "ed")
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
       })
@@ -174,12 +204,15 @@ export class AssignesMembershipService {
 
   // Update a record
   async update(updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
-    const { type, type_user, user_id, status, id } = updateAssignesMembershipDto;
-    if (status === ReservationStatus.COMPLETE) {
+    const { type, type_user, user_id, status, id, ...rest } = updateAssignesMembershipDto;
+    if (status === ReservationStatus.COMPLETE || status === ReservationStatus.CANCELLED) {
       await this.handleValidationIfNeeded(user_id, type, type_user);
     }
-    await this.assignesMembershipRepository.update(id, { status });
-    return this.getUpdatedEntity(id);
+    await this.assignesMembershipRepository.update(id, {
+      status,
+      ...rest,
+    });
+    return await this.getUpdatedEntity(id);
   }
 
   private async handleValidationIfNeeded(user_id: number, type?: string, type_user?: string) {
@@ -200,5 +233,18 @@ export class AssignesMembershipService {
   }
   async remove(id: number) {
     await this.assignesMembershipRepository.delete(id);
+  }
+
+  async calculateCoWrokingSpaceTotalPrice(offerId: number, basePrice: number) {
+    let discount = 0;
+    const totalPrice = basePrice;
+
+    if (offerId) {
+      const offer = await this.offer.findOne(offerId);
+      const typeDiscount = offer.type_discount;
+      const discountAmount = offer.discount;
+      discount = typeDiscount === "amount" ? discountAmount : totalPrice * (discountAmount / 100);
+    }
+    return totalPrice - discount;
   }
 }

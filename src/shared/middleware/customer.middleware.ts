@@ -3,11 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import { CompanyService } from "src/companies/company.service";
 import { IndividualService } from "src/individual/individual.service";
 import { StudentActivityService } from "src/student-activity/studentActivity.service";
+import { UserService } from "src/users/user.service";
 import { TypeUser } from "../enum/global-enum";
 
 @Injectable()
 export class CustomerMiddleware implements NestMiddleware {
   constructor(
+    private readonly userService: UserService,
     private readonly individualService: IndividualService,
     private readonly companyService: CompanyService,
     private readonly studentActivityService: StudentActivityService,
@@ -27,6 +29,9 @@ export class CustomerMiddleware implements NestMiddleware {
         break;
       case TypeUser.StudentActivity:
         customer = await this.studentActivityService.findOne(customer_id);
+        break;
+      case TypeUser.User:
+        customer = await this.userService.findOneById(customer_id);
         break;
       default:
         throw new Error("Invalid user type");

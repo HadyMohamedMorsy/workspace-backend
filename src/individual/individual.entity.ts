@@ -47,10 +47,10 @@ export class Individual {
   college: string;
 
   @OneToMany(() => Deals, deals => deals.individual)
-  deals: Deals[];
+  deals: Deals;
 
   @OneToMany(() => Order, order => order.individual)
-  orders: Order[];
+  orders: Order;
 
   @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.individual)
   assignGeneralOffers: AssignGeneralOffer[];

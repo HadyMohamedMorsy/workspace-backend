@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as moment from "moment";
+import { PRODUCT_TYPE } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateGeneralOfferDto } from "./dto/create-general-offer.dto";
 import { UpdateGeneralOfferDto } from "./dto/update-general-offer.dto";
-import { PRODUCT_TYPE } from "./enum/product.enum";
 import { GeneralOffer } from "./generalOffer.entity";
 
 @Injectable()
@@ -42,6 +42,51 @@ export class GeneralOfferService {
     const offers = await this.generalOfferRepository
       .createQueryBuilder("offer")
       .where("offer.product = :productType", { productType: PRODUCT_TYPE.Deskarea })
+      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
+        now: now.toDate(),
+      })
+      .getMany();
+
+    return {
+      data: offers,
+    };
+  }
+  async findMembership() {
+    const now = moment();
+
+    const offers = await this.generalOfferRepository
+      .createQueryBuilder("offer")
+      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Membership })
+      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
+        now: now.toDate(),
+      })
+      .getMany();
+
+    return {
+      data: offers,
+    };
+  }
+  async findDeals() {
+    const now = moment();
+
+    const offers = await this.generalOfferRepository
+      .createQueryBuilder("offer")
+      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Deals })
+      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
+        now: now.toDate(),
+      })
+      .getMany();
+
+    return {
+      data: offers,
+    };
+  }
+  async findPackages() {
+    const now = moment();
+
+    const offers = await this.generalOfferRepository
+      .createQueryBuilder("offer")
+      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Packages })
       .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
         now: now.toDate(),
       })

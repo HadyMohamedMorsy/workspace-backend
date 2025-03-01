@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
 
@@ -8,6 +8,11 @@ export class CreateDealsDto {
   @Type(() => Number)
   @IsNotEmpty()
   room_id: number;
+
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  offer_id?: number;
 
   @IsNumber()
   @Type(() => Number)

@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { PRODUCT_TYPE } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
-import { PRODUCT_TYPE } from "../enum/product.enum";
 import { IsMaxDiscount } from "./custom/ismax-discount";
 
 export enum DiscountType {

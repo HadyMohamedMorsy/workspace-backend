@@ -58,7 +58,7 @@ export class Shared {
   @ManyToOne(() => AssignesMembership, assignesMembership => assignesMembership.shared, {
     onDelete: "CASCADE",
   })
-  assignessMemebership: AssignesMembership[];
+  assignessMemebership: AssignesMembership;
 
   @ManyToOne(() => GeneralSettings, settings => settings.shared, {
     onDelete: "CASCADE",
@@ -68,7 +68,7 @@ export class Shared {
   @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.shared, {
     onDelete: "CASCADE",
   })
-  assignGeneralOffer: AssignGeneralOffer[];
+  assignGeneralOffer: AssignGeneralOffer;
 
   @Column({ nullable: true })
   total_price: number;

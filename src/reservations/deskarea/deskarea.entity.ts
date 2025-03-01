@@ -58,12 +58,12 @@ export class Deskarea {
   @ManyToOne(() => AssignesMembership, assignesMembership => assignesMembership.deskarea, {
     onDelete: "CASCADE",
   })
-  assignessMemebership: AssignesMembership[];
+  assignessMemebership: AssignesMembership;
 
   @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.deskarea, {
     onDelete: "CASCADE",
   })
-  assignGeneralOffer: AssignGeneralOffer[];
+  assignGeneralOffer: AssignGeneralOffer;
 
   @ManyToOne(() => GeneralSettings, settings => settings.deskarea, {
     onDelete: "CASCADE",

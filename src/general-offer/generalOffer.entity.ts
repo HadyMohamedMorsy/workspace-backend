@@ -1,4 +1,5 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { PRODUCT_TYPE } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import {
   Column,
@@ -10,14 +11,13 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { DiscountType } from "./dto/create-general-offer.dto";
-import { PRODUCT_TYPE } from "./enum/product.enum";
 
 @Entity()
 export class GeneralOffer {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   name: string;
 
   @OneToMany(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.generalOffer)

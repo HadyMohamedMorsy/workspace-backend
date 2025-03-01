@@ -33,6 +33,11 @@ export class UserService {
 
   public async findAll(filterData: any) {
     const queryBuilder = this.apiFeaturesService.setRepository(User).buildQuery(filterData);
+
+    queryBuilder.leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
+      typeOrder: "HOLD",
+    });
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 

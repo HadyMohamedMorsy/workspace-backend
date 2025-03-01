@@ -18,8 +18,10 @@ export class StudentActivityService {
   // Create a new record
   async create(createStudentActivityDto: CreateStudentActivityDto): Promise<StudentActivity> {
     const studentActivity = this.studentActivityRepository.create(createStudentActivityDto);
-    const newClient = await this.studentActivityRepository.save(studentActivity);
-    return await this.findOne(newClient.id);
+    if (studentActivity) {
+      const newClient = await this.studentActivityRepository.save(studentActivity);
+      return await this.findOne(newClient.id);
+    }
   }
 
   // Get all records
@@ -39,7 +41,10 @@ export class StudentActivityService {
       .leftJoinAndSelect("es.packages", "pa")
       .leftJoinAndSelect("pa.room", "pr")
       .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
+        typeOrder: "HOLD",
+      });
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

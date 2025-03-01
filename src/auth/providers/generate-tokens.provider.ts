@@ -47,6 +47,7 @@ export class GenerateTokensProvider {
       // Generate Refresh token without email
       this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl),
     ]);
+
     return {
       access_token,
       refreshToken,

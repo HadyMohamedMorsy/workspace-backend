@@ -1,3 +1,4 @@
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackages } from "src/offer-packages/offer-package.entity.ts";
@@ -45,6 +46,11 @@ export class AssignesPackages {
 
   @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages)
   reservationRooms: ReservationRoom;
+
+  @ManyToOne(() => AssignGeneralOffer, assignGeneralOffer => assignGeneralOffer.assignesPackages, {
+    onDelete: "CASCADE",
+  })
+  assignGeneralOffer: AssignGeneralOffer;
 
   @Column({ type: "timestamp", nullable: true })
   start_date: Date;

@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import * as moment from "moment";
+import * as moment from "moment-timezone";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
@@ -16,15 +16,15 @@ import { DealsService } from "src/deals/deals.service";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Room } from "src/rooms/room.entity";
 import { RoomsService } from "src/rooms/rooms.service";
-import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { calculateHours, formatDate } from "src/shared/helpers/utilities";
 import { Repository } from "typeorm";
+import { calculateHours, diffrentHour, formatDate } from "../helpers/utitlties";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
 import { ReservationRoom } from "./reservation-room.entity";
 
-type ReservationType = "offer" | "package" | "deal";
+type ReservationType = "offer" | "package" | "deal" | "normal";
 
 @Injectable()
 export class ReservationRoomService {
@@ -43,7 +43,11 @@ export class ReservationRoomService {
   // ==================== PUBLIC METHODS ====================
 
   async create(createDto: CreateReservationRoomDto, reqBody: any) {
-    return this.handleReservationCreation(createDto, reqBody, "offer");
+    return this.handleReservationCreation(
+      createDto,
+      reqBody,
+      createDto.offer_id ? "offer" : "normal",
+    );
   }
 
   async createReservationByPackage(createDto: CreateReservationRoomDto, reqBody: any) {
@@ -76,9 +80,12 @@ export class ReservationRoomService {
       )
       .leftJoinAndSelect("r.individual", "individual")
       .leftJoinAndSelect("r.company", "company")
-      .leftJoinAndSelect("r.studentActivity", "studentActivity").addSelect(`
+      .leftJoinAndSelect("r.studentActivity", "studentActivity")
+      .addSelect(
+        `
     COALESCE(individual.name, company.name, studentActivity.name, 'Unknown Client') AS "clientName"
-  `);
+  `,
+      );
 
     if (filterData?.roomIds) {
       queryBuilder.andWhere("rr.id IN (:...roomIds)", {
@@ -87,31 +94,104 @@ export class ReservationRoomService {
     }
 
     const reservations = await queryBuilder.getRawMany();
-    const formattedReservations = reservations.map(reservation => {
-      const start = moment(reservation.r_selected_day, "DD/MM/YYYY")
-        .set("hour", reservation.r_start_hour)
-        .set("minute", reservation.r_start_minute)
-        .toDate();
 
-      const end = moment(reservation.r_selected_day, "DD/MM/YYYY")
-        .set("hour", reservation.r_end_hour)
-        .set("minute", reservation.r_end_minute)
-        .toDate();
+    if (filterData?.isFree) {
+      const freeSlots = this.getFreeSlots(reservations, filterData.roomIds);
+      return { data: freeSlots };
+    }
 
-      return {
-        id: String(reservation.r_id),
-        title: reservation.clientName,
-        start: start.toISOString().replace(/\.\d+Z$/, ""),
-        end: end.toISOString().replace(/\.\d+Z$/, ""),
-        extendedProps: {
-          roomName: reservation.rr_name,
-        },
-      };
-    });
-
+    const formattedReservations = reservations.map(res => this.formatReservation(res));
     return {
       data: formattedReservations,
     };
+  }
+
+  private formatReservation(res) {
+    const timeZone = "Africa/Cairo";
+
+    const startHour = this.ato24h(res.r_start_hour, res.r_start_minute, res.r_start_time);
+    const endHour = this.ato24h(res.r_end_hour, res.r_end_minute, res.r_end_time);
+
+    const start = this.createCairoTime(res.r_selected_day, startHour, res.r_start_minute, timeZone);
+    const end = this.createCairoTime(res.r_selected_day, endHour, res.r_end_minute, timeZone);
+
+    return {
+      id: String(res.r_id),
+      title: res.clientName || "Unknown Client",
+      start: start.format("YYYY-MM-DDTHH:mm:ssZ"),
+      end: end.format("YYYY-MM-DDTHH:mm:ssZ"),
+      extendedProps: {
+        roomName: res.rr_name,
+      },
+    };
+  }
+
+  private getFreeSlots(reservations, roomIds) {
+    const timeZone = "Africa/Cairo";
+    const freeSlots = [];
+
+    const rooms = roomIds || [...new Set(reservations.map(res => res.rr_id))];
+
+    rooms.forEach(roomId => {
+      const roomReservations = reservations.filter(res => res.rr_id === roomId);
+      const roomName = roomReservations.length > 0 ? roomReservations[0].rr_name : "Unknown Room";
+
+      roomReservations.sort((a, b) => {
+        const startA = this.createCairoTime(
+          a.r_selected_day,
+          a.r_start_hour,
+          a.r_start_minute,
+          timeZone,
+        ).valueOf();
+
+        const startB = this.createCairoTime(
+          b.r_selected_day,
+          b.r_start_hour,
+          b.r_start_minute,
+          timeZone,
+        ).valueOf();
+
+        return startA - startB;
+      });
+
+      let lastEndTime = moment.tz("00:00", "HH:mm", timeZone);
+
+      roomReservations.forEach(res => {
+        const startHour = this.ato24h(res.r_start_hour, res.r_start_minute, res.r_start_time);
+        const endHour = this.ato24h(res.r_end_hour, res.r_end_minute, res.r_end_time);
+
+        const start = this.createCairoTime(
+          res.r_selected_day,
+          startHour,
+          res.r_start_minute,
+          timeZone,
+        );
+        const end = this.createCairoTime(res.r_selected_day, endHour, res.r_end_minute, timeZone);
+
+        if (start.diff(lastEndTime, "minutes") > 0) {
+          freeSlots.push({
+            roomId,
+            roomName: roomName,
+            start: lastEndTime.format("YYYY-MM-DDTHH:mm:ssZ"),
+            end: start.format("YYYY-MM-DDTHH:mm:ssZ"),
+          });
+        }
+
+        lastEndTime = end;
+      });
+
+      const endOfDay = moment.tz("23:59", "HH:mm", timeZone);
+      if (endOfDay.diff(lastEndTime, "minutes") > 0) {
+        freeSlots.push({
+          roomId,
+          roomName: roomName,
+          start: lastEndTime.format("YYYY-MM-DDTHH:mm:ssZ"),
+          end: endOfDay.format("YYYY-MM-DDTHH:mm:ssZ"),
+        });
+      }
+    });
+
+    return freeSlots;
   }
 
   async findRoomsByUserType(filterData: any, userType: string) {
@@ -132,6 +212,10 @@ export class ReservationRoomService {
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.room", "er")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg")
+      .andWhere("e.assignesPackages IS NULL")
+      .andWhere("e.deals IS NULL")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
@@ -152,9 +236,13 @@ export class ReservationRoomService {
       .buildQuery(filterData);
 
     queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
+      .leftJoinAndSelect("e.company", "ecc")
       .leftJoinAndSelect("e.room", "er")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
+      .andWhere("ecc.id = :company_id", { company_id: filterData.company_id })
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg")
+      .andWhere("e.assignesPackages IS NULL")
+      .andWhere("e.deals IS NULL")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
@@ -180,6 +268,10 @@ export class ReservationRoomService {
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
       })
+      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("ess.generalOffer", "eg")
+      .andWhere("e.assignesPackages IS NULL")
+      .andWhere("e.deals IS NULL")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
@@ -203,6 +295,10 @@ export class ReservationRoomService {
       .leftJoinAndSelect("e.room", "er")
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .leftJoinAndSelect("e.assignGeneralOffer", "es")
+      .leftJoinAndSelect("es.generalOffer", "eg")
+      .andWhere("e.assignesPackages IS NULL")
+      .andWhere("e.deals IS NULL")
       .andWhere("ec.id = :user_id", {
         user_id: filterData.user_id,
       });
@@ -505,13 +601,13 @@ export class ReservationRoomService {
   ) {
     switch (type) {
       case "offer":
-        return this.processOffer(dto.offer_id, dto.customer_id, dto.type_user, reqBody);
+        return this.processOffer(dto, reqBody);
       case "package":
         return this.processPackage(dto.package_id, dto);
       case "deal":
         return this.processDeal(dto.deal_id, dto);
       default:
-        return {};
+        return this.processCalcNormal(dto);
     }
   }
 
@@ -538,7 +634,7 @@ export class ReservationRoomService {
       total_time: diffHours,
       ...additionalData,
       createdBy: reqBody.createdBy,
-      [dto.type_user.toLowerCase()]: reqBody.customer,
+      [dto.type_user]: reqBody.customer,
     });
   }
 
@@ -560,26 +656,27 @@ export class ReservationRoomService {
 
   // ==================== SPECIFIC LOGIC HANDLERS ====================
 
-  private async processOffer(
-    offerId: number,
-    customerId: number,
-    typeUser: TypeUser,
-    reqBody: any,
-  ) {
-    if (!offerId) return {};
+  private async processOffer(dto: CreateReservationRoomDto, reqBody: any) {
+    if (!dto.offer_id) return {};
 
     const payload: CreateAssignGeneralOfferDto = {
-      customer_id: customerId,
-      offer_id: offerId,
-      type_user: typeUser,
+      customer_id: dto.customer_id,
+      offer_id: dto.offer_id,
+      type_user: dto.type_user,
     };
 
     const assignOffer = await this.assignGlobalOffer.create(payload, reqBody);
-    const offer = await this.globalOffer.findOne(offerId);
-
+    const offer = await this.globalOffer.findOne(dto.offer_id);
     return {
       assignGeneralOffer: assignOffer,
-      total_price: this.calculatePrice(offer, reqBody.room.price, reqBody),
+      total_price: await this.calculatePrice(offer, dto.room_id, dto),
+    };
+  }
+
+  private async processCalcNormal(dto: CreateReservationRoomDto) {
+    return {
+      assignGeneralOffer: null,
+      total_price: await this.calculatePrice(null, dto.room_id, dto),
     };
   }
 
@@ -712,7 +809,9 @@ export class ReservationRoomService {
       ],
     });
 
-    return existingReservations;
+    if (existingReservations.length) {
+      throw new BadRequestException(`You can't create another reservation for this user.`);
+    }
   }
 
   private async getActiveReservations(roomId: number, day: string) {
@@ -749,11 +848,18 @@ export class ReservationRoomService {
     });
   }
 
-  private calculatePrice(offer: any, basePrice: number, details: any) {
-    const diffHours = calculateHours(details);
-    let price = diffHours ? basePrice * diffHours : basePrice;
-    if (offer?.discount) price = Math.max(0, price - offer.discount);
-    return price;
+  private async calculatePrice(offer: any, roomId: number, details: any) {
+    const priceRoom = await this.room.findOne(roomId);
+    const diffHours = diffrentHour(details);
+    let discount = 0;
+    const totalPrice = diffHours ? +priceRoom.price * diffHours : +priceRoom.price;
+    if (offer) {
+      const typeDiscount = offer.type_discount;
+      const discountAmount = offer.discount;
+      discount = typeDiscount === "amount" ? discountAmount : totalPrice * (discountAmount / 100);
+    }
+
+    return totalPrice - discount;
   }
 
   private async handleCancellation(dto: UpdateReservationRoomDto) {
@@ -787,5 +893,22 @@ export class ReservationRoomService {
     }
 
     await this.reservationRoomRepository.update(dto.id, rest);
+  }
+
+  private ato24h(hourStr: string, minuteStr: string, period: string) {
+    const hour = parseInt(hourStr, 10);
+    const periodLower = period.toLowerCase();
+
+    if (periodLower === "pm" && hour !== 12) return hour + 12;
+    if (periodLower === "am" && hour === 12) return 0;
+    return hour;
+  }
+
+  private createCairoTime(date: string, hour: number, minute: number, timeZone: string) {
+    return moment.tz(
+      `${date} ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
+      "DD/MM/YYYY HH:mm",
+      timeZone,
+    );
   }
 }

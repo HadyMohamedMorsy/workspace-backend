@@ -1,3 +1,4 @@
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity.ts";
@@ -49,6 +50,15 @@ export class AssignesMembership {
 
   @OneToMany(() => Deskarea, shared => shared.assignessMemebership)
   shared: Shared[];
+
+  @ManyToOne(
+    () => AssignGeneralOffer,
+    assignGeneralOffer => assignGeneralOffer.assignessMemebership,
+    {
+      onDelete: "CASCADE",
+    },
+  )
+  assignGeneralOffer: AssignGeneralOffer;
 
   @Column({ type: "timestamp", nullable: true })
   start_date: Date;

@@ -16,7 +16,6 @@ export function IsMaxDiscount(
         validate(value: any, args: ValidationArguments) {
           const [typeDiscountProperty, maxValue] = args.constraints;
           const typeDiscount = (args.object as any)[typeDiscountProperty];
-          console.log(value);
 
           if (typeDiscount === "percentage" && value > maxValue) {
             return false;

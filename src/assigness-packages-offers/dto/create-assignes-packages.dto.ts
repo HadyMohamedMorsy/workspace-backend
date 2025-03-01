@@ -14,6 +14,11 @@ export class CreateAssignesPackageDto {
   @IsNotEmpty()
   package_id: number;
 
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  offer_id?: number;
+
   @IsEnum(TypeUser, {
     message:
       "type order must be one of the following: individual or company or studentActivity or User",

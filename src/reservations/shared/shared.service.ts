@@ -12,14 +12,15 @@ import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/crea
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesMembershipService } from "src/assignes-memberships/assignes-membership.service";
 import { Company } from "src/companies/company.entity";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { calculateHours, formatDate } from "src/shared/helpers/utilities";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import { Repository, SelectQueryBuilder } from "typeorm";
+import { diffrentHour, formatDate } from "../helpers/utitlties";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { Shared } from "./shared.entity";
@@ -31,6 +32,7 @@ export class SharedService {
     private sharedRepository: Repository<Shared>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly assignGlobalOffer: AssignGeneralOfferservice,
+    protected readonly offer: GeneralOfferService,
     protected readonly settings: GeneralSettingsService,
     @Inject(forwardRef(() => AssignesMembershipService))
     protected readonly membership: AssignesMembershipService,
@@ -64,7 +66,7 @@ export class SharedService {
       assignGeneralOffer,
       settings,
       createdBy: reqBody.createdBy,
-      [type_user.toLowerCase()]: reqBody.customer,
+      [type_user]: reqBody.customer,
     });
     return await this.sharedRepository.save(shared);
   }
@@ -157,7 +159,7 @@ export class SharedService {
     if (updateSharedDto.status === ReservationStatus.CANCELLED) {
       await this.handleCancelledStatus(updateSharedDto, membership_id, rest);
     } else {
-      await this.handleCompletedStatus(updateSharedDto, rest);
+      await this.handleCompletedStatus(updateSharedDto, offer_id, rest);
     }
 
     return this.sharedRepository.findOne({ where: { id: updateSharedDto.id } });
@@ -177,12 +179,12 @@ export class SharedService {
 
   private async handleCompletedStatus(
     updateSharedDto: UpdateSharedDto,
+    offerId: number,
     rest: Partial<UpdateSharedDto>,
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { setting_id, ...updateDto } = rest;
-    const totalPrice = await this.calculateCoWrokingSpaceTotalPrice(rest);
-    const diffInHours = this.diffrentHour(rest);
+    const totalPrice = await this.calculateCoWrokingSpaceTotalPrice(rest, setting_id, offerId);
+    const diffInHours = diffrentHour(rest);
     await this.sharedRepository.update(updateSharedDto.id, {
       ...updateDto,
       total_time: diffInHours,
@@ -195,22 +197,25 @@ export class SharedService {
     return await this.settings.findOne(settingId);
   }
 
-  async calculateCoWrokingSpaceTotalPrice(rest: Partial<UpdateSharedDto>) {
-    const diffInHours = this.diffrentHour(rest);
-    const settings = await this.findSetting(rest.setting_id);
-    return diffInHours ? settings.price_shared * +diffInHours : settings.price_shared;
+  async calculateCoWrokingSpaceTotalPrice(
+    rest: Partial<UpdateSharedDto>,
+    settingId: number,
+    offerId: number,
+  ) {
+    const diffInHours = diffrentHour(rest);
+    const settings = await this.findSetting(settingId);
+    let discount = 0;
+    const totalPrice = diffInHours ? settings.price_shared * +diffInHours : settings.price_shared;
+    if (offerId) {
+      const offer = await this.offer.findOne(offerId);
+      const typeDiscount = offer.type_discount;
+      const discountAmount = offer.discount;
+
+      discount = typeDiscount === "amount" ? discountAmount : totalPrice * (discountAmount / 100);
+    }
+    return totalPrice - discount;
   }
 
-  diffrentHour(rest: Partial<UpdateSharedDto>) {
-    return calculateHours({
-      start_hour: rest.start_hour,
-      start_minute: rest.start_minute,
-      start_time: rest.start_time,
-      end_hour: rest.end_hour,
-      end_minute: rest.end_minute,
-      end_time: rest.end_time,
-    });
-  }
   async createReservationByMememberShip(
     createSharedDto: CreateSharedDto,
     reqBody: {
@@ -285,7 +290,7 @@ export class SharedService {
       ...createSharedDto,
       assignessMemebership: memberShip,
       createdBy: reqBody.createdBy,
-      [type_user.toLowerCase()]: reqBody.customer,
+      [type_user]: reqBody.customer,
     });
     await this.sharedRepository.save(shared);
     return this.membership.findOne(memberShip.id);

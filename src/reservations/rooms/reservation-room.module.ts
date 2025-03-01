@@ -10,6 +10,7 @@ import { IndividualModule } from "src/individual/individual.module";
 import { RoomsModule } from "src/rooms/rooms.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
+import { UsersModule } from "src/users/users.module";
 import { ReservationRoomController } from "./reservation-room.controller";
 import { ReservationRoom } from "./reservation-room.entity";
 import { ReservationRoomService } from "./reservation-room.service";
@@ -23,6 +24,7 @@ import { ReservationRoomService } from "./reservation-room.service";
     RoomsModule,
     AssignGeneralOfferModule,
     GeneralOfferModule,
+    UsersModule,
     forwardRef(() => AssignesPackagesModule),
     DealsModule,
     TypeOrmModule.forFeature([ReservationRoom]),

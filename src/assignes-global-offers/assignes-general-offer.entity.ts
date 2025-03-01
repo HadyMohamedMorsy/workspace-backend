@@ -1,4 +1,7 @@
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Company } from "src/companies/company.entity";
+import { Deals } from "src/deals/deals.entity";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
@@ -61,6 +64,15 @@ export class AssignGeneralOffer {
 
   @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages)
   reservationRooms: ReservationRoom;
+
+  @OneToMany(() => Deals, deal => deal.assignGeneralOffer)
+  deals: Deals;
+
+  @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.assignGeneralOffer)
+  assignesPackages: AssignesPackages;
+
+  @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.assignGeneralOffer)
+  assignessMemebership: AssignesMembership;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

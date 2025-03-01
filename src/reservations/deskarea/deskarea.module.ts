@@ -3,10 +3,12 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
 import { CompanyModule } from "src/companies/company.module";
+import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
+import { UsersModule } from "src/users/users.module";
 import { DeskareaController } from "./deskarea.controller";
 import { Deskarea } from "./deskarea.entity";
 import { DeskareaService } from "./deskarea.service";
@@ -19,6 +21,8 @@ import { DeskareaService } from "./deskarea.service";
     GeneralSettingsModule,
     StudentActivityModule,
     AssignGeneralOfferModule,
+    GeneralOfferModule,
+    UsersModule,
     TypeOrmModule.forFeature([Deskarea]),
   ],
   controllers: [DeskareaController],

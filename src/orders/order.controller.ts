@@ -1,5 +1,3 @@
-// controllers/product.controller.ts
-
 import {
   Body,
   Controller,
@@ -97,6 +95,9 @@ export class OrderController {
     "/api/v1/returns",
     "/api/v1/category",
     "/api/v1/product",
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
@@ -120,6 +121,9 @@ export class OrderController {
     "/api/v1/returns",
     "/api/v1/category",
     "/api/v1/product",
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
   ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([

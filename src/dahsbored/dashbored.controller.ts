@@ -11,8 +11,9 @@ export class DashboredController {
   @UseInterceptors(CachingInterceptor)
   async getAnalytics(@Body() filterQueryDto: FiltersDashboredDto, @Req() req: Request) {
     const user = req["userData"];
-    const allowedRoles = ["founder", "general-manager", "accountant"];
+    const allowedRoles = ["founder", "technical-support", "general-manager", "accountant"];
     const hasAccess = allowedRoles.includes(user.role);
+
     const [
       // Salary related
       [totalInternalSallary, totalExternalSallary, totalExpanses],
@@ -20,7 +21,7 @@ export class DashboredController {
       // Expenses related
       expensesResults,
 
-      // revenueResults related
+      // Revenue related
       revenueResults,
 
       // Purchase/Return related
@@ -32,6 +33,24 @@ export class DashboredController {
 
       // Order price
       [totalOrderPrice],
+
+      // Packages related
+      [totalCompletedPackages, totalCancelledPackages, totalActivePackages],
+
+      // Shared related
+      [totalCompletedShared, totalCancelledShared, totalActiveShared],
+
+      // Desk Area related
+      [totalCompletedDeskArea, totalCancelledDeskArea, totalActiveDeskArea],
+
+      // Reservation Room related
+      [totalCompletedReservationRoom, totalCancelledReservationRoom, totalActiveReservationRoom],
+
+      // Membership related
+      [totalCompletedMembership, totalCancelledMembership, totalActiveMembership],
+
+      // Offer related
+      [totalOffer],
     ] = await Promise.all([
       // Salary group
       Promise.all([
@@ -95,22 +114,60 @@ export class DashboredController {
 
       // Order price group
       Promise.all([this.dashboredService.getTotalOrderPriceOrders(filterQueryDto)]),
+
+      // Packages group
+      Promise.all([
+        this.dashboredService.getAllTotalPackages(filterQueryDto),
+        this.dashboredService.getAllTotalCancelledPackages(filterQueryDto),
+        this.dashboredService.getAllTotalActivePackages(filterQueryDto),
+      ]),
+
+      // Shared group
+      Promise.all([
+        this.dashboredService.getAllTotalShared(filterQueryDto),
+        this.dashboredService.getAllTotalCancelledShared(filterQueryDto),
+        this.dashboredService.getAllTotalActiveShared(filterQueryDto),
+      ]),
+
+      // Desk Area group
+      Promise.all([
+        this.dashboredService.getAllTotalDeskArea(filterQueryDto),
+        this.dashboredService.getAllTotalCancelledDeskArea(filterQueryDto),
+        this.dashboredService.getAllTotalActiveDeskArea(filterQueryDto),
+      ]),
+
+      // Reservation Room group
+      Promise.all([
+        this.dashboredService.getAllTotalReservationRoom(filterQueryDto),
+        this.dashboredService.getAllTotalCancelledReservationRoom(filterQueryDto),
+        this.dashboredService.getAllTotalActiveReservationRoom(filterQueryDto),
+      ]),
+
+      // Membership group
+      Promise.all([
+        this.dashboredService.getAllTotalMemberShip(filterQueryDto),
+        this.dashboredService.getAllTotalCancelledMemberShip(filterQueryDto),
+        this.dashboredService.getAllTotalActiveMemberShip(filterQueryDto),
+      ]),
+
+      // Offer group
+      Promise.all([this.dashboredService.getAllTotalOffer(filterQueryDto)]),
     ]);
 
     // Helper function to safely get values
     const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
 
-    // Structured result construction
     return [
-      // Salary section
-      ...this.createMetrics(
-        [
-          ["Total Salary internal salaries", getValue(totalInternalSallary, "totalCost")],
-          ["Total Salary external salaries", getValue(totalExternalSallary, "totalCost")],
-          ["Total Expenses Cost", getValue(totalExpanses, "totalCost")],
-        ],
-        "pi pi-wallet",
-      ),
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              ["Total Salary internal salaries", getValue(totalInternalSallary, "totalCost")],
+              ["Total Salary external salaries", getValue(totalExternalSallary, "totalCost")],
+              ["Total Expenses Cost", getValue(totalExpanses, "totalCost")],
+            ],
+            "pi pi-wallet",
+          )
+        : []),
 
       // Expenses section
       ...(hasAccess
@@ -132,7 +189,7 @@ export class DashboredController {
           )
         : []),
 
-      // revenue
+      // Revenue section
       ...(hasAccess
         ? this.createMetrics(
             [
@@ -152,15 +209,17 @@ export class DashboredController {
         : []),
 
       // Purchase/Return section
-      ...this.createMetrics(
-        [
-          ["Total Count Purchase", getValue(totalCountPurshase, "count")],
-          ["Total Count Returns", getValue(totalCountReturns, "count")],
-          ["Total Purchase", getValue(totalPurshase, "total")],
-          ["Total Returns", getValue(totalReturns, "total")],
-        ],
-        "pi pi-box",
-      ),
+      ...(hasAccess
+        ? this.createMetrics(
+            [
+              ["Total Count Purchase", getValue(totalCountPurshase, "count")],
+              ["Total Count Returns", getValue(totalCountReturns, "count")],
+              ["Total Purchase", getValue(totalPurshase, "total")],
+              ["Total Returns", getValue(totalReturns, "total")],
+            ],
+            "pi pi-box",
+          )
+        : []),
 
       // Order counts
       ...this.createMetrics(
@@ -187,6 +246,74 @@ export class DashboredController {
         ],
         "pi pi-inbox",
       ),
+
+      // Packages section
+      ...this.createMetrics(
+        [
+          ["Total Completed Packages Revenue", getValue(totalCompletedPackages, "totalRevenue")],
+          ["Total Cancelled Packages Revenue", getValue(totalCancelledPackages, "totalRevenue")],
+          ["Total Active Packages Revenue", getValue(totalActivePackages, "totalRevenue")],
+        ],
+        "pi pi-box",
+      ),
+
+      // Shared section
+      ...this.createMetrics(
+        [
+          ["Total Completed Shared Revenue", getValue(totalCompletedShared, "totalRevenue")],
+          ["Total Cancelled Shared Revenue", getValue(totalCancelledShared, "totalRevenue")],
+          ["Total Active Shared Revenue", getValue(totalActiveShared, "totalRevenue")],
+        ],
+        "pi pi-box",
+      ),
+
+      // Desk Area section
+      ...this.createMetrics(
+        [
+          ["Total Completed Desk Area Revenue", getValue(totalCompletedDeskArea, "totalRevenue")],
+          ["Total Cancelled Desk Area Revenue", getValue(totalCancelledDeskArea, "totalRevenue")],
+          ["Total Active Desk Area Revenue", getValue(totalActiveDeskArea, "totalRevenue")],
+        ],
+        "pi pi-box",
+      ),
+
+      // Reservation Room section
+      ...this.createMetrics(
+        [
+          [
+            "Total Completed Reservation Room Revenue",
+            getValue(totalCompletedReservationRoom, "totalRevenue"),
+          ],
+          [
+            "Total Cancelled Reservation Room Revenue",
+            getValue(totalCancelledReservationRoom, "totalRevenue"),
+          ],
+          [
+            "Total Active Reservation Room Revenue",
+            getValue(totalActiveReservationRoom, "totalRevenue"),
+          ],
+        ],
+        "pi pi-box",
+      ),
+
+      // Membership section
+      ...this.createMetrics(
+        [
+          [
+            "Total Completed Membership Revenue",
+            getValue(totalCompletedMembership, "totalRevenue"),
+          ],
+          [
+            "Total Cancelled Membership Revenue",
+            getValue(totalCancelledMembership, "totalRevenue"),
+          ],
+          ["Total Active Membership Revenue", getValue(totalActiveMembership, "totalRevenue")],
+        ],
+        "pi pi-box",
+      ),
+
+      // Offer section
+      ...this.createMetrics([["Total Offers", getValue(totalOffer, "count")]], "pi pi-box"),
     ];
   }
 
