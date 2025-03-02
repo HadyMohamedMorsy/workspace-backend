@@ -6,7 +6,7 @@ import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateCoWorkingSpaceDto } from "./dto/create-offer-co-working-space.dto";
 import { UpdateCoWorkingSpaceDto } from "./dto/update-offer-co-working-space.dto";
-import { CoWorkingSpace } from "./offer-co-working-space.entity.ts";
+import { CoWorkingSpace } from "./offer-co-working-space.entity";
 
 @Injectable()
 export class OfferCoWorkingSpaceService {

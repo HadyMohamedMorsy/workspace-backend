@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { RoomsModule } from "src/rooms/rooms.module";
-import { OfferPackages } from "./offer-package.entity.ts";
+import { OfferPackages } from "./offer-package.entity";
 import { OfferPackagesController } from "./offerpackages.controller";
 import { OfferPackagesService } from "./offerpackages.service";
 

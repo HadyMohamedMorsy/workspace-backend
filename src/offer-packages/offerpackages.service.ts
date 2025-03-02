@@ -6,7 +6,7 @@ import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { CreateOfferPackagesDto } from "./dto/create-offer-packages.dto";
 import { UpdateOfferPackagesDto } from "./dto/update-offer-packages.dto";
-import { OfferPackages } from "./offer-package.entity.ts";
+import { OfferPackages } from "./offer-package.entity";
 
 @Injectable()
 export class OfferPackagesService {

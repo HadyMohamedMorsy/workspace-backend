@@ -1,7 +1,7 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { OfferPackages } from "src/offer-packages/offer-package.entity.ts";
+import { OfferPackages } from "src/offer-packages/offer-package.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";

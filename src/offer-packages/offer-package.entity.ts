@@ -24,7 +24,7 @@ export class OfferPackages {
   @Column()
   price: number;
 
-  @ManyToOne(() => Room, room => room.offers_room, {
+  @ManyToOne(() => Room, room => room.offersRoom, {
     onDelete: "CASCADE",
   })
   room: Room;

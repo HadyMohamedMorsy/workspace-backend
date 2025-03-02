@@ -1,5 +1,5 @@
 import { Deals } from "src/deals/deals.entity";
-import { OfferPackages } from "src/offer-packages/offer-package.entity.ts";
+import { OfferPackages } from "src/offer-packages/offer-package.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -24,7 +24,7 @@ export class Room {
   note: string;
 
   @OneToMany(() => OfferPackages, offerPackages => offerPackages.room)
-  offers_room: OfferPackages[];
+  offersRoom: OfferPackages[];
 
   @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.room)
   reservationRoom: ReservationRoom[];

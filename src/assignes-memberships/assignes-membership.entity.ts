@@ -1,7 +1,7 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity.ts";
+import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
