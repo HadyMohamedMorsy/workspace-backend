@@ -19,6 +19,7 @@ import {
   GENERALMANGER,
   OPERATIONMANGER,
   SALES,
+  TECHNICALSUPPORT,
 } from "./permissions-default";
 import { User } from "./user.entity";
 @Injectable()
@@ -75,6 +76,7 @@ export class UserService {
     delete createUserDto.password_confirmation;
 
     const rolePermissionsMap = {
+      [Role.TECHNICAL_SUPPORT]: TECHNICALSUPPORT,
       [Role.FOUNDER]: FOUNDER,
       [Role.GENERAL_MANAGER]: GENERALMANGER,
       [Role.OPERATION_MANAGER]: OPERATIONMANGER,

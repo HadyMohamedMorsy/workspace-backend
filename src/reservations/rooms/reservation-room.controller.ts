@@ -27,12 +27,6 @@ export class ReservationRoomController {
   @Post("/index")
   @UseInterceptors(CachingInterceptor)
   @HttpCode(200)
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.INDEX],
-    },
-  ])
   async findAll(@Body() filterQueryDto: any) {
     return this.reservationRoomService.getReservationsForThisWeek(filterQueryDto);
   }
