@@ -67,7 +67,7 @@ export class UserService {
   public async findOneByEmail(email: string) {
     const user = await this.repository.findOne({ where: { email } });
     if (!user) {
-      throw new UnauthorizedException(`${user} with  ${email} not found`);
+      throw new UnauthorizedException(`${email} not found`);
     }
     return user;
   }
