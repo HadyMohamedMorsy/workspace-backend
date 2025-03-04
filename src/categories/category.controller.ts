@@ -51,7 +51,7 @@ export class CategoryController {
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/category"])
+  @ClearCacheAnotherModules(["/api/v1/lists"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
@@ -64,7 +64,7 @@ export class CategoryController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/category"])
+  @ClearCacheAnotherModules(["/api/v1/lists"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
@@ -77,7 +77,7 @@ export class CategoryController {
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/category"])
+  @ClearCacheAnotherModules(["/api/v1/lists"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
