@@ -3,11 +3,14 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Inject,
   Post,
   Req,
   UnauthorizedException,
 } from "@nestjs/common";
 
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 import { Auth } from "src/shared/decorators/auth.decorator";
 import { AuthType } from "src/shared/enum/global-enum";
 import { RefreshTokenDto } from "./dtos/refresh-token.dto";
@@ -21,6 +24,8 @@ export class AuthController {
      * Injecting Auth Service
      */
     private readonly authService: AuthService,
+
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Post("login")
@@ -38,9 +43,11 @@ export class AuthController {
   }
 
   @Post("logout")
-  logout(@Req() req: any) {
+  async logout(@Req() req: any) {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) throw new UnauthorizedException("Invalid Token");
+    await this.cacheManager.reset();
+
     return {
       data: true,
     };
