@@ -12,7 +12,7 @@ export class TaskMiddleware implements NestMiddleware {
       throw new NotFoundException(`User with ID ${user_id} not found`);
     }
 
-    req["user"] = user;
+    req["assignToUser"] = user;
 
     next();
   }

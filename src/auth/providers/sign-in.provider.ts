@@ -10,6 +10,7 @@ import { UserService } from "src/users/user.service";
 import { SignInDto } from "../dtos/signin.dto";
 import { GenerateTokensProvider } from "./generate-tokens.provider";
 import { HashingProvider } from "./hashing.provider";
+import { RefreshTokensProvider } from "./refresh-tokens.provider";
 
 @Injectable()
 export class SignInProvider {
@@ -27,6 +28,7 @@ export class SignInProvider {
      * Inject generateTokensProvider
      */
     private readonly generateTokensProvider: GenerateTokensProvider,
+    private readonly refreshTokensProvider: RefreshTokensProvider,
   ) {}
 
   public async signIn(signInDto: SignInDto) {
@@ -51,5 +53,14 @@ export class SignInProvider {
 
     // Generate access token
     return await this.generateTokensProvider.generateTokens(user);
+  }
+
+  public async refreshToken(refreshToken: { refreshToken: string }) {
+    try {
+      const newTokens = await this.refreshTokensProvider.refreshTokens(refreshToken);
+      return newTokens;
+    } catch (err) {
+      throw new UnauthorizedException(err.message);
+    }
   }
 }

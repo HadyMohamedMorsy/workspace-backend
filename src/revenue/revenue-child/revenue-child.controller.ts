@@ -35,9 +35,8 @@ export class RevenueChildController {
   async findAll(@Body() filterQueryDto: any) {
     return this.revenueChildService.findAll(filterQueryDto);
   }
-
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/revenue-place"])
+  @ClearCacheAnotherModules(["/api/v1/revenue"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
@@ -50,7 +49,7 @@ export class RevenueChildController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/revenue-place"])
+  @ClearCacheAnotherModules(["/api/v1/revenue"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
@@ -63,7 +62,8 @@ export class RevenueChildController {
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules(["/api/v1/revenue"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Revenue,

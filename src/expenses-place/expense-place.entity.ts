@@ -13,8 +13,8 @@ export class ExpensePlace {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  name: string;
+  @Column({ unique: true })
+  name: string;rooms
 
   @Column({ nullable: true })
   total: number;

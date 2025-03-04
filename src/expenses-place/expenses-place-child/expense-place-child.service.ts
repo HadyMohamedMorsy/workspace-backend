@@ -46,6 +46,12 @@ export class ExpensesPlaceChildService {
         expenseplace_id: filterData.expensePlace_id,
       });
     }
+    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filterData.customFilters.start_date,
+        end_date: filterData.customFilters.end_date,
+      });
+    }
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

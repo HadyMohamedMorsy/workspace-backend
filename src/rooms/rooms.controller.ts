@@ -37,7 +37,7 @@ export class RoomsController {
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
+  @ClearCacheAnotherModules(["/api/v1/lists", "/api/v1/rooms-filters-calender"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
@@ -50,7 +50,7 @@ export class RoomsController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
+  @ClearCacheAnotherModules(["/api/v1/lists", "/api/v1/rooms-filters-calender"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
@@ -63,7 +63,7 @@ export class RoomsController {
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
+  @ClearCacheAnotherModules(["/api/v1/lists", "/api/v1/rooms-filters-calender"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {

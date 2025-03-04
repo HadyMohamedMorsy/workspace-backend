@@ -23,13 +23,6 @@ export class RevenueService {
   async findAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Revenue).buildQuery(filterData);
 
-    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
-      queryBuilder.andWhere("r.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filterData.customFilters.start_date,
-        end_date: filterData.customFilters.end_date,
-      });
-    }
-
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 

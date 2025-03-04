@@ -2,9 +2,7 @@ import { BadRequestException, Inject, Injectable, forwardRef } from "@nestjs/com
 import { SignInProvider } from "./sign-in.provider";
 
 import { UserService } from "src/users/user.service";
-import { RefreshTokenDto } from "../dtos/refresh-token.dto";
 import { SignInDto } from "../dtos/signin.dto";
-import { RefreshTokensProvider } from "./refresh-tokens.provider";
 
 @Injectable()
 export class AuthService {
@@ -17,24 +15,19 @@ export class AuthService {
      * Inject the signInProvider
      */
     private readonly signInProvider: SignInProvider,
-
-    /**
-     * Inject refreshTokensProvider
-     */
-    private readonly refreshTokensProvider: RefreshTokensProvider,
   ) {}
 
   public async signIn(signInDto: SignInDto) {
     return await this.signInProvider.signIn(signInDto);
   }
 
+  public async refreshToken(refreshToken: { refreshToken: string }) {
+    return await this.signInProvider.refreshToken(refreshToken);
+  }
+
   async getUserPermissions(userId: number) {
     const user = await this.usersService.findOneById(userId);
     if (!user) throw new BadRequestException("User Is Not Exist");
     return user.permission;
-  }
-
-  public async refreshTokens(refreshTokenDto: RefreshTokenDto) {
-    return await this.refreshTokensProvider.refreshTokens(refreshTokenDto);
   }
 }

@@ -14,6 +14,6 @@ import { TaskService } from "./tasks.service";
 })
 export class TaskModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TaskMiddleware).forRoutes("tasks/store", "tasks/update");
+    consumer.apply(TaskMiddleware).forRoutes("task/store", "task/update");
   }
 }

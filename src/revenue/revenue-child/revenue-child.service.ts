@@ -39,9 +39,16 @@ export class RevenueChildService {
   async findAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(RevenueChild).buildQuery(filterData);
 
-    if (filterData.revenue_id) {
-      queryBuilder.leftJoin("e.revenue", "r").andWhere("r.id = :revenue_id", {
-        revenue_id: filterData.revenue_id,
+    if (filterData.revenueChild_id) {
+      queryBuilder.leftJoin("e.revenue", "r").andWhere("r.id = :revenueChild_id", {
+        revenueChild_id: filterData.revenueChild_id,
+      });
+    }
+
+    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
+      queryBuilder.andWhere("r.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filterData.customFilters.start_date,
+        end_date: filterData.customFilters.end_date,
       });
     }
 

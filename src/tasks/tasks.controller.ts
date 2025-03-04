@@ -57,7 +57,7 @@ export class TaskController {
     },
   ])
   async create(@Body() createTaskDto: CreateTaskDto, @Req() req: Request) {
-    const user = req["user"];
+    const user = req["assignToUser"];
     const createdBy = req["createdBy"];
     const payload = { ...createTaskDto, user, createdBy };
     return await this.taskService.create(payload);

@@ -28,7 +28,6 @@ export class AuthenticationGuard implements CanActivate {
     ]) ?? [AuthenticationGuard.defaultAuthType];
 
     const guards = authTypes.map(type => this.authTypeGuardMap[type]).flat();
-
     // Declare the default error
     let error = new UnauthorizedException();
 

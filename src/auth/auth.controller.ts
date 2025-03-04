@@ -34,7 +34,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK) // changed since the default is 201
   @Post("refresh-tokens")
   refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshTokens(refreshTokenDto);
+    return this.authService.refreshToken(refreshTokenDto);
   }
 
   @Post("logout")
