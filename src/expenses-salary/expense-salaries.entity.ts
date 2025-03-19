@@ -15,7 +15,22 @@ export class ExpenseSalaries {
   id: number;
 
   @Column({ nullable: true })
-  cost: number;
+  sallary: number;
+
+  @Column({ nullable: true })
+  incentives: number;
+
+  @Column({ nullable: true })
+  rewards: number;
+
+  @Column({ nullable: true })
+  discounts: number;
+
+  @Column({ nullable: true })
+  annual: number;
+
+  @Column({ nullable: true })
+  net_sallary: number;
 
   @Column({ default: TypeSallary.Internal })
   type_sallary: string;

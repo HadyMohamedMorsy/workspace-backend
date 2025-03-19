@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { TypeSallary } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { User } from "src/users/user.entity";
@@ -16,28 +17,36 @@ export class ExpensesSalariesService {
     private expensesSalariesRepository: Repository<ExpenseSalaries>,
     protected readonly apiFeaturesService: APIFeaturesService,
     private readonly usersService: UserService,
+    private readonly setting: GeneralSettingsService,
   ) {}
 
   // Create a new record
   async create(createExpensesSalariesDto: CreateExpenseSalariesDto): Promise<ExpenseSalaries> {
-    let user: User | null = null;
-    let expensesSalaries: ExpenseSalaries | null = null;
+    const { user_id, type_sallary, sallary } = createExpensesSalariesDto;
 
-    if (createExpensesSalariesDto.type_sallary === TypeSallary.Internal) {
-      user = await this.usersService.findOneById(createExpensesSalariesDto.user_id);
-      if (!user) {
-        throw new NotFoundException(`user is not found `);
-      }
+    const user =
+      type_sallary === TypeSallary.Internal ? await this.validateUser(user_id) : undefined;
+    // Calculate values once
+    const annual = await this.calcAnnual(+sallary, user_id);
+    const updatedSalary = +sallary + annual;
+    const netSallary = updatedSalary + this.calcNetSallary(createExpensesSalariesDto);
+    // Create base entity
+    const expensesSalaries = this.expensesSalariesRepository.create({
+      ...createExpensesSalariesDto,
+      annual,
+      net_sallary: netSallary,
+      ...(user && { user }),
+    });
 
-      expensesSalaries = this.expensesSalariesRepository.create({
-        ...createExpensesSalariesDto,
-        user,
-      });
-    } else {
-      expensesSalaries = this.expensesSalariesRepository.create(createExpensesSalariesDto);
+    return this.expensesSalariesRepository.save(expensesSalaries);
+  }
+
+  private async validateUser(userId: number): Promise<User> {
+    const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
-
-    return await this.expensesSalariesRepository.save(expensesSalaries);
+    return user;
   }
 
   // Get all records
@@ -122,5 +131,33 @@ export class ExpensesSalariesService {
   // Delete a record
   async remove(id: number) {
     await this.expensesSalariesRepository.delete(id);
+  }
+
+  calcNetSallary(createExpensesSalariesDto: CreateExpenseSalariesDto) {
+    return (
+      (createExpensesSalariesDto.incentives ?? 0) +
+      (createExpensesSalariesDto.rewards ?? 0) -
+      (createExpensesSalariesDto.discounts ?? 0)
+    );
+  }
+
+  async calcAnnual(salary: number, userId?: number) {
+    const currentDate = new Date();
+    const settings = await this.setting.findAll({});
+    if (currentDate.getMonth() === 0) {
+      return salary * (settings[0].annual_increase / 100);
+    }
+
+    if (userId) {
+      const lastAnnualRecord = await this.expensesSalariesRepository.findOne({
+        where: { user: { id: userId } },
+        order: { created_at: "DESC" },
+        select: ["user"],
+      });
+
+      return lastAnnualRecord?.annual || 0;
+    }
+
+    return 0;
   }
 }

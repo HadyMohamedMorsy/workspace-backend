@@ -20,6 +20,15 @@ export class GeneralSettings {
   @Column()
   price_deskarea: number;
 
+  @Column()
+  full_day_price_deskarea: number;
+
+  @Column()
+  full_day_price_shared: number;
+
+  @Column()
+  annual_increase: number;
+
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
 

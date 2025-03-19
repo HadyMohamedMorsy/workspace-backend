@@ -59,8 +59,8 @@ export class DahboredService {
   async getAllExapsesInternalSallary(filter: FiltersDashboredDto) {
     return await this.expenseSalariesRepository
       .createQueryBuilder("expenseSalaries")
-      .select("SUM(expenseSalaries.cost)", "totalCost")
-      .where("expenseSalaries.cost > 0")
+      .select("SUM(expenseSalaries.net_sallary)", "totalCost")
+      .where("expenseSalaries.net_sallary > 0")
       .andWhere("expenseSalaries.created_at BETWEEN :startFrom AND :startTo", {
         startFrom: filter.start_date,
         startTo: filter.end_date,
@@ -71,8 +71,8 @@ export class DahboredService {
   async getAllExapsesExternalSallary(filter: FiltersDashboredDto) {
     return await this.expenseSalariesRepository
       .createQueryBuilder("expenseSalaries")
-      .select("SUM(expenseSalaries.cost)", "totalCost")
-      .where("expenseSalaries.cost > 0")
+      .select("SUM(expenseSalaries.net_sallary)", "totalCost")
+      .where("expenseSalaries.net_sallary > 0")
       .andWhere("expenseSalaries.created_at BETWEEN :startFrom AND :startTo", {
         startFrom: filter.start_date,
         startTo: filter.end_date,
