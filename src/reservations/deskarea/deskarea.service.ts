@@ -271,7 +271,7 @@ export class DeskareaService {
     const diffInHours = diffrentHour(rest);
     await this.deskareaRepository.update(updateDeskareaDto.id, {
       ...updateDto,
-      total_time: diffInHours,
+      total_time: updateDeskareaDto.is_full_day ? 24 : diffInHours,
       total_price: totalPrice,
       status: ReservationStatus.COMPLETE,
     });
@@ -286,8 +286,10 @@ export class DeskareaService {
     settingId: number,
     offerId: number,
   ) {
-    const diffInHours = diffrentHour(rest);
     const settings = await this.findSetting(settingId);
+    if (rest.is_full_day) return settings.full_day_price_deskarea;
+
+    const diffInHours = diffrentHour(rest);
     let discount = 0;
 
     const totalPrice = diffInHours

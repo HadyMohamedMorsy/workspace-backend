@@ -14,16 +14,19 @@ export class Shared {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  is_full_day: boolean;
+
   @Column()
   selected_day: string;
 
-  @Column()
+  @Column({ nullable: true })
   start_hour: number;
 
-  @Column()
+  @Column({ nullable: true })
   start_minute: number;
 
-  @Column({ type: "enum", enum: TimeOfDay })
+  @Column({ type: "enum", enum: TimeOfDay, nullable: true })
   @IsEnum(TimeOfDay)
   start_time: TimeOfDay;
 

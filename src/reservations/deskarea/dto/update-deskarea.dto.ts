@@ -10,25 +10,21 @@ export class UpdateDeskAreaDto extends PartialType(CreateDeskAreaDto) {
   @IsNotEmpty()
   id: number;
 
-  @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
+  @ValidateIf(o => o.status !== ReservationStatus.CANCELLED || !o.is_full_day)
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   end_hour: number;
 
-  @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
+  @ValidateIf(o => o.status !== ReservationStatus.CANCELLED || !o.is_full_day)
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   end_minute: number;
 
-  @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
+  @ValidateIf(o => o.status !== ReservationStatus.CANCELLED || !o.is_full_day)
   @IsString()
   @IsNotEmpty()
   @IsEnum(TimeOfDay)
   end_time: TimeOfDay;
-
-  // @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
-  // @Validate(ValidateTimeReservationValidator)
-  // validate_time: boolean;
 }

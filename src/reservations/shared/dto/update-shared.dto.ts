@@ -27,8 +27,4 @@ export class UpdateSharedDto extends PartialType(CreateSharedDto) {
   @IsNotEmpty()
   @IsEnum(TimeOfDay)
   end_time: TimeOfDay;
-
-  // @ValidateIf(o => o.status !== ReservationStatus.CANCELLED)
-  // @Validate(ValidateTimeReservationValidator)
-  // validate_time: boolean;
 }

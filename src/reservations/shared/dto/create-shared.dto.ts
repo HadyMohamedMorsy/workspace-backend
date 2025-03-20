@@ -1,5 +1,13 @@
 import { Type } from "class-transformer";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from "class-validator";
 import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
 
 export class CreateSharedDto {
@@ -7,16 +15,22 @@ export class CreateSharedDto {
   @IsNotEmpty()
   selected_day: string;
 
+  @IsBoolean()
+  is_full_day: boolean;
+
+  @ValidateIf(obj => !obj.is_full_day)
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   start_hour: number;
 
+  @ValidateIf(obj => !obj.is_full_day)
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   start_minute: number;
 
+  @ValidateIf(obj => !obj.is_full_day)
   @IsString()
   @IsNotEmpty()
   @IsEnum(TimeOfDay)

@@ -187,7 +187,7 @@ export class SharedService {
     const diffInHours = diffrentHour(rest);
     await this.sharedRepository.update(updateSharedDto.id, {
       ...updateDto,
-      total_time: diffInHours,
+      total_time: updateSharedDto.is_full_day ? 24 : diffInHours,
       total_price: totalPrice,
       status: ReservationStatus.COMPLETE,
     });
@@ -202,10 +202,13 @@ export class SharedService {
     settingId: number,
     offerId: number,
   ) {
-    const diffInHours = diffrentHour(rest);
     const settings = await this.findSetting(settingId);
+    if (rest.is_full_day) return settings.full_day_price_shared;
+
+    const diffInHours = diffrentHour(rest);
     let discount = 0;
     const totalPrice = diffInHours ? settings.price_shared * +diffInHours : settings.price_shared;
+
     if (offerId) {
       const offer = await this.offer.findOne(offerId);
       const typeDiscount = offer.type_discount;
