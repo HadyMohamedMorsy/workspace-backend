@@ -11,6 +11,7 @@ import { AppService } from "./app.service";
 import { AssignGeneralOfferModule } from "./assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "./assignes-memberships/assignes-membership.module";
 import { AssignesPackagesModule } from "./assigness-packages-offers/assignes-packages.module";
+import { AttendModule } from "./attends/attend.module";
 import { AuthModule } from "./auth/auth.module";
 import jwtConfig from "./auth/config/jwt.config";
 import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard";
@@ -78,6 +79,7 @@ const ENV = process.env.NODE_ENV;
     OfferCoWorkingSpaceModule,
     DealsModule,
     IndividualModule,
+    AttendModule,
     ExpensesSalariesModule,
     ExpensesPlaceChildModule,
     ExpensesPlaceModule,

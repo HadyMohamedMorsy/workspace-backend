@@ -12,8 +12,8 @@ import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity"
 import { Shared } from "src/reservations/shared/shared.entity";
 import { Returns } from "src/returns/returns.entity";
 import { RevenueChild } from "src/revenue/revenue-child/revenue-child.entity";
-import { TypeSallary } from "src/shared/enum/global-enum";
-import { Repository } from "typeorm";
+import { ReservationStatus, TypeSallary } from "src/shared/enum/global-enum";
+import { Between, Repository } from "typeorm";
 import { FiltersDashboredDto } from "./dto/filter-dashbored.dto";
 
 @Injectable()
@@ -68,6 +68,65 @@ export class DahboredService {
       .andWhere("expenseSalaries.type_sallary = :typeSalary", { typeSalary: TypeSallary.Internal })
       .getRawOne();
   }
+
+  async getAllExistClient(filter: FiltersDashboredDto) {
+    const [sharedActive, sharedCompleted, deskActive, deskCompleted, roomActive, roomCompleted] =
+      await Promise.all([
+        this.sharedRepository.count({
+          where: {
+            status: ReservationStatus.ACTIVE,
+            created_at: Between(filter.start_date, filter.end_date),
+          },
+        }),
+        this.sharedRepository.count({
+          where: {
+            status: ReservationStatus.COMPLETE,
+            created_at: Between(filter.start_date, filter.end_date),
+          },
+        }),
+
+        this.deskAreaRepository.count({
+          where: {
+            status: ReservationStatus.ACTIVE,
+            created_at: Between(filter.start_date, filter.end_date),
+          },
+        }),
+        this.deskAreaRepository.count({
+          where: {
+            status: ReservationStatus.COMPLETE,
+            created_at: Between(filter.start_date, filter.end_date),
+          },
+        }),
+
+        this.reservationRoomRepository.count({
+          where: {
+            status: ReservationStatus.ACTIVE,
+            created_at: Between(filter.start_date, filter.end_date),
+          },
+        }),
+        this.reservationRoomRepository.count({
+          where: {
+            status: ReservationStatus.COMPLETE,
+            created_at: Between(filter.start_date, filter.end_date),
+          },
+        }),
+      ]);
+
+    console.log(
+      sharedActive,
+      sharedCompleted,
+      deskActive,
+      deskCompleted,
+      roomActive,
+      roomCompleted,
+    );
+
+    return {
+      total:
+        sharedActive + sharedCompleted + deskActive + deskCompleted + roomActive + roomCompleted,
+    };
+  }
+
   async getAllExapsesExternalSallary(filter: FiltersDashboredDto) {
     return await this.expenseSalariesRepository
       .createQueryBuilder("expenseSalaries")

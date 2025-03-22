@@ -15,6 +15,7 @@ export class DashboredController {
     const hasAccess = allowedRoles.includes(user.role);
 
     const [
+      [existClientResults],
       // Salary related
       [totalInternalSallary, totalExternalSallary, totalExpanses],
 
@@ -57,6 +58,8 @@ export class DashboredController {
       // Offer related
       [totalOffer],
     ] = await Promise.all([
+      Promise.all([this.dashboredService.getAllExistClient(filterQueryDto)]),
+
       // Salary group
       Promise.all([
         this.dashboredService.getAllExapsesInternalSallary(filterQueryDto),
@@ -177,6 +180,11 @@ export class DashboredController {
     const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
 
     return [
+      ...this.createMetrics(
+        [["Total Existing Clients", getValue(existClientResults, "total")]],
+        "pi pi-users",
+      ),
+
       ...(hasAccess
         ? this.createMetrics(
             [
