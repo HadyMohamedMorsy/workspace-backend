@@ -73,6 +73,12 @@ export class User {
   })
   password: string;
 
+  @Column({ nullable: true })
+  annual_start: number;
+
+  @Column({ nullable: true })
+  annual_increase: number;
+
   @OneToMany(() => Task, task => task.user)
   task: Task[];
 

@@ -21,9 +21,4 @@ export class CreateGeneralSettingsDto {
   @Type(() => Number)
   @IsNotEmpty()
   full_day_price_shared: number;
-
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  annual_increase: number;
 }

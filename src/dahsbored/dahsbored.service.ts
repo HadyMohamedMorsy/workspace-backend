@@ -70,60 +70,148 @@ export class DahboredService {
   }
 
   async getAllExistClient(filter: FiltersDashboredDto) {
-    const [sharedActive, sharedCompleted, deskActive, deskCompleted, roomActive, roomCompleted] =
-      await Promise.all([
-        this.sharedRepository.count({
-          where: {
-            status: ReservationStatus.ACTIVE,
-            created_at: Between(filter.start_date, filter.end_date),
-          },
-        }),
-        this.sharedRepository.count({
-          where: {
-            status: ReservationStatus.COMPLETE,
-            created_at: Between(filter.start_date, filter.end_date),
-          },
-        }),
+    const [sharedActive, deskActive, roomActive] = await Promise.all([
+      this.sharedRepository.count({
+        where: {
+          status: ReservationStatus.ACTIVE,
+          created_at: Between(filter.start_date, filter.end_date),
+        },
+      }),
 
-        this.deskAreaRepository.count({
-          where: {
-            status: ReservationStatus.ACTIVE,
-            created_at: Between(filter.start_date, filter.end_date),
-          },
-        }),
-        this.deskAreaRepository.count({
-          where: {
-            status: ReservationStatus.COMPLETE,
-            created_at: Between(filter.start_date, filter.end_date),
-          },
-        }),
+      this.deskAreaRepository.count({
+        where: {
+          status: ReservationStatus.ACTIVE,
+          created_at: Between(filter.start_date, filter.end_date),
+        },
+      }),
 
-        this.reservationRoomRepository.count({
-          where: {
-            status: ReservationStatus.ACTIVE,
-            created_at: Between(filter.start_date, filter.end_date),
-          },
-        }),
-        this.reservationRoomRepository.count({
-          where: {
-            status: ReservationStatus.COMPLETE,
-            created_at: Between(filter.start_date, filter.end_date),
-          },
-        }),
-      ]);
-
-    console.log(
-      sharedActive,
-      sharedCompleted,
-      deskActive,
-      deskCompleted,
-      roomActive,
-      roomCompleted,
-    );
+      this.reservationRoomRepository.count({
+        where: {
+          status: ReservationStatus.ACTIVE,
+          created_at: Between(filter.start_date, filter.end_date),
+        },
+      }),
+    ]);
 
     return {
-      total:
-        sharedActive + sharedCompleted + deskActive + deskCompleted + roomActive + roomCompleted,
+      total: sharedActive + deskActive + roomActive,
+    };
+  }
+
+  async getAllClientsRoomsActive(filter: FiltersDashboredDto) {
+    const roomsActive = await this.reservationRoomRepository.count({
+      where: {
+        status: ReservationStatus.ACTIVE,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: roomsActive,
+    };
+  }
+
+  async getAllExistClientDeskareaActive(filter: FiltersDashboredDto) {
+    const deskareaActive = await this.deskAreaRepository.count({
+      where: {
+        status: ReservationStatus.ACTIVE,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: deskareaActive,
+    };
+  }
+
+  async getAllExistClientSharedActive(filter: FiltersDashboredDto) {
+    const sharedActive = await this.sharedRepository.count({
+      where: {
+        status: ReservationStatus.ACTIVE,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: sharedActive,
+    };
+  }
+
+  async getAllClientsRoomsCompleted(filter: FiltersDashboredDto) {
+    const roomsActive = await this.reservationRoomRepository.count({
+      where: {
+        status: ReservationStatus.COMPLETE,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: roomsActive,
+    };
+  }
+
+  async getAllExistClientDeskareaCompleted(filter: FiltersDashboredDto) {
+    const deskareaActive = await this.deskAreaRepository.count({
+      where: {
+        status: ReservationStatus.COMPLETE,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: deskareaActive,
+    };
+  }
+
+  async getAllExistClientSharedCompleted(filter: FiltersDashboredDto) {
+    const sharedActive = await this.sharedRepository.count({
+      where: {
+        status: ReservationStatus.COMPLETE,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: sharedActive,
+    };
+  }
+
+  async getAllClientsRoomsCancelled(filter: FiltersDashboredDto) {
+    const roomsActive = await this.reservationRoomRepository.count({
+      where: {
+        status: ReservationStatus.CANCELLED,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: roomsActive,
+    };
+  }
+
+  async getAllExistClientDeskareaCancelled(filter: FiltersDashboredDto) {
+    const deskareaActive = await this.deskAreaRepository.count({
+      where: {
+        status: ReservationStatus.CANCELLED,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: deskareaActive,
+    };
+  }
+
+  async getAllExistClientSharedCancelled(filter: FiltersDashboredDto) {
+    const sharedActive = await this.sharedRepository.count({
+      where: {
+        status: ReservationStatus.CANCELLED,
+        created_at: Between(filter.start_date, filter.end_date),
+      },
+    });
+
+    return {
+      total: sharedActive,
     };
   }
 

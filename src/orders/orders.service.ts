@@ -48,13 +48,13 @@ export class OrdersService {
       order_price: orderPrice,
       createdBy: reqBody.createdBy,
       [createOrderDto.type_user]: reqBody.customer,
-      order_items: createOrderDto.order_items.map(item => {
-        return {
-          product: item.product.id,
+      order_items:
+        createOrderDto.order_items?.map(item => ({
+          product_id: item.product?.id,
           quantity: item.quantity,
-        };
-      }),
+        })) || [],
     };
+
     const order = this.orderRepository.create(payload);
     const orderSaved = await this.orderRepository.save(order);
 
@@ -68,7 +68,7 @@ export class OrdersService {
         };
       });
       updateProducts.forEach(async product => {
-        await this.productService.update(product);
+        await this.productService.updateStore(product);
       });
     }
     return orderSaved;

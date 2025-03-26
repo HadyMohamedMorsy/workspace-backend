@@ -5,6 +5,7 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Matches,
@@ -73,6 +74,16 @@ export class CreateUserDto {
   })
   @Match("password", { message: "Password confirmation must match password" })
   password_confirmation: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  annual_start: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  annual_increase: number;
 }
 
 export class ResourcePermissionDto {

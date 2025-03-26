@@ -21,7 +21,6 @@ export class ProductService {
   // Create a new product
   async create(createProductDto: CreateProductDto): Promise<Product> {
     const categories = await this.categoryService.findMany(createProductDto.category_ids);
-
     if (!categories) {
       // If the product is not found, throw a NotFoundException
       throw new NotFoundException(`categories with id ${createProductDto.category_ids} not found`);
@@ -78,7 +77,10 @@ export class ProductService {
 
   // Get product by ID
   async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository.findOne({ where: { id } });
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ["categories"],
+    });
     if (!product) {
       throw new NotFoundException(`${product} with id ${id} not found`);
     }
@@ -86,8 +88,28 @@ export class ProductService {
   }
 
   async update(updateProductDto: UpdateProductDto) {
+    const categories = await this.categoryService.findMany(updateProductDto.category_ids);
+
+    if (!categories) {
+      throw new NotFoundException(`categories with id ${updateProductDto.category_ids} not found`);
+    }
+    await this.productRepository.update(updateProductDto.id, {
+      ...updateProductDto,
+      categories,
+    });
+
+    return this.productRepository.findOne({
+      where: { id: updateProductDto.id },
+      relations: ["categories"],
+    });
+  }
+
+  async updateStore(updateProductDto: UpdateProductDto) {
     await this.productRepository.update(updateProductDto.id, updateProductDto);
-    return this.productRepository.findOne({ where: { id: updateProductDto.id } });
+
+    return this.productRepository.findOne({
+      where: { id: updateProductDto.id },
+    });
   }
 
   async updateWithManyRelation(updateProductDto: UpdateProductDto) {

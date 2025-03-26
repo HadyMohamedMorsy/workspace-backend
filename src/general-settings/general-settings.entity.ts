@@ -26,9 +26,6 @@ export class GeneralSettings {
   @Column()
   full_day_price_shared: number;
 
-  @Column()
-  annual_increase: number;
-
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
 

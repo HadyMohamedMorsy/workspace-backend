@@ -58,8 +58,11 @@ export class Order {
   @Column({ nullable: true })
   total_order: number;
 
-  @Column("json", { nullable: true })
-  order_items: OrderItemDto[] | null;
+  @Column("jsonb", { nullable: true })
+  order_items: Array<{
+    product_id: number;
+    quantity: number;
+  }> | null;
 
   @ManyToOne(() => User, user => user.createdByOrder, {
     onDelete: "CASCADE",

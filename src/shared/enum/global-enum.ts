@@ -94,6 +94,7 @@ export enum TypeMember {
 
 export enum ReservationStatus {
   ACTIVE = "active",
+  PENDING = "pending",
   CANCELLED = "cancelled",
   COMPLETE = "complete",
 }

@@ -807,6 +807,10 @@ export class ReservationRoomService {
           status: ReservationStatus.ACTIVE,
           ...customerCondition,
         },
+        {
+          status: ReservationStatus.PENDING,
+          ...customerCondition,
+        },
       ],
     });
 

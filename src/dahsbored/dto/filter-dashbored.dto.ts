@@ -9,4 +9,8 @@ export class FiltersDashboredDto {
   @IsString()
   @IsNotEmpty()
   end_date = moment().utc().endOf("day").toDate();
+
+  @IsString()
+  @IsNotEmpty()
+  slug: string;
 }

@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { TypeSallary } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { User } from "src/users/user.entity";
@@ -17,7 +16,6 @@ export class ExpensesSalariesService {
     private expensesSalariesRepository: Repository<ExpenseSalaries>,
     protected readonly apiFeaturesService: APIFeaturesService,
     private readonly usersService: UserService,
-    private readonly setting: GeneralSettingsService,
   ) {}
 
   // Create a new record
@@ -27,7 +25,7 @@ export class ExpensesSalariesService {
     const user =
       type_sallary === TypeSallary.Internal ? await this.validateUser(user_id) : undefined;
     // Calculate values once
-    const annual = await this.calcAnnual(+sallary, user_id);
+    const annual = await this.calcAnnual(+sallary, user);
     const updatedSalary = +sallary + annual;
     const netSallary = updatedSalary + this.calcNetSallary(createExpensesSalariesDto);
     // Create base entity
@@ -141,21 +139,19 @@ export class ExpensesSalariesService {
     );
   }
 
-  async calcAnnual(salary: number, userId?: number) {
-    const currentDate = new Date();
-    const settings = await this.setting.findAll({});
-    if (currentDate.getMonth() === 0) {
-      return salary * (settings[0].annual_increase / 100);
-    }
-
-    if (userId) {
-      const lastAnnualRecord = await this.expensesSalariesRepository.findOne({
-        where: { user: { id: userId } },
+  async calcAnnual(salary: number, user?: User) {
+    if (user) {
+      const currentDate = new Date();
+      const userRelated = await this.expensesSalariesRepository.findOne({
+        where: { user: { id: user.id } },
         order: { created_at: "DESC" },
-        select: ["user"],
       });
 
-      return lastAnnualRecord?.annual || 0;
+      if (currentDate.getMonth() === user.annual_start) {
+        return salary * (user.annual_increase / 100) + userRelated?.annual;
+      }
+
+      return userRelated?.annual || 0;
     }
 
     return 0;
