@@ -75,6 +75,13 @@ export class SharedService {
     const queryBuilder = this.apiFeaturesService.setRepository(Shared).buildQuery(filterData);
     queryBuilder.leftJoin("e.createdBy", "ec").addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
 
+    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filterData.customFilters.start_date,
+        end_date: filterData.customFilters.end_date,
+      });
+    }
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
