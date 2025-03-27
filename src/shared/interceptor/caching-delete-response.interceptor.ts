@@ -29,12 +29,10 @@ export class DeleteCacheInterceptor implements NestInterceptor {
     };
     const keys = cacheFilters.get(url());
     if (keys) {
-      for (const key of keys) { 
+      for (const key of keys) {
         await this.cacheManager.del(key);
       }
       cacheFilters.delete(prefix);
     }
-    cacheFilters.delete("/api/v1/dashboard");
-    await this.cacheManager.del("/api/v1/dashboard");
   }
 }

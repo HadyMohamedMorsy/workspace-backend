@@ -82,7 +82,7 @@ export class ReservationRoom {
   @Column({ nullable: true })
   total_time: number;
 
-  @Column()
+  @Column({ nullable: true })
   note: string;
 
   @ManyToOne(() => User, user => user.createdByReservationRoom, {

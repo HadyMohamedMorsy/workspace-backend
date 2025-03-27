@@ -79,7 +79,7 @@ export class Shared {
   @Column({ nullable: true })
   total_time: number;
 
-  @Column()
+  @Column({ nullable: true })
   note: string;
 
   @ManyToOne(() => User, user => user.createdByShared, {

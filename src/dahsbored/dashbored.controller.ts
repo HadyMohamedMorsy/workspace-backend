@@ -1,5 +1,4 @@
-import { Body, Controller, Post, Req, UseInterceptors } from "@nestjs/common";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { Body, Controller, Post, Req } from "@nestjs/common";
 import { DahboredService } from "./dahsbored.service";
 import { FiltersDashboredDto } from "./dto/filter-dashbored.dto";
 
@@ -8,7 +7,6 @@ export class DashboredController {
   constructor(private readonly dashboredService: DahboredService) {}
 
   @Post("analytics")
-  @UseInterceptors(CachingInterceptor)
   async getAnalytics(@Body() filterQueryDto: FiltersDashboredDto, @Req() req: Request) {
     const user = req["userData"];
     const allowedRoles = ["founder", "technical-support", "general-manager", "accountant"];
@@ -214,8 +212,8 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Count Purchase", getValue(totalCountPurshase, "count")],
-        ["Total Purchase", getValue(totalPurshase, "total")],
+        ["All Count Purchase", getValue(totalCountPurshase, "count")],
+        ["All Purchase", getValue(totalPurshase, "total")],
       ],
       "pi pi-wallet",
     );
@@ -232,8 +230,8 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Count Purchase", getValue(totalCountReturns, "count")],
-        ["Total Returns", getValue(totalReturns, "total")],
+        ["All Count Purchase", getValue(totalCountReturns, "count")],
+        ["All Returns", getValue(totalReturns, "total")],
       ],
       "pi pi-wallet",
     );
@@ -276,12 +274,12 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Orders Paid", getValue(orderTotals[0], "total")],
-        ["Total Orders Cost", getValue(orderTotals[1], "total")],
-        ["Total Orders Hold", getValue(orderTotals[2], "total")],
-        ["Amount Orders Kitchen", getValue(totalOrderPrice, "total")],
+        ["All Orders Paid", getValue(orderTotals[0], "total")],
+        ["All Orders Cost", getValue(orderTotals[1], "total")],
+        ["All Orders Hold", getValue(orderTotals[2], "total")],
+        ["All Amount Orders Kitchen", getValue(totalOrderPrice, "total")],
         [
-          "Total Orders Kitchen",
+          "All Orders Kitchen",
           getValue(orderTotals[0], "total") + getValue(orderTotals[1], "total"),
         ],
         ,
@@ -303,9 +301,9 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Completed Hours Shared", getValue(totalCompletedHourShared, "totalHour")],
-        ["Total Completed Hours Deskarea", getValue(totalCompletedHourDesk, "totalHour")],
-        ["Total Completed Hours Rooms", getValue(totalCompletedHourRooms, "totalHour")],
+        ["All Completed Hours Shared", getValue(totalCompletedHourShared, "totalHour")],
+        ["All Completed Hours Deskarea", getValue(totalCompletedHourDesk, "totalHour")],
+        ["All Completed Hours Rooms", getValue(totalCompletedHourRooms, "totalHour")],
       ],
       "pi pi-box",
     );
@@ -323,9 +321,9 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Completed Deal Revenue", getValue(totalCompletedDeal, "totalRevenue")],
-        ["Total Cancelled Deal Revenue", getValue(totalCancelledDeal, "totalRevenue")],
-        ["Total Active Deal Revenue", getValue(totalActiveDeal, "totalRevenue")],
+        ["All Completed Deal Revenue", getValue(totalCompletedDeal, "totalRevenue")],
+        ["All Cancelled Deal", getValue(totalCancelledDeal, "totalRevenue")],
+        ["All Active Deal", getValue(totalActiveDeal, "totalRevenue")],
       ],
       "pi pi-box",
     );
@@ -348,9 +346,9 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Completed Packages Revenue", getValue(totalCompletedPackages, "totalRevenue")],
-        ["Total Cancelled Packages Revenue", getValue(totalCancelledPackages, "totalRevenue")],
-        ["Total Active Packages Revenue", getValue(totalActivePackages, "totalRevenue")],
+        ["All Completed Packages Revenue", getValue(totalCompletedPackages, "totalRevenue")],
+        ["All Cancelled Packages", getValue(totalCancelledPackages, "totalRevenue")],
+        ["All Active Packages", getValue(totalActivePackages, "totalRevenue")],
       ],
       "pi pi-box",
     );
@@ -371,9 +369,9 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Completed Shared Revenue", getValue(totalCompletedShared, "totalRevenue")],
-        ["Total Cancelled Shared Revenue", getValue(totalCancelledShared, "totalRevenue")],
-        ["Total Active Shared Revenue", getValue(totalActiveShared, "totalRevenue")],
+        ["All Completed Shared Revenue", getValue(totalCompletedShared, "totalRevenue")],
+        ["All Cancelled Shared", getValue(totalCancelledShared, "totalRevenue")],
+        ["All Active Shared", getValue(totalActiveShared, "totalRevenue")],
       ],
       "pi pi-box",
     );
@@ -396,9 +394,9 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Completed Desk Area Revenue", getValue(totalCompletedDeskArea, "totalRevenue")],
-        ["Total Cancelled Desk Area Revenue", getValue(totalCancelledDeskArea, "totalRevenue")],
-        ["Total Active Desk Area Revenue", getValue(totalActiveDeskArea, "totalRevenue")],
+        ["All Completed Desk Area Revenue", getValue(totalCompletedDeskArea, "totalRevenue")],
+        ["All Cancelled Desk Area", getValue(totalCancelledDeskArea, "totalRevenue")],
+        ["All Active Desk Area", getValue(totalActiveDeskArea, "totalRevenue")],
       ],
       "pi pi-box",
     );
@@ -421,17 +419,11 @@ export class DashboredController {
     return this.createMetrics(
       [
         [
-          "Total Completed Reservation Room Revenue",
+          "All Completed Reservation Room Revenue",
           getValue(totalCompletedReservationRoom, "totalRevenue"),
         ],
-        [
-          "Total Cancelled Reservation Room Revenue",
-          getValue(totalCancelledReservationRoom, "totalRevenue"),
-        ],
-        [
-          "Total Active Reservation Room Revenue",
-          getValue(totalActiveReservationRoom, "totalRevenue"),
-        ],
+        ["All Cancelled Reservation Room", getValue(totalCancelledReservationRoom, "totalRevenue")],
+        ["All Active Reservation Room", getValue(totalActiveReservationRoom, "totalRevenue")],
       ],
       "pi pi-box",
     );
@@ -453,9 +445,9 @@ export class DashboredController {
 
     return this.createMetrics(
       [
-        ["Total Completed Membership Revenue", getValue(totalCompletedMembership, "totalRevenue")],
-        ["Total Cancelled Membership Revenue", getValue(totalCancelledMembership, "totalRevenue")],
-        ["Total Active Membership Revenue", getValue(totalActiveMembership, "totalRevenue")],
+        ["All Completed Membership Revenue", getValue(totalCompletedMembership, "totalRevenue")],
+        ["All Cancelled Membership", getValue(totalCancelledMembership, "totalRevenue")],
+        ["All Active Membership", getValue(totalActiveMembership, "totalRevenue")],
       ],
       "pi pi-box",
     );
@@ -469,6 +461,6 @@ export class DashboredController {
       this.dashboredService.getAllTotalOffer(filterQueryDto),
     ]);
 
-    return this.createMetrics([["Total Offers", getValue(totalOffer, "count")]], "pi pi-box");
+    return this.createMetrics([["All Offers", getValue(totalOffer, "count")]], "pi pi-box");
   }
 }

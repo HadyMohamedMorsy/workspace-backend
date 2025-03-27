@@ -73,7 +73,7 @@ export class Deskarea {
   })
   settings: GeneralSettings;
 
-  @Column()
+  @Column({ nullable: true })
   note: string;
 
   @Column({ nullable: true })

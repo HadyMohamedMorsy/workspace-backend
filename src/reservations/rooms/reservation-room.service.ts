@@ -88,7 +88,7 @@ export class ReservationRoomService {
   `,
       );
 
-    if (filterData?.roomIds) {
+    if (filterData?.roomIds && filterData.roomIds.length > 0) {
       queryBuilder.andWhere("rr.id IN (:...roomIds)", {
         roomIds: filterData.roomIds.map(id => String(id)),
       });
