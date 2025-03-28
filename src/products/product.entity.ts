@@ -32,7 +32,10 @@ export class Product {
   store: number;
 
   @Column({ nullable: true })
-  featured_image: string; // Add featured_image column
+  type: string;
+
+  @Column({ nullable: true })
+  featured_image: string;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

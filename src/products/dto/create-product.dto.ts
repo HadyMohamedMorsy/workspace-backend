@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import {
   IsArray,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -22,8 +23,19 @@ export class CreateProductDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   featured_image: string;
+
+  @IsEnum(
+    {
+      Wieght: "weight",
+      Item: "item",
+    },
+    {
+      message: "weight or item only",
+    },
+  )
+  type: "item" | "weight";
 
   @IsNumber()
   @IsOptional()

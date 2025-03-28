@@ -87,23 +87,6 @@ export class ProductService {
     return product;
   }
 
-  async update(updateProductDto: UpdateProductDto) {
-    const categories = await this.categoryService.findMany(updateProductDto.category_ids);
-
-    if (!categories) {
-      throw new NotFoundException(`categories with id ${updateProductDto.category_ids} not found`);
-    }
-    await this.productRepository.update(updateProductDto.id, {
-      ...updateProductDto,
-      categories,
-    });
-
-    return this.productRepository.findOne({
-      where: { id: updateProductDto.id },
-      relations: ["categories"],
-    });
-  }
-
   async updateStore(updateProductDto: UpdateProductDto) {
     await this.productRepository.update(updateProductDto.id, updateProductDto);
 
@@ -126,6 +109,7 @@ export class ProductService {
     existingProduct.name = updateProductDto.name;
     existingProduct.code = updateProductDto.code;
     existingProduct.selling_price = updateProductDto.selling_price;
+    existingProduct.type = updateProductDto.type;
     existingProduct.store = updateProductDto.store;
     existingProduct.featured_image = updateProductDto.featured_image;
 

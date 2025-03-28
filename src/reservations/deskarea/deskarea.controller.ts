@@ -17,6 +17,7 @@ import { CachingInterceptor } from "src/shared/interceptor/caching-response.inte
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { DeskareaService } from "./deskarea.service";
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
+import { UpdateDekareaNoteDto } from "./dto/update-deskarea.-note.dto";
 import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
 
 @UseGuards(AuthorizationGuard)
@@ -197,6 +198,26 @@ export class DeskareaController {
   ])
   async update(@Body() updateDeskareaDto: UpdateDeskAreaDto) {
     return await this.deskareaService.update(updateDeskareaDto);
+  }
+
+  @Post("/update-note")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assign-general-offer",
+    "/api/v1/assignes-membership",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async updateNote(@Body() updateDeskareaDto: UpdateDekareaNoteDto) {
+    return await this.deskareaService.updateNote(updateDeskareaDto);
   }
 
   @Delete("/delete")

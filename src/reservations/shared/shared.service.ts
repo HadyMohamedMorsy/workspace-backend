@@ -22,6 +22,7 @@ import { User } from "src/users/user.entity";
 import { Repository, SelectQueryBuilder } from "typeorm";
 import { diffrentHour, formatDate } from "../helpers/utitlties";
 import { CreateSharedDto } from "./dto/create-shared.dto";
+import { UpdateSharedNoteDto } from "./dto/update-shared.-note.dto copy";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { Shared } from "./shared.entity";
 
@@ -169,6 +170,10 @@ export class SharedService {
       await this.handleCompletedStatus(updateSharedDto, offer_id, rest);
     }
 
+    return this.sharedRepository.findOne({ where: { id: updateSharedDto.id } });
+  }
+  async updateNote(updateSharedDto: UpdateSharedNoteDto) {
+    await this.sharedRepository.update(updateSharedDto.id, updateSharedDto);
     return this.sharedRepository.findOne({ where: { id: updateSharedDto.id } });
   }
 

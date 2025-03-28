@@ -16,6 +16,7 @@ import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-re
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateSharedDto } from "./dto/create-shared.dto";
+import { UpdateSharedNoteDto } from "./dto/update-shared.-note.dto copy";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { SharedService } from "./shared.service";
 
@@ -196,6 +197,26 @@ export class SharedController {
   ])
   async update(@Body() updateSharedDto: UpdateSharedDto) {
     return await this.sharedService.update(updateSharedDto);
+  }
+
+  @Post("/update-note")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assign-general-offer",
+    "/api/v1/assignes-membership",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async updateNote(@Body() updateSharedDto: UpdateSharedNoteDto) {
+    return await this.sharedService.updateNote(updateSharedDto);
   }
 
   @Delete("/delete")

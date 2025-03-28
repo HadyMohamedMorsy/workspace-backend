@@ -24,6 +24,7 @@ import { diffrentHour, formatDate } from "../helpers/utitlties";
 import { Shared } from "../shared/shared.entity";
 import { Deskarea } from "./deskarea.entity"; // Changed from Company to Deskarea
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
+import { UpdateDekareaNoteDto } from "./dto/update-deskarea.-note.dto";
 import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
 
 @Injectable()
@@ -253,6 +254,11 @@ export class DeskareaService {
       await this.handleCompletedStatus(updateDeskareaDto, offer_id, rest);
     }
 
+    return this.deskareaRepository.findOne({ where: { id: updateDeskareaDto.id } });
+  }
+
+  async updateNote(updateDeskareaDto: UpdateDekareaNoteDto) {
+    await this.deskareaRepository.update(updateDeskareaDto.id, updateDeskareaDto);
     return this.deskareaRepository.findOne({ where: { id: updateDeskareaDto.id } });
   }
 
