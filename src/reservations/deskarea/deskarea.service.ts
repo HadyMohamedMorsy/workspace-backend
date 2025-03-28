@@ -76,7 +76,28 @@ export class DeskareaService {
   // Get all deskareas
   async findAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-    queryBuilder.leftJoin("e.createdBy", "ec").addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    queryBuilder
+      .leftJoin("e.createdBy", "ecr")
+      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"])
+      .leftJoin("e.individual", "ep")
+      .addSelect(["ep.id", "ep.name", "ep.whatsApp"])
+      .leftJoin("e.company", "ec")
+      .addSelect(["ec.id", "ec.phone", "ec.name"])
+      .leftJoin("e.studentActivity", "es")
+      .addSelect(["es.id", "es.name", "es.unviresty"]);
+
+    if (filterData.search.value) {
+      queryBuilder.andWhere(
+        `ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name OR ecr.firstName LIKE :name`,
+        {
+          name: `%${filterData.search.value}%`,
+        },
+      );
+      queryBuilder.andWhere(`ec.whatsApp LIKE :number OR ep.whatsApp LIKE :number`, {
+        number: `%${filterData.search.value}%`,
+      });
+    }
 
     if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {

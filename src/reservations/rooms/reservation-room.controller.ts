@@ -24,6 +24,13 @@ import { ReservationRoomService } from "./reservation-room.service";
 export class ReservationRoomController {
   constructor(private readonly reservationRoomService: ReservationRoomService) {}
 
+  @Post("/all-rooms")
+  @UseInterceptors(CachingInterceptor)
+  @HttpCode(200)
+  async findRoomAll(@Body() filterQueryDto: any) {
+    return this.reservationRoomService.findAll(filterQueryDto);
+  }
+
   @Post("/index")
   @UseInterceptors(CachingInterceptor)
   @HttpCode(200)
@@ -256,6 +263,26 @@ export class ReservationRoomController {
   ])
   async update(@Body() updateReservationRoomDto: UpdateReservationRoomDto) {
     return await this.reservationRoomService.update(updateReservationRoomDto);
+  }
+
+  @Post("/update-note")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-package",
+    "/api/v1/deals",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async updateNote(@Body() updateReservationRoomDto: UpdateReservationRoomDto) {
+    return await this.reservationRoomService.updateNote(updateReservationRoomDto);
   }
 
   @Delete("/delete")
