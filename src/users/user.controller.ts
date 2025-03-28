@@ -8,8 +8,9 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { Auth } from "src/shared/decorators/auth.decorator";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { Permission, Resource } from "src/shared/enum/global-enum";
+import { AuthType, Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
@@ -45,6 +46,13 @@ export class UserController {
     },
   ])
   public createUsers(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto);
+  }
+
+  @Post("/store-tech")
+  @UseInterceptors(DeleteCacheInterceptor)
+  @Auth(AuthType.None)
+  public createByTechUsers(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
 
