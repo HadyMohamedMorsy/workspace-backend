@@ -19,23 +19,27 @@ export class PurchasesService {
   // Create a new record
   async create(createPurchasDto: CreatePurchasDto): Promise<Purchases> {
     const product = await this.productService.findOne(createPurchasDto.product_id);
-
     const newStore = (product.store || 0) + createPurchasDto.purshase_qty;
     product.store = newStore;
-    product.purshase_price = createPurchasDto.purshase_price;
+    product.purshase_price = this.calculatePurchasePrice(createPurchasDto);
 
-    await this.productService.update({
+    await this.productService.updateStore({
       id: product.id,
       store: newStore,
-      purshase_price: createPurchasDto.purshase_price,
+      purshase_price: this.calculatePurchasePrice(createPurchasDto),
     });
 
     const purchase = this.purchasesRepository.create({
       ...createPurchasDto,
+      purshase_price: this.calculatePurchasePrice(createPurchasDto),
       product,
     });
 
     return await this.purchasesRepository.save(purchase);
+  }
+
+  private calculatePurchasePrice(dto: CreatePurchasDto | UpdatePurchasDto): number {
+    return dto.type_store === "item" ? dto.purshase_price : dto.total;
   }
 
   // Get all records
@@ -92,16 +96,17 @@ export class PurchasesService {
 
     const newStore = (product.store || 0) + updatePurchasDto.purshase_qty;
     product.store = newStore;
-    product.purshase_price = updatePurchasDto.purshase_price;
+    product.purshase_price = this.calculatePurchasePrice(updatePurchasDto);
 
-    await this.productService.update({
+    await this.productService.updateStore({
       id: product.id,
       store: newStore,
-      purshase_price: updatePurchasDto.purshase_price,
+      purshase_price: this.calculatePurchasePrice(updatePurchasDto),
     });
 
     await this.purchasesRepository.update(updatePurchasDto.id, {
       ...updatePurchasDto,
+      purshase_price: this.calculatePurchasePrice(updatePurchasDto),
       product,
     });
     return this.purchasesRepository.findOne({ where: { id: updatePurchasDto.id } });

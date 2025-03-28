@@ -1,5 +1,5 @@
-import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString, ValidateIf } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
 
 export class CreateReturnsDto {
   @IsString()
@@ -7,22 +7,31 @@ export class CreateReturnsDto {
   type_store: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   note: string;
 
   @ValidateIf(obj => obj.type_store === "weight")
-  @IsNumber()
+  @Transform(({ value }) => {
+    if (typeof value === "string") {
+      return parseFloat(value.startsWith(".") ? `0${value}` : value);
+    }
+    return value;
+  })
+  @IsNumber({ allowNaN: false, allowInfinity: false })
   @IsNotEmpty()
   weight_kg: number;
 
   @ValidateIf(obj => obj.type_store === "weight")
   @IsNumber()
+  @Type(() => Number)
   weight_g: number;
 
   @ValidateIf(obj => obj.type_store === "weight")
   @IsNumber()
+  @Type(() => Number)
   weight_product: number;
 
+  @ValidateIf(obj => obj.individual_type === "item")
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()

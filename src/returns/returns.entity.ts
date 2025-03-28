@@ -12,7 +12,12 @@ export class Returns {
   @Column({ nullable: true })
   return_price: number;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   weight_kg: number;
 
   @Column({ nullable: true })
@@ -32,7 +37,7 @@ export class Returns {
   })
   product: Product;
 
-  @Column({ type: "text" })
+  @Column({ type: "text", nullable: true })
   note: string;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })

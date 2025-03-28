@@ -12,7 +12,12 @@ export class Purchases {
   @Column({ nullable: true })
   purshase_price: number;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   weight_kg: number;
 
   @Column({ nullable: true })

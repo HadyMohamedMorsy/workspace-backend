@@ -33,10 +33,16 @@ export class ReturnsService {
 
     const newStore = product.store - createReturnsDto.return_qty;
     product.store = newStore;
-    await this.productService.update({ id: product.id, store: newStore });
+    await this.productService.updateStore({ id: product.id, store: newStore });
+
+    const price =
+      createReturnsDto.type_store === "item"
+        ? createReturnsDto.return_price
+        : createReturnsDto.total;
 
     const returns = this.returnRepository.create({
       ...createReturnsDto,
+      return_price: +price,
       product,
     });
 
@@ -96,10 +102,16 @@ export class ReturnsService {
 
     const newStore = product.store - updateReturnsDto.return_qty;
     product.store = newStore;
-    await this.productService.update({ id: product.id, store: newStore });
+    await this.productService.updateStore({ id: product.id, store: newStore });
+
+    const price =
+      updateReturnsDto.type_store === "item"
+        ? updateReturnsDto.return_price
+        : updateReturnsDto.total;
 
     await this.returnRepository.update(updateReturnsDto.id, {
       ...updateReturnsDto,
+      return_price: +price,
       product,
     });
     return this.returnRepository.findOne({ where: { id: updateReturnsDto.id } });

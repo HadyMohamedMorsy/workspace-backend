@@ -1,4 +1,4 @@
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsString, ValidateIf } from "class-validator";
 
 export class CreatePurchasDto {
@@ -7,8 +7,13 @@ export class CreatePurchasDto {
   type_store: string;
 
   @ValidateIf(obj => obj.type_store === "weight")
-  @IsNumber()
-  @Type(() => Number)
+  @Transform(({ value }) => {
+    if (typeof value === "string") {
+      return parseFloat(value.startsWith(".") ? `0${value}` : value);
+    }
+    return value;
+  })
+  @IsNumber({ allowNaN: false, allowInfinity: false })
   @IsNotEmpty()
   weight_kg: number;
 
@@ -22,6 +27,7 @@ export class CreatePurchasDto {
   @IsNumber()
   weight_product: number;
 
+  @ValidateIf(obj => obj.individual_type === "item")
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
