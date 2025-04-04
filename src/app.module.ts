@@ -147,6 +147,6 @@ const ENV = process.env.NODE_ENV;
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
-    consumer.apply(UserMiddleware).exclude("auth/login").forRoutes("*");
+    consumer.apply(UserMiddleware).exclude("auth/login" , "user/store-tech").forRoutes("*");
   }
 }
