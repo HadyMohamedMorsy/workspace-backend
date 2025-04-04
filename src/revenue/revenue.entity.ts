@@ -16,6 +16,9 @@ export class Revenue {
   @Column({ unique: true })
   name: string;
 
+  @Column({ default: "static" })
+  type: string;
+
   @Column({ nullable: true })
   total: number;
 
