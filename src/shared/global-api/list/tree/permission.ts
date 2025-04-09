@@ -112,6 +112,10 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
     actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
   {
+    resource: Resource.Deposite,
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
+  },
+  {
     resource: Resource.Deals,
     actions: [
       Permission.CREATE,

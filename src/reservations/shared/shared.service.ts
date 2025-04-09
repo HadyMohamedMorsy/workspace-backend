@@ -192,7 +192,7 @@ export class SharedService {
 
     return this.sharedRepository.findOne({ where: { id: updateSharedDto.id } });
   }
-  async updateNote(updateSharedDto: UpdateSharedNoteDto) {
+  async updateEntity(updateSharedDto: UpdateSharedNoteDto) {
     await this.sharedRepository.update(updateSharedDto.id, updateSharedDto);
     return this.sharedRepository.findOne({ where: { id: updateSharedDto.id } });
   }

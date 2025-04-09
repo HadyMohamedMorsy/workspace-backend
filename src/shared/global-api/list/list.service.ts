@@ -7,8 +7,10 @@ import { RoomsService } from "src/rooms/rooms.service";
 import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
 import { LISTS_EXPENSES_AR, LISTS_EXPENSES_EN } from "./lists/expenses/expenses";
+import { PAYMENT_METHODS_EN } from "./lists/payment-methods/payment-methods";
 import { LISTS_REVENUE_AR, LISTS_REVENUE_EN } from "./lists/revenue/revenue";
 import { LISTS_ROLES_AR, LISTS_ROLES_EN } from "./lists/roles/roles";
+import { Sort_CUSTOMERS_EN } from "./lists/sort-customers/sort-customers";
 import { LISTS_TYPE_COMPANY_AR, LISTS_TYPE_COMPANY_EN } from "./lists/type-company/type-company";
 import { LIST_TYPE_DISCOUNT_AR, LIST_TYPE_DISCOUNT_EN } from "./lists/type-discount/type-discount";
 import { LIST_TYPE_ORDER_AR, LIST_TYPE_ORDER_EN } from "./lists/type-order/type-order";
@@ -71,6 +73,14 @@ export class ListService {
     revenue: {
       en: LISTS_REVENUE_EN,
       ar: LISTS_REVENUE_AR,
+    },
+    payment_method: {
+      en: PAYMENT_METHODS_EN,
+      ar: PAYMENT_METHODS_EN,
+    },
+    sort_customers: {
+      en: Sort_CUSTOMERS_EN,
+      ar: Sort_CUSTOMERS_EN,
     },
   };
 

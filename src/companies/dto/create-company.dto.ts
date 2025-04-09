@@ -32,6 +32,22 @@ export class CreateCompanyDto {
   address: string;
 
   @IsString()
+  @IsNotEmpty()
+  nationality: string;
+
+  @IsString()
+  @IsOptional()
+  email: string;
+
+  @IsString()
+  @IsOptional()
+  featured_image: string;
+
+  @IsString()
+  @IsOptional()
+  note: string;
+
+  @IsString()
   @MaxLength(11)
   @IsNotEmpty()
   whatsApp: string;

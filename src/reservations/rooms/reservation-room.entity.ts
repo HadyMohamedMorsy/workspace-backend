@@ -3,12 +3,21 @@ import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Company } from "src/companies/company.entity";
 import { Deals } from "src/deals/deals.entity";
+import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
-import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity()
 export class ReservationRoom {
@@ -84,6 +93,18 @@ export class ReservationRoom {
 
   @Column({ nullable: true })
   note: string;
+
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
+  payment_method: PaymentMethod;
+
+  @OneToOne(() => Deposite, deposite => deposite.reservationRooms, { onDelete: "SET NULL" })
+  @JoinColumn()
+  deposites: Deposite;
 
   @ManyToOne(() => User, user => user.createdByReservationRoom, {
     onDelete: "CASCADE",

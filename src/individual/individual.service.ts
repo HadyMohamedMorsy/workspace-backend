@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as moment from "moment";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
@@ -28,6 +29,11 @@ export class IndividualService {
   async findAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Individual).buildQuery(filterData);
 
+    const dateFilter = {
+      new: { operator: ">=", date: moment().startOf("day").toDate() },
+      old: { operator: "<", date: moment().startOf("day").toDate() },
+    };
+
     queryBuilder
       .leftJoinAndSelect("e.assign_memberships", "ep", "ep.status = :status_memeber", {
         status_memeber: ReservationStatus.ACTIVE,
@@ -43,6 +49,11 @@ export class IndividualService {
       .leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
         typeOrder: "HOLD",
       });
+
+    if (dateFilter[filterData?.sort_customers]) {
+      const { operator, date } = dateFilter[filterData?.sort_customers];
+      queryBuilder.andWhere(`e.created_at ${operator} :date`, { date });
+    }
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

@@ -42,6 +42,18 @@ export class Company {
   @Column({ type: "text", nullable: true })
   address: string;
 
+  @Column({ nullable: true })
+  nationality: string;
+
+  @Column({ nullable: true })
+  email: string;
+
+  @Column({ nullable: true })
+  note: string;
+
+  @Column({ nullable: true })
+  featured_image: string;
+
   @Column({ unique: true, name: "whatsapp" })
   whatsApp: string;
 

@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateRoomDto {
   @IsString()
@@ -21,6 +21,6 @@ export class CreateRoomDto {
   price: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   note: string;
 }

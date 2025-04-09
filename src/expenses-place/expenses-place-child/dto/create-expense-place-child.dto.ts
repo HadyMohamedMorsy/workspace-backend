@@ -1,11 +1,15 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateExpensePlaceChildDto {
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   cost: number;
+
+  @IsString()
+  @IsOptional()
+  featured_image: string;
 
   @IsNumber()
   @Type(() => Number)

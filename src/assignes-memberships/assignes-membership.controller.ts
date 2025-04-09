@@ -9,6 +9,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
@@ -97,6 +98,26 @@ export class AssignesMembershipController {
     });
   }
 
+  @Post("/store-deposite")
+  @ClearCacheAnotherModules(["/api/v1/deposite"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deposite,
+      actions: [Permission.CREATE],
+    },
+  ])
+  async createDeposite(
+    @Body() createAssignesMembershipDepositeDto: CreateDepositeDto,
+    @Req() req: Request,
+  ) {
+    const createdBy = req["createdBy"];
+    return await this.assignesMembershipService.createDeposite(
+      createAssignesMembershipDepositeDto,
+      createdBy,
+    );
+  }
+
   @Post("/update")
   @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
@@ -108,6 +129,19 @@ export class AssignesMembershipController {
   ])
   async update(@Body() updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
     return await this.assignesMembershipService.update(updateAssignesMembershipDto);
+  }
+
+  @Post("/update-entity")
+  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async updateEntity(@Body() updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
+    return await this.assignesMembershipService.updateEntity(updateAssignesMembershipDto);
   }
 
   @Delete("/delete")

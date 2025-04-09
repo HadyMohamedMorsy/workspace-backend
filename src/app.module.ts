@@ -20,6 +20,7 @@ import { CategoryModule } from "./categories/category.module";
 import { CompanyModule } from "./companies/company.module";
 import { DashboredModule } from "./dahsbored/dashbored.module";
 import { DealsModule } from "./deals/deals.module";
+import { DepositesModule } from "./deposit/deposites.module";
 import { ExpensesPlaceModule } from "./expenses-place/expense-place.module";
 import { ExpensesPlaceChildModule } from "./expenses-place/expenses-place-child/expense-place-child.module";
 import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.module";
@@ -66,6 +67,7 @@ const ENV = process.env.NODE_ENV;
     SearchModule,
     GeneralOfferModule,
     GeneralSettingsModule,
+    DepositesModule,
     TaskModule,
     RevenueModule,
     RevenueChildModule,
@@ -147,6 +149,6 @@ const ENV = process.env.NODE_ENV;
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
-    consumer.apply(UserMiddleware).exclude("auth/login" , "user/store-tech").forRoutes("*");
+    consumer.apply(UserMiddleware).exclude("auth/login", "user/store-tech").forRoutes("*");
   }
 }

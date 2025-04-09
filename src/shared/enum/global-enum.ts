@@ -30,6 +30,7 @@ export enum Resource {
   OfferWorkingSpace = "offer-memeber-ship",
   OfferPackages = "offer-packages",
   Deals = "deals",
+  Deposite = "deposite",
   Task = "tasks",
   Deskarea = "deskarea",
   Shared = "shared",
@@ -61,6 +62,18 @@ export enum TypeUser {
 export enum TypeSallary {
   Internal = "Internal",
   External = "External",
+}
+
+export enum PaymentMethod {
+  Cach = "cach",
+  Instapay = "instapay",
+  Visa = "visa",
+  VodafoneCach = "vodafone-cach",
+}
+
+export enum SortCustomers {
+  Old = "old",
+  New = "new",
 }
 
 export enum Role {

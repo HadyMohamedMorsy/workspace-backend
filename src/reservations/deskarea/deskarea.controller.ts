@@ -200,7 +200,7 @@ export class DeskareaController {
     return await this.deskareaService.update(updateDeskareaDto);
   }
 
-  @Post("/update-note")
+  @Post("/update-entity")
   @ClearCacheAnotherModules([
     "/api/v1/individual",
     "/api/v1/company",
@@ -216,8 +216,8 @@ export class DeskareaController {
       actions: [Permission.UPDATE],
     },
   ])
-  async updateNote(@Body() updateDeskareaDto: UpdateDekareaNoteDto) {
-    return await this.deskareaService.updateNote(updateDeskareaDto);
+  async updateEntity(@Body() updateDeskareaDto: UpdateDekareaNoteDto) {
+    return await this.deskareaService.updateEntity(updateDeskareaDto);
   }
 
   @Delete("/delete")

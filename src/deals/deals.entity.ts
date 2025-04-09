@@ -1,17 +1,20 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
+import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Room } from "src/rooms/room.entity";
-import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -59,6 +62,14 @@ export class Deals {
   })
   room: Room;
 
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
+  payment_method: PaymentMethod;
+
   @ManyToOne(() => Individual, individual => individual.deals, {
     onDelete: "CASCADE",
   })
@@ -86,6 +97,10 @@ export class Deals {
     onDelete: "CASCADE",
   })
   createdBy: User;
+
+  @OneToOne(() => Deposite, deposite => deposite.deal, { onDelete: "SET NULL" })
+  @JoinColumn()
+  deposites: Deposite;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

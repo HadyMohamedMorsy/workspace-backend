@@ -1,17 +1,20 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
+import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackages } from "src/offer-packages/offer-package.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
-import { ReservationStatus } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -69,6 +72,18 @@ export class AssignesPackages {
 
   @Column({ nullable: true })
   total_price: number;
+
+  @OneToOne(() => Deposite, deposite => deposite.assignesPackages, { onDelete: "SET NULL" })
+  @JoinColumn()
+  deposites: Deposite;
+
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
+  payment_method: PaymentMethod;
 
   @ManyToOne(() => User, user => user.createdByPackages, {
     onDelete: "CASCADE",

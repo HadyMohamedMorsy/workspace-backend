@@ -1,8 +1,16 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { Company } from "src/companies/company.entity";
+import { DepositeService } from "src/deposit/deposites.service";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationRoomService } from "src/reservations/rooms/reservation-room.service";
@@ -25,6 +33,7 @@ export class DealsService {
     protected readonly assignGlobalOffer: AssignGeneralOfferservice,
     protected readonly offer: GeneralOfferService,
     protected readonly roomService: RoomsService,
+    protected readonly depositeService: DepositeService,
     @Inject(forwardRef(() => ReservationRoomService))
     private readonly reservationRoom: ReservationRoomService,
   ) {}
@@ -89,6 +98,7 @@ export class DealsService {
       .leftJoinAndSelect("e.room", "er")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .leftJoin("e.createdBy", "ec")
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
@@ -109,6 +119,7 @@ export class DealsService {
       .leftJoinAndSelect("e.company", "ec")
       .leftJoinAndSelect("e.room", "er")
       .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
       .leftJoin("e.createdBy", "ecc")
@@ -130,6 +141,7 @@ export class DealsService {
       .leftJoinAndSelect("e.studentActivity", "es")
       .leftJoinAndSelect("e.room", "er")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
@@ -188,6 +200,48 @@ export class DealsService {
       ...rest,
     });
     return this.dealsRepository.findOne({ where: { id: updateDealsDto.id } });
+  }
+
+  async createDeposite(create: CreateDepositeDto, createdBy: User) {
+    const { entity_id } = create;
+
+    try {
+      const deal = await this.findOne(entity_id);
+
+      if (!deal) {
+        throw new NotFoundException(`${deal} with  not found`);
+      }
+      const payload: CreateDepositeDto = {
+        ...create,
+        createdBy,
+        deal,
+      };
+
+      const deposite = await this.depositeService.create(payload);
+
+      if (!deposite || deposite.total_price >= deal.total_price) {
+        throw new BadRequestException(
+          `Deposit amount (${deposite?.total_price}) must be less than assignment total price (${deal.total_price})`,
+        );
+      }
+
+      return await this.updateEntity({
+        id: entity_id,
+        deposites: deposite,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+    }
+  }
+
+  async updateEntity(updateDealsDto: UpdateDealsDto) {
+    await this.dealsRepository.update(updateDealsDto.id, updateDealsDto);
+    return this.dealsRepository.findOne({
+      where: { id: updateDealsDto.id },
+      relations: ["deposites"],
+    });
   }
 
   private async handleStatusValidation(

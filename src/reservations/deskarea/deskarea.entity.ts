@@ -4,7 +4,7 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { Company } from "src/companies/company.entity";
 import { GeneralSettings } from "src/general-settings/general-settings.entity";
 import { Individual } from "src/individual/individual.entity";
-import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
@@ -78,6 +78,14 @@ export class Deskarea {
 
   @Column({ nullable: true })
   total_price: number;
+
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
+  payment_method: PaymentMethod;
 
   @Column({ nullable: true })
   total_time: number;

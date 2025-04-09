@@ -2,6 +2,7 @@ import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { CompanyModule } from "src/companies/company.module";
+import { DepositesModule } from "src/deposit/deposites.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
@@ -20,6 +21,7 @@ import { DealsService } from "./deals.service";
     IndividualModule,
     CompanyModule,
     AssignGeneralOfferModule,
+    DepositesModule,
     GeneralOfferModule,
     StudentActivityModule,
     UsersModule,

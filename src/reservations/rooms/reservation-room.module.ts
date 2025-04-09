@@ -4,6 +4,7 @@ import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-ge
 import { AssignesPackagesModule } from "src/assigness-packages-offers/assignes-packages.module";
 import { CompanyModule } from "src/companies/company.module";
 import { DealsModule } from "src/deals/deals.module";
+import { DepositesModule } from "src/deposit/deposites.module";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
@@ -22,6 +23,7 @@ import { ReservationRoomService } from "./reservation-room.service";
     IndividualModule,
     StudentActivityModule,
     RoomsModule,
+    DepositesModule,
     AssignGeneralOfferModule,
     GeneralOfferModule,
     UsersModule,

@@ -278,7 +278,7 @@ export class DeskareaService {
     return this.deskareaRepository.findOne({ where: { id: updateDeskareaDto.id } });
   }
 
-  async updateNote(updateDeskareaDto: UpdateDekareaNoteDto) {
+  async updateEntity(updateDeskareaDto: UpdateDekareaNoteDto) {
     await this.deskareaRepository.update(updateDeskareaDto.id, updateDeskareaDto);
     return this.deskareaRepository.findOne({ where: { id: updateDeskareaDto.id } });
   }

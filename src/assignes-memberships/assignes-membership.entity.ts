@@ -1,18 +1,21 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
+import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
-import { ReservationStatus } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -77,6 +80,18 @@ export class AssignesMembership {
 
   @Column({ nullable: true })
   total_price: number;
+
+  @OneToOne(() => Deposite, deposite => deposite.assignessMemebership, { onDelete: "SET NULL" })
+  @JoinColumn()
+  deposites: Deposite;
+
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
+  payment_method: PaymentMethod;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

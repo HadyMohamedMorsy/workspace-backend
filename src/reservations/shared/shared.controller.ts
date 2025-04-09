@@ -199,7 +199,7 @@ export class SharedController {
     return await this.sharedService.update(updateSharedDto);
   }
 
-  @Post("/update-note")
+  @Post("/update-entity")
   @ClearCacheAnotherModules([
     "/api/v1/individual",
     "/api/v1/company",
@@ -215,8 +215,8 @@ export class SharedController {
       actions: [Permission.UPDATE],
     },
   ])
-  async updateNote(@Body() updateSharedDto: UpdateSharedNoteDto) {
-    return await this.sharedService.updateNote(updateSharedDto);
+  async updateEntity(@Body() updateSharedDto: UpdateSharedNoteDto) {
+    return await this.sharedService.updateEntity(updateSharedDto);
   }
 
   @Delete("/delete")

@@ -1,6 +1,6 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { TypeOrder, TypeUser } from "src/shared/enum/global-enum";
+import { PaymentMethod, TypeOrder, TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
@@ -57,6 +57,14 @@ export class Order {
 
   @Column({ nullable: true })
   total_order: number;
+
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
+  payment_method: PaymentMethod;
 
   @Column("jsonb", { nullable: true })
   order_items: Array<{

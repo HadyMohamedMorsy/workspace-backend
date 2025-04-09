@@ -1,8 +1,16 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { Company } from "src/companies/company.entity";
+import { DepositeService } from "src/deposit/deposites.service";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
@@ -25,6 +33,7 @@ export class AssignesPackagesService {
     protected readonly assignGlobalOffer: AssignGeneralOfferservice,
     protected readonly offer: GeneralOfferService,
     protected readonly offerPackagesService: OfferPackagesService,
+    protected readonly depositeService: DepositeService,
     @Inject(forwardRef(() => ReservationRoomService))
     private readonly reservationRoom: ReservationRoomService,
   ) {}
@@ -70,6 +79,41 @@ export class AssignesPackagesService {
     });
     const newPackage = await this.assignesPackagesRepository.save(assignes_packages);
     return this.findOne(newPackage.id);
+  }
+
+  async createDeposite(create: CreateDepositeDto, createdBy: User) {
+    const { entity_id } = create;
+
+    try {
+      const assignPackage = await this.findOne(entity_id);
+
+      if (!assignPackage) {
+        throw new NotFoundException(`${assignPackage} with  not found`);
+      }
+      const payload: CreateDepositeDto = {
+        ...create,
+        createdBy,
+        assignPackage,
+      };
+
+      const deposite = await this.depositeService.create(payload);
+
+      // Validate deposit amount
+      if (!deposite || deposite.total_price >= assignPackage.total_price) {
+        throw new BadRequestException(
+          `Deposit amount (${deposite?.total_price}) must be less than assignment total price (${assignPackage.total_price})`,
+        );
+      }
+
+      return await this.updateEntity({
+        id: entity_id,
+        deposites: deposite,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+    }
   }
 
   // Get a single record by ID
@@ -118,6 +162,7 @@ export class AssignesPackagesService {
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("ep.room", "epr")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
@@ -144,6 +189,7 @@ export class AssignesPackagesService {
       .leftJoinAndSelect("e.company", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("ep.room", "epr")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
@@ -170,6 +216,7 @@ export class AssignesPackagesService {
       .leftJoinAndSelect("e.studentActivity", "ei")
       .leftJoinAndSelect("e.packages", "ep")
       .leftJoinAndSelect("ep.room", "epr")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
       .andWhere("ei.id = :studentActivity_id", {
@@ -199,6 +246,14 @@ export class AssignesPackagesService {
       ...rest,
     });
     return await this.fetchUpdatedPackage(id);
+  }
+
+  async updateEntity(updateAssognPackageDto: UpdateAssignesPackageDto) {
+    await this.assignesPackagesRepository.update(updateAssognPackageDto.id, updateAssognPackageDto);
+    return this.assignesPackagesRepository.findOne({
+      where: { id: updateAssognPackageDto.id },
+      relations: ["deposites"],
+    });
   }
 
   private async handleStatusValidation(

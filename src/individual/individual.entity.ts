@@ -46,6 +46,9 @@ export class Individual {
   @Column({ nullable: true })
   college: string;
 
+  @Column({ nullable: true })
+  nationality: string;
+
   @OneToMany(() => Deals, deals => deals.individual)
   deals: Deals;
 

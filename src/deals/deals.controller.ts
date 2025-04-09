@@ -9,7 +9,10 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
+import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
+import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
 import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
 import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
@@ -75,7 +78,15 @@ export class DealsController {
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-package",
+    "/api/v1/deals",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
@@ -92,7 +103,15 @@ export class DealsController {
   }
 
   @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-package",
+    "/api/v1/deals",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
@@ -101,6 +120,39 @@ export class DealsController {
   ])
   async update(@Body() updateDealsDto: UpdateDealsDto) {
     return await this.dealsService.update(updateDealsDto);
+  }
+
+  @Post("/update-entity")
+  @ClearCacheAnotherModules([
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+    "/api/v1/user",
+    "/api/v1/assignes-package",
+    "/api/v1/deals",
+  ])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deals,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async updateEntity(@Body() updateDealsDto: UpdateDealsDto) {
+    return await this.dealsService.updateEntity(updateDealsDto);
+  }
+
+  @Post("/store-deposite")
+  @UseInterceptors(DeleteCacheInterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deposite,
+      actions: [Permission.CREATE],
+    },
+  ])
+  async createDeposite(@Body() createDealsDto: CreateDepositeDto, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return await this.dealsService.createDeposite(createDealsDto, createdBy);
   }
 
   @Delete("/delete")

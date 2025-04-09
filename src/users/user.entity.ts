@@ -3,6 +3,7 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Company } from "src/companies/company.entity";
 import { Deals } from "src/deals/deals.entity";
+import { Deposite } from "src/deposit/deposites.entity";
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { Individual } from "src/individual/individual.entity";
@@ -99,6 +100,11 @@ export class User {
 
   @OneToMany(() => Deals, deals => deals.createdBy)
   createdByDeal: Deals[];
+
+  @OneToMany(() => Deals, deals => deals.createdBy, {
+    onDelete: "CASCADE",
+  })
+  createdByDeposite: Deposite[];
 
   @OneToMany(() => Order, order => order.createdBy)
   createdByOrder: Order[];

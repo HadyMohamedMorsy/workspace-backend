@@ -11,13 +11,17 @@ import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-g
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
+
 import { Deals } from "src/deals/deals.entity";
 import { DealsService } from "src/deals/deals.service";
+import { DepositeService } from "src/deposit/deposites.service";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Room } from "src/rooms/room.entity";
 import { RoomsService } from "src/rooms/rooms.service";
 import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
+import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import { calculateHours, diffrentHour, formatDate } from "../helpers/utitlties";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
@@ -34,6 +38,7 @@ export class ReservationRoomService {
     private readonly apiFeaturesService: APIFeaturesService,
     private readonly assignGlobalOffer: AssignGeneralOfferservice,
     private readonly globalOffer: GeneralOfferService,
+    protected readonly depositeService: DepositeService,
     private readonly room: RoomsService,
     @Inject(forwardRef(() => AssignesPackagesService))
     private readonly packageRooms: AssignesPackagesService,
@@ -56,7 +61,8 @@ export class ReservationRoomService {
       .leftJoin("e.company", "ec")
       .addSelect(["ec.id", "ec.phone", "ec.name"])
       .leftJoin("e.studentActivity", "es")
-      .addSelect(["es.id", "es.name", "es.unviresty"]);
+      .addSelect(["es.id", "es.name", "es.unviresty"])
+      .leftJoinAndSelect("e.deposites", "esdep");
 
     if (filterData.search.value) {
       queryBuilder.andWhere(
@@ -261,6 +267,7 @@ export class ReservationRoomService {
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .leftJoinAndSelect("e.assignGeneralOffer", "es")
       .leftJoinAndSelect("es.generalOffer", "eg")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("e.assignesPackages IS NULL")
       .andWhere("e.deals IS NULL")
       .leftJoin("e.createdBy", "ec")
@@ -288,6 +295,7 @@ export class ReservationRoomService {
       .andWhere("ecc.id = :company_id", { company_id: filterData.company_id })
       .leftJoinAndSelect("e.assignGeneralOffer", "es")
       .leftJoinAndSelect("es.generalOffer", "eg")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("e.assignesPackages IS NULL")
       .andWhere("e.deals IS NULL")
       .leftJoin("e.createdBy", "ec")
@@ -317,6 +325,7 @@ export class ReservationRoomService {
       })
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("e.assignesPackages IS NULL")
       .andWhere("e.deals IS NULL")
       .leftJoin("e.createdBy", "ec")
@@ -344,6 +353,7 @@ export class ReservationRoomService {
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
       .leftJoinAndSelect("e.assignGeneralOffer", "es")
       .leftJoinAndSelect("es.generalOffer", "eg")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("e.assignesPackages IS NULL")
       .andWhere("e.deals IS NULL")
       .andWhere("ec.id = :user_id", {
@@ -368,6 +378,7 @@ export class ReservationRoomService {
 
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.assignesPackages", "em")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .andWhere("em.id = :package_id", { package_id: filterData.package_id })
@@ -392,6 +403,7 @@ export class ReservationRoomService {
 
     queryBuilder
       .leftJoinAndSelect("e.company", "ec")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.assignesPackages", "em")
       .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
       .andWhere("em.id = :package_id", { package_id: filterData.package_id })
@@ -417,6 +429,7 @@ export class ReservationRoomService {
 
     queryBuilder
       .leftJoinAndSelect("e.studentActivity", "es")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.assignesPackages", "em")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
@@ -444,6 +457,7 @@ export class ReservationRoomService {
     queryBuilder
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.deals", "em")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
       .andWhere("em.id = :deal_id", { deal_id: filterData.deal_id })
       .leftJoin("e.createdBy", "ec")
@@ -468,6 +482,7 @@ export class ReservationRoomService {
     queryBuilder
       .leftJoinAndSelect("e.company", "ec")
       .leftJoinAndSelect("e.deals", "em")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
       .andWhere("em.id = :deal_id", { deal_id: filterData.deal_id })
 
@@ -493,6 +508,7 @@ export class ReservationRoomService {
     queryBuilder
       .leftJoinAndSelect("e.studentActivity", "es")
       .leftJoinAndSelect("e.deals", "em")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .andWhere("es.id = :studentActivity_id", {
         studentActivity_id: filterData.studentActivity_id,
       })
@@ -550,9 +566,46 @@ export class ReservationRoomService {
     return this.findOne(updateDto.id);
   }
 
-  async updateNote(updateDto: UpdateReservationRoomDto) {
+  async createDeposite(create: CreateDepositeDto, createdBy: User) {
+    const { entity_id } = create;
+
+    try {
+      const reservationRoom = await this.findOne(entity_id);
+
+      if (!reservationRoom) {
+        throw new NotFoundException(`${reservationRoom} with  not found`);
+      }
+      const payload: CreateDepositeDto = {
+        ...create,
+        createdBy,
+        reservationRoom,
+      };
+
+      const deposite = await this.depositeService.create(payload);
+
+      if (!deposite || deposite.total_price >= reservationRoom.total_price) {
+        throw new BadRequestException(
+          `Deposit amount (${deposite?.total_price}) must be less than assignment total price (${reservationRoom.total_price})`,
+        );
+      }
+
+      return await this.updateEntity({
+        id: entity_id,
+        deposites: deposite,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+    }
+  }
+
+  async updateEntity(updateDto: UpdateReservationRoomDto) {
     await this.reservationRoomRepository.update(updateDto.id, updateDto);
-    return this.reservationRoomRepository.findOne({ where: { id: updateDto.id } });
+    return this.reservationRoomRepository.findOne({
+      where: { id: updateDto.id },
+      relations: ["deposites"],
+    });
   }
 
   async remove(id: number) {

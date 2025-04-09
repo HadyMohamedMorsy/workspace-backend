@@ -16,6 +16,9 @@ export class ExpensePlaceChild {
   @Column()
   cost: number;
 
+  @Column({ nullable: true })
+  featured_image: string;
+
   @ManyToOne(() => ExpensePlace, expense => expense.expensePlaceChild, {
     onDelete: "CASCADE",
   })

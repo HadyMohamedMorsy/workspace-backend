@@ -9,6 +9,7 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
@@ -265,7 +266,21 @@ export class ReservationRoomController {
     return await this.reservationRoomService.update(updateReservationRoomDto);
   }
 
-  @Post("/update-note")
+  @Post("/store-deposite")
+  @ClearCacheAnotherModules(["/api/v1/deposite"])
+  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Permissions([
+    {
+      resource: Resource.Deposite,
+      actions: [Permission.CREATE],
+    },
+  ])
+  async createDeposite(@Body() createReservationRoomDto: CreateDepositeDto, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return await this.reservationRoomService.createDeposite(createReservationRoomDto, createdBy);
+  }
+
+  @Post("/update-entity")
   @ClearCacheAnotherModules([
     "/api/v1/individual",
     "/api/v1/company",
@@ -281,8 +296,8 @@ export class ReservationRoomController {
       actions: [Permission.UPDATE],
     },
   ])
-  async updateNote(@Body() updateReservationRoomDto: UpdateReservationRoomDto) {
-    return await this.reservationRoomService.updateNote(updateReservationRoomDto);
+  async updateEntity(@Body() updateReservationRoomDto: UpdateReservationRoomDto) {
+    return await this.reservationRoomService.updateEntity(updateReservationRoomDto);
   }
 
   @Delete("/delete")

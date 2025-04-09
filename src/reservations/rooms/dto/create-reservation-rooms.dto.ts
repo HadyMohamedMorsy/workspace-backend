@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { Deposite } from "src/deposit/deposites.entity";
 import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
 
 export class CreateReservationRoomDto {
@@ -80,4 +81,7 @@ export class CreateReservationRoomDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  @IsOptional()
+  deposites?: Deposite;
 }

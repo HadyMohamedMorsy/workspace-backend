@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { Deposite } from "src/deposit/deposites.entity";
 import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
 
@@ -63,4 +64,7 @@ export class CreateAssignesMembershipDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  @IsOptional()
+  deposites?: Deposite;
 }

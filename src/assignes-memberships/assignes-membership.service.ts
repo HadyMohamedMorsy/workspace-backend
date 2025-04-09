@@ -1,8 +1,16 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { Company } from "src/companies/company.entity";
+import { DepositeService } from "src/deposit/deposites.service";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Individual } from "src/individual/individual.entity";
 import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
@@ -26,6 +34,7 @@ export class AssignesMembershipService {
     protected readonly assignGlobalOffer: AssignGeneralOfferservice,
     protected readonly offer: GeneralOfferService,
     protected readonly offerCoWorkingSpaceService: OfferCoWorkingSpaceService,
+    protected readonly depositeService: DepositeService,
     @Inject(forwardRef(() => SharedService))
     private readonly shared: SharedService,
 
@@ -77,9 +86,44 @@ export class AssignesMembershipService {
     const newMember = await this.assignesMembershipRepository.save(assignesMembership);
     return await this.findOne(newMember.id);
   }
+  // Create a new record
+  async createDeposite(create: CreateDepositeDto, createdBy: User) {
+    const { entity_id } = create;
+
+    try {
+      const assignMembership = await this.findOne(entity_id);
+
+      if (!assignMembership) {
+        throw new NotFoundException(`${assignMembership} with  not found`);
+      }
+      const payload: CreateDepositeDto = {
+        ...create,
+        createdBy,
+        assignMembership,
+      };
+
+      const deposite = await this.depositeService.create(payload);
+
+      // Validate deposit amount
+      if (!deposite || deposite.total_price >= assignMembership.total_price) {
+        throw new BadRequestException(
+          `Deposit amount (${deposite?.total_price}) must be less than assignment total price (${assignMembership.total_price})`,
+        );
+      }
+
+      return await this.updateEntity({
+        id: entity_id,
+        deposites: deposite,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+    }
+  }
 
   // Get a single record by ID
-  async findOne(id: number): Promise<AssignesMembership> {
+  async findOne(id: number) {
     const assignesMembership = await this.assignesMembershipRepository.findOne({
       where: { id },
       relations: ["memeberShip"],
@@ -126,6 +170,7 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.individual", "ei")
       .leftJoinAndSelect("e.memeberShip", "em")
       .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.deskarea", "ed")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
@@ -153,6 +198,7 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.company", "ec")
       .leftJoinAndSelect("e.memeberShip", "em")
       .leftJoinAndSelect("e.shared", "es")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.deskarea", "ed")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
@@ -181,6 +227,7 @@ export class AssignesMembershipService {
       .leftJoinAndSelect("e.studentActivity", "es")
       .leftJoinAndSelect("e.memeberShip", "em")
       .leftJoinAndSelect("e.shared", "esh")
+      .leftJoinAndSelect("e.deposites", "esdep")
       .leftJoinAndSelect("e.deskarea", "ed")
       .leftJoinAndSelect("e.assignGeneralOffer", "ess")
       .leftJoinAndSelect("ess.generalOffer", "eg")
@@ -213,6 +260,17 @@ export class AssignesMembershipService {
       ...rest,
     });
     return await this.getUpdatedEntity(id);
+  }
+
+  async updateEntity(updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
+    await this.assignesMembershipRepository.update(
+      updateAssignesMembershipDto.id,
+      updateAssignesMembershipDto,
+    );
+    return this.assignesMembershipRepository.findOne({
+      where: { id: updateAssignesMembershipDto.id },
+      relations: ["deposites"],
+    });
   }
 
   private async handleValidationIfNeeded(user_id: number, type?: string, type_user?: string) {

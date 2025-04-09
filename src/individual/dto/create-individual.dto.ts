@@ -37,4 +37,8 @@ export class CreateIndividualDto {
   @IsString()
   @IsOptional()
   college: string;
+
+  @IsString()
+  @IsNotEmpty()
+  nationality: string;
 }
