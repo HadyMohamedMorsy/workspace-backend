@@ -124,11 +124,13 @@ export class ReservationRoomService {
       .leftJoinAndSelect("r.room", "rr")
       .where(
         `TO_DATE(r.selected_day, 'DD/MM/YYYY') 
-        BETWEEN TO_DATE(:startOfWeek, 'DD/MM/YYYY') 
-        AND TO_DATE(:endOfWeek, 'DD/MM/YYYY')`,
+      BETWEEN TO_DATE(:startOfWeek, 'DD/MM/YYYY') 
+      AND TO_DATE(:endOfWeek, 'DD/MM/YYYY')
+      AND r.status != :status`,
         {
           startOfWeek: formattedStartOfWeek,
           endOfWeek: formattedEndOfWeek,
+          status: ReservationStatus.CANCELLED,
         },
       )
       .leftJoinAndSelect("r.individual", "individual")
@@ -149,7 +151,12 @@ export class ReservationRoomService {
     const reservations = await queryBuilder.getRawMany();
 
     if (filterData?.isFree) {
-      const freeSlots = this.getFreeSlots(reservations, filterData.roomIds);
+      const freeSlots = this.getFreeSlots(
+        reservations,
+        filterData.roomIds,
+        startOfWeek,
+        endOfWeek, // Pass the endOfWeek to the free slots calculation
+      );
       return { data: freeSlots };
     }
 
@@ -179,67 +186,65 @@ export class ReservationRoomService {
     };
   }
 
-  private getFreeSlots(reservations, roomIds) {
+  // Updated free slots calculation
+  private getFreeSlots(
+    reservations: any[],
+    roomIds: string[],
+    startOfWeek: moment.Moment,
+    endOfWeek: moment.Moment,
+  ) {
     const timeZone = "Africa/Cairo";
     const freeSlots = [];
 
     const rooms = roomIds || [...new Set(reservations.map(res => res.rr_id))];
 
     rooms.forEach(roomId => {
-      const roomReservations = reservations.filter(res => res.rr_id === roomId);
-      const roomName = roomReservations.length > 0 ? roomReservations[0].rr_name : "Unknown Room";
+      const roomReservations = reservations
+        .filter(res => res.rr_id === roomId)
+        .map(res => ({
+          ...res,
+          start: this.createCairoTime(
+            res.r_selected_day,
+            this.ato24h(res.r_start_hour, res.r_start_minute, res.r_start_time),
+            res.r_start_minute,
+            timeZone,
+          ),
+          end: this.createCairoTime(
+            res.r_selected_day,
+            this.ato24h(res.r_end_hour, res.r_end_minute, res.r_end_time),
+            res.r_end_minute,
+            timeZone,
+          ),
+        }));
 
-      roomReservations.sort((a, b) => {
-        const startA = this.createCairoTime(
-          a.r_selected_day,
-          a.r_start_hour,
-          a.r_start_minute,
-          timeZone,
-        ).valueOf();
+      // Sort by start time
+      roomReservations.sort((a, b) => a.start.valueOf() - b.start.valueOf());
 
-        const startB = this.createCairoTime(
-          b.r_selected_day,
-          b.r_start_hour,
-          b.r_start_minute,
-          timeZone,
-        ).valueOf();
+      let lastEnd = startOfWeek.clone().tz(timeZone);
+      const roomName = roomReservations[0]?.rr_name || "Unknown Room";
 
-        return startA - startB;
-      });
-
-      let lastEndTime = moment.tz("00:00", "HH:mm", timeZone);
-
-      roomReservations.forEach(res => {
-        const startHour = this.ato24h(res.r_start_hour, res.r_start_minute, res.r_start_time);
-        const endHour = this.ato24h(res.r_end_hour, res.r_end_minute, res.r_end_time);
-
-        const start = this.createCairoTime(
-          res.r_selected_day,
-          startHour,
-          res.r_start_minute,
-          timeZone,
-        );
-        const end = this.createCairoTime(res.r_selected_day, endHour, res.r_end_minute, timeZone);
-
-        if (start.diff(lastEndTime, "minutes") > 0) {
+      // Check gaps between reservations
+      for (const res of roomReservations) {
+        if (res.start.isAfter(lastEnd)) {
           freeSlots.push({
             roomId,
-            roomName: roomName,
-            start: lastEndTime.format("YYYY-MM-DDTHH:mm:ssZ"),
-            end: start.format("YYYY-MM-DDTHH:mm:ssZ"),
+            roomName,
+            start: lastEnd.format("YYYY-MM-DDTHH:mm:ssZ"),
+            end: res.start.format("YYYY-MM-DDTHH:mm:ssZ"),
           });
         }
 
-        lastEndTime = end;
-      });
+        if (res.end.isAfter(lastEnd)) {
+          lastEnd = res.end.clone();
+        }
+      }
 
-      const endOfDay = moment.tz("23:59", "HH:mm", timeZone);
-      if (endOfDay.diff(lastEndTime, "minutes") > 0) {
+      if (lastEnd.isBefore(endOfWeek)) {
         freeSlots.push({
           roomId,
-          roomName: roomName,
-          start: lastEndTime.format("YYYY-MM-DDTHH:mm:ssZ"),
-          end: endOfDay.format("YYYY-MM-DDTHH:mm:ssZ"),
+          roomName,
+          start: lastEnd.format("YYYY-MM-DDTHH:mm:ssZ"),
+          end: endOfWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
         });
       }
     });
@@ -1014,20 +1019,14 @@ export class ReservationRoomService {
     await this.reservationRoomRepository.update(dto.id, rest);
   }
 
-  private ato24h(hourStr: string, minuteStr: string, period: string) {
-    const hour = parseInt(hourStr, 10);
-    const periodLower = period.toLowerCase();
-
-    if (periodLower === "pm" && hour !== 12) return hour + 12;
-    if (periodLower === "am" && hour === 12) return 0;
+  private ato24h(hour: number, minute: number, period: string): number {
+    if (period?.toLowerCase() === "pm" && hour < 12) return hour + 12;
+    if (period?.toLowerCase() === "am" && hour === 12) return 0;
     return hour;
   }
 
-  private createCairoTime(date: string, hour: number, minute: number, timeZone: string) {
-    return moment.tz(
-      `${date} ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
-      "DD/MM/YYYY HH:mm",
-      timeZone,
-    );
+  private createCairoTime(dateStr: string, hour: number, minute: number, zone: string) {
+    const [day, month, year] = dateStr.split("/");
+    return moment.tz(`${year}-${month}-${day} ${hour}:${minute}`, "YYYY-MM-DD HH:mm", zone);
   }
 }
