@@ -4,7 +4,7 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
-import { PaymentMethod } from "src/shared/enum/global-enum";
+import { DepositeStatus, PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 
 export class CreateDepositeDto {
@@ -12,6 +12,10 @@ export class CreateDepositeDto {
   @Type(() => Number)
   @IsNotEmpty()
   entity_id: number;
+
+  @IsEnum(DepositeStatus)
+  @IsOptional()
+  status: DepositeStatus = DepositeStatus.COMPLETE;
 
   @IsNumber()
   @Type(() => Number)

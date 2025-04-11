@@ -267,7 +267,12 @@ export class ReservationRoomController {
   }
 
   @Post("/store-deposite")
-  @ClearCacheAnotherModules(["/api/v1/deposite"])
+  @ClearCacheAnotherModules([
+    "/api/v1/deposite",
+    "/api/v1/individual",
+    "/api/v1/company",
+    "/api/v1/studentActivity",
+  ])
   @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {

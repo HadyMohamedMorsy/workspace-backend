@@ -3,6 +3,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { Deals } from "src/deals/deals.entity";
+import { Deposite } from "src/deposit/deposites.entity";
+import { ExpensePlace } from "src/expenses-place/expense-place.entity";
 import { ExpensePlaceChild } from "src/expenses-place/expenses-place-child/expense-place-child.entity";
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
 import { Order } from "src/orders/order.entity";
@@ -12,13 +15,29 @@ import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity"
 import { Shared } from "src/reservations/shared/shared.entity";
 import { Returns } from "src/returns/returns.entity";
 import { RevenueChild } from "src/revenue/revenue-child/revenue-child.entity";
-import { ReservationStatus, TypeSallary } from "src/shared/enum/global-enum";
-import { Between, Repository } from "typeorm";
+import { Revenue } from "src/revenue/revenue.entity";
+import {
+  DepositeStatus,
+  PaymentMethod,
+  ReservationStatus,
+  TypeOrder,
+  TypeSallary,
+} from "src/shared/enum/global-enum";
+import { Between, In, Repository } from "typeorm";
 import { FiltersDashboredDto } from "./dto/filter-dashbored.dto";
 
 @Injectable()
 export class DahboredService {
   constructor(
+    @InjectRepository(ExpensePlace)
+    private readonly expensePlaceRepository: Repository<ExpensePlace>,
+
+    @InjectRepository(Revenue)
+    private readonly revenueRepository: Repository<Revenue>,
+
+    @InjectRepository(Deals)
+    private readonly dealsRepository: Repository<Deals>,
+
     @InjectRepository(ExpensePlaceChild)
     private readonly expensePlaceChildRepository: Repository<ExpensePlaceChild>,
 
@@ -52,6 +71,9 @@ export class DahboredService {
     @InjectRepository(Deskarea)
     private readonly deskAreaRepository: Repository<Deskarea>,
 
+    @InjectRepository(Deposite)
+    private readonly depositeRepository: Repository<Deposite>,
+
     @InjectRepository(ReservationRoom)
     private readonly reservationRoomRepository: Repository<ReservationRoom>,
   ) {}
@@ -69,6 +91,152 @@ export class DahboredService {
       .getRawOne();
   }
 
+  async getAllRevenueToday(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      depositeRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+      purchasesSum,
+      returnsSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select("SUM(deal.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Cach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select("SUM(reservation.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Cach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages with deposit subtraction
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select("SUM(package.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Cach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership with deposit subtraction
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select("SUM(membership.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Cach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Rest of the original queries (Shared, Desk Area, Deposites, Orders, etc.)
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.depositeRepository.sum("total_price", {
+        status: DepositeStatus.COMPLETE,
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders (keep original PAID/COST handling)
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.COST,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Other financials (keep original)
+      this.revenueChildRepository.sum("amount", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.expensePlaceChildRepository.sum("cost", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.purchasesRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.returnsRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    // Calculate net revenue with proper null handling
+    const totalRevenue =
+      (+dealsNet?.net || 0) +
+      (+reservationRoomNet?.net || 0) +
+      (+packagesNet?.net || 0) +
+      (+membershipNet?.net || 0) +
+      (sharedRevenue || 0) +
+      (deskAreaRevenue || 0) +
+      (depositeRevenue || 0) +
+      (orderPaid || 0) -
+      (orderCost || 0) + // Changed to subtract order costs
+      (revenueChildSum || 0) +
+      (returnsSum || 0) -
+      (expenseSum || 0) -
+      (purchasesSum || 0);
+    return {
+      total: totalRevenue,
+      details: {
+        dealsRevenue: +dealsNet?.net || 0,
+        reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        packagesRevenue: +packagesNet?.net || 0,
+        membershipRevenue: +membershipNet?.net || 0,
+        sharedRevenue,
+        deskAreaRevenue,
+        depositeRevenue,
+        orderPaid,
+        orderCost,
+        revenueChildSum,
+        expenseSum,
+        purchasesSum,
+        returnsSum,
+      },
+    };
+  }
   async getAllExistClient(filter: FiltersDashboredDto) {
     const [sharedActive, deskActive, roomActive] = await Promise.all([
       this.sharedRepository.count({
@@ -225,6 +393,18 @@ export class DahboredService {
         startTo: filter.end_date,
       })
       .andWhere("expenseSalaries.type_sallary = :typeSalary", { typeSalary: TypeSallary.External })
+      .getRawOne();
+  }
+
+  async getAllExapsesPlaceOther(filter: FiltersDashboredDto) {
+    return await this.expensePlaceRepository
+      .createQueryBuilder("expensePlace")
+      .select("SUM(expensePlace.total)", "totalCost")
+      .where("expensePlace.total > 0")
+      .andWhere("expensePlace.created_at BETWEEN :startFrom AND :startTo", {
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
+      })
       .getRawOne();
   }
 
@@ -397,6 +577,18 @@ export class DahboredService {
       .select("COUNT(purshase.id)", "count")
       .where("purshase.total > 0")
       .andWhere("purshase.created_at BETWEEN :startFrom AND :startTo", {
+        startFrom: filter.start_date,
+        startTo: filter.end_date,
+      })
+      .getRawOne();
+  }
+
+  async getAllAnotherRevenue(filter: FiltersDashboredDto) {
+    return await this.revenueRepository
+      .createQueryBuilder("revenue")
+      .select("SUM(revenue.total)", "totalRevenue")
+      .where("revenue.total > 0")
+      .andWhere("revenue.created_at BETWEEN :startFrom AND :startTo", {
         startFrom: filter.start_date,
         startTo: filter.end_date,
       })
@@ -618,15 +810,15 @@ export class DahboredService {
   }
 
   async getAllTotalDeal(filter: FiltersDashboredDto) {
-    return this.getTotalRevenueByStatus(this.deskAreaRepository, "complete", filter, "shared");
+    return this.getTotalRevenueByStatus(this.dealsRepository, "complete", filter, "deals");
   }
 
   async getAllTotalCancelledDeal(filter: FiltersDashboredDto) {
-    return this.getTotalRevenueByStatus(this.deskAreaRepository, "cancelled", filter, "shared");
+    return this.getTotalRevenueByStatus(this.dealsRepository, "cancelled", filter, "deals");
   }
 
   async getAllTotalActiveDeal(filter: FiltersDashboredDto) {
-    return this.getTotalRevenueByStatus(this.deskAreaRepository, "active", filter, "shared");
+    return this.getTotalRevenueByStatus(this.dealsRepository, "active", filter, "deals");
   }
 
   async getAllTotalShared(filter: FiltersDashboredDto) {
@@ -651,6 +843,14 @@ export class DahboredService {
 
   async getAllTotalActiveDeskArea(filter: FiltersDashboredDto) {
     return this.getTotalRevenueByStatus(this.deskAreaRepository, "active", filter, "deskarea");
+  }
+
+  async getAllTotalDeposit(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.depositeRepository, "complete", filter, "deposite");
+  }
+
+  async getAllTotalCancelledDeposit(filter: FiltersDashboredDto) {
+    return this.getTotalRevenueByStatus(this.depositeRepository, "cancelled", filter, "deposite");
   }
 
   async getAllTotalReservationRoom(filter: FiltersDashboredDto) {
@@ -843,6 +1043,277 @@ export class DahboredService {
       .andWhere("order.created_at BETWEEN :startFrom AND :startTo", {
         startFrom: filter.start_date,
         startTo: filter.end_date,
+      })
+      .getRawOne();
+  }
+
+  async getCashRevenueForDeskAreas(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.deskAreaRepository, "deskarea", filter, PaymentMethod.Cach);
+  }
+
+  async getVisaRevenueForDeskAreas(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.deskAreaRepository, "deskarea", filter, PaymentMethod.Visa);
+  }
+
+  async getVodafoneCachRevenueForDeskAreas(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.deskAreaRepository,
+      "deskarea",
+      filter,
+      PaymentMethod.VodafoneCach,
+    );
+  }
+
+  async getInstapayRevenueForDeskAreas(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.deskAreaRepository,
+      "deskarea",
+      filter,
+      PaymentMethod.Instapay,
+    );
+  }
+
+  async getCashRevenueForDeals(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.dealsRepository, "deals", filter, PaymentMethod.Cach);
+  }
+
+  async getVisaRevenueForDeals(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.dealsRepository, "deals", filter, PaymentMethod.Visa);
+  }
+
+  async getVodafoneCachRevenueForDeals(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.dealsRepository,
+      "deals",
+      filter,
+      PaymentMethod.VodafoneCach,
+    );
+  }
+
+  async getInstapayRevenueForDeals(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.dealsRepository, "deals", filter, PaymentMethod.Instapay);
+  }
+
+  async getReservationRoomCashRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.reservationRoomRepository,
+      "reservationRoom",
+      filter,
+      PaymentMethod.Cach,
+    );
+  }
+
+  async getReservationRoomVisaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.reservationRoomRepository,
+      "reservationRoom",
+      filter,
+      PaymentMethod.Visa,
+    );
+  }
+
+  async getReservationRoomInstaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.reservationRoomRepository,
+      "reservationRoom",
+      filter,
+      PaymentMethod.Instapay,
+    );
+  }
+
+  async getReservationRoomVodafoneRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.reservationRoomRepository,
+      "reservationRoom",
+      filter,
+      PaymentMethod.VodafoneCach,
+    );
+  }
+
+  async getAssignesPackagesCashRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.packagesRepository,
+      "assignesPackages",
+      filter,
+      PaymentMethod.Cach,
+    );
+  }
+
+  async getAssignesPackagesInstaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.packagesRepository,
+      "assignesPackages",
+      filter,
+      PaymentMethod.Instapay,
+    );
+  }
+
+  async getAssignesPackagesVisaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.packagesRepository,
+      "assignesPackages",
+      filter,
+      PaymentMethod.Visa,
+    );
+  }
+
+  async getAssignesPackagesVodafoneRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.packagesRepository,
+      "assignesPackages",
+      filter,
+      PaymentMethod.VodafoneCach,
+    );
+  }
+
+  async getAssignesMemberShipCachRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.membershipRepository,
+      "assignesMemberShip",
+      filter,
+      PaymentMethod.Cach,
+    );
+  }
+
+  async getAssignesMemberShipVisaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.membershipRepository,
+      "assignesMemberShip",
+      filter,
+      PaymentMethod.Visa,
+    );
+  }
+
+  async getAssignesMemberShipInstaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.membershipRepository,
+      "assignesMemberShip",
+      filter,
+      PaymentMethod.Instapay,
+    );
+  }
+
+  async getAssignesMemberShipVodafoneRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.membershipRepository,
+      "assignesMemberShip",
+      filter,
+      PaymentMethod.VodafoneCach,
+    );
+  }
+
+  async getSharedCachRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.sharedRepository, "shared", filter, PaymentMethod.Cach);
+  }
+
+  async getSharedVisaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.sharedRepository, "shared", filter, PaymentMethod.Visa);
+  }
+
+  async getSharedInstaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.sharedRepository, "shared", filter, PaymentMethod.Instapay);
+  }
+
+  async getSharedVodafoneRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.sharedRepository,
+      "shared",
+      filter,
+      PaymentMethod.VodafoneCach,
+    );
+  }
+  async getDepositeCachRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.depositeRepository, "deposite", filter, PaymentMethod.Cach);
+  }
+
+  async getDepositeVisaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(this.depositeRepository, "deposite", filter, PaymentMethod.Visa);
+  }
+
+  async getDepositeInstaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.depositeRepository,
+      "deposite",
+      filter,
+      PaymentMethod.Instapay,
+    );
+  }
+
+  async getDepositeVodafoneRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.depositeRepository,
+      "deposite",
+      filter,
+      PaymentMethod.VodafoneCach,
+    );
+  }
+
+  async getOrderCachRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.orderRepository,
+      "orders",
+      filter,
+      PaymentMethod.Cach,
+      "type_order",
+      TypeOrder.PAID,
+      "total_order",
+    );
+  }
+
+  async getOrderVisaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.orderRepository,
+      "orders",
+      filter,
+      PaymentMethod.Visa,
+      "type_order",
+      TypeOrder.PAID,
+      "total_order",
+    );
+  }
+
+  async getOrderInstaRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.orderRepository,
+      "orders",
+      filter,
+      PaymentMethod.Instapay,
+      "type_order",
+      TypeOrder.PAID,
+      "total_order",
+    );
+  }
+
+  async getOrderVodafoneRevenue(filter: FiltersDashboredDto) {
+    return this.getPaymentRevenue(
+      this.orderRepository,
+      "orders",
+      filter,
+      PaymentMethod.VodafoneCach,
+      "type_order",
+      TypeOrder.PAID,
+      "total_order",
+    );
+  }
+
+  private async getPaymentRevenue(
+    repository: Repository<any>,
+    entityName: string,
+    filter: FiltersDashboredDto,
+    method: PaymentMethod,
+    status = "status",
+    statusValue = "complete",
+    total = "total_price",
+  ) {
+    return repository
+      .createQueryBuilder(entityName)
+      .select(`SUM(${entityName}.${total})`, "totalRevenue")
+      .where(`${entityName}.payment_method = :method`, { method })
+      .andWhere(`${entityName}.${status} = :status`, { status: statusValue })
+      .andWhere(`${entityName}.${total} > 0`)
+      .andWhere(`${entityName}.created_at BETWEEN :startDate AND :endDate`, {
+        startDate: filter.start_date,
+        endDate: filter.end_date,
       })
       .getRawOne();
   }

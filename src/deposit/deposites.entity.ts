@@ -2,7 +2,7 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
-import { PaymentMethod } from "src/shared/enum/global-enum";
+import { DepositeStatus, PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import {
   Column,
@@ -21,6 +21,9 @@ export class Deposite {
 
   @Column({ nullable: true })
   total_price: number;
+
+  @Column({ type: "enum", enum: DepositeStatus, default: DepositeStatus.COMPLETE })
+  status: DepositeStatus;
 
   @Column({
     nullable: true,

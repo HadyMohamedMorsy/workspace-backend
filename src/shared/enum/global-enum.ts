@@ -112,6 +112,11 @@ export enum ReservationStatus {
   COMPLETE = "complete",
 }
 
+export enum DepositeStatus {
+  CANCELLED = "cancelled",
+  COMPLETE = "complete",
+}
+
 export enum TasksStatus {
   ACTIVE = "active",
   CANCELLED = "cancelled",

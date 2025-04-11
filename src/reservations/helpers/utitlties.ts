@@ -51,6 +51,5 @@ export function calculateHours(details: calulateHour) {
 
   const hours = Math.floor(totalMinutes / 60);
   const remainingMinutes = totalMinutes % 60;
-
   return remainingMinutes > 10 ? hours + 1 : hours;
 }

@@ -972,7 +972,17 @@ export class ReservationRoomService {
   }
 
   private async handleCancellation(dto: UpdateReservationRoomDto) {
-    const { start_hour, start_minute, start_time, end_hour, end_minute, end_time, ...rest } = dto;
+    const {
+      start_hour,
+      start_minute,
+      start_time,
+      end_hour,
+      end_minute,
+      end_time,
+      package_id,
+      deal_id,
+      ...rest
+    } = dto;
 
     const diffHours = calculateHours({
       start_hour,
@@ -983,8 +993,8 @@ export class ReservationRoomService {
       end_time,
     });
 
-    if (dto.package_id) {
-      const pkg = await this.validatePackage(dto.package_id);
+    if (package_id) {
+      const pkg = await this.validatePackage(package_id);
       await this.packageRooms.update({
         id: pkg.id,
         used: pkg.used - diffHours,
@@ -992,8 +1002,8 @@ export class ReservationRoomService {
       });
     }
 
-    if (dto.deal_id) {
-      const deal = await this.validateDeal(dto.deal_id);
+    if (deal_id) {
+      const deal = await this.validateDeal(deal_id);
       await this.deal.update({
         id: deal.id,
         used: deal.used - diffHours,

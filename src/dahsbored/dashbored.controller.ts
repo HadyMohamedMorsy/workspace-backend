@@ -31,6 +31,8 @@ export class DashboredController {
     slug: string,
   ) {
     switch (slug) {
+      case "cash-today":
+        return this.handleAllRevenueMetrics(filterQueryDto);
       case "clients":
         return this.handleClientsMetrics(filterQueryDto);
       case "salaries":
@@ -53,6 +55,8 @@ export class DashboredController {
         return this.handleRevenueDealsMetrics(filterQueryDto, hasAccess);
       case "revenue_packages":
         return this.handleRevenuePackageMetrics(filterQueryDto, hasAccess);
+      case "revenue_deposit":
+        return this.handleRevenueDepositMetrics(filterQueryDto, hasAccess);
       case "revenue_shared":
         return this.handleRevenueSharedMetrics(filterQueryDto, hasAccess);
       case "revenue_deskarea":
@@ -61,11 +65,50 @@ export class DashboredController {
         return this.handleRevenueRoomsMetrics(filterQueryDto, hasAccess);
       case "revenue_membership":
         return this.handleRevenueMemberShipMetrics(filterQueryDto, hasAccess);
+      case "deskarea_payment_method":
+        return this.getDeskAreaPaymentMetrics(filterQueryDto, hasAccess);
+      case "reservation_room_payment_method":
+        return this.getReservationRoomPaymentMetrics(filterQueryDto, hasAccess);
+      case "package_payment_method":
+        return this.getAssignesPackagesPaymentMetrics(filterQueryDto, hasAccess);
+      case "membership_payment_method":
+        return this.getMembershipPaymentMetrics(filterQueryDto, hasAccess);
+      case "shared_payment_method":
+        return this.getSharedMetrics(filterQueryDto, hasAccess);
+      case "order_payment_method":
+        return this.getOrderMetrics(filterQueryDto, hasAccess);
+      case "deposites_payment_methods":
+        return this.getDepositeMetrics(filterQueryDto, hasAccess);
+      case "deals_payment_methods":
+        return this.getDealsPaymentMetrics(filterQueryDto, hasAccess);
       case "offers":
         return this.handleTotalOffersMetrics(filterQueryDto, hasAccess);
       default:
         return this.handleClientsMetrics(filterQueryDto);
     }
+  }
+
+  private async handleAllRevenueMetrics(filterQueryDto: FiltersDashboredDto) {
+    const revenueData = await this.dashboredService.getAllRevenueToday(filterQueryDto);
+
+    return this.createMetrics(
+      [
+        ["Total Cash", revenueData?.total || 0],
+        ["Deals Cash", revenueData?.details.dealsRevenue || 0],
+        ["Shared Cash", revenueData?.details.sharedRevenue || 0],
+        ["Desk Area Cash", revenueData?.details.deskAreaRevenue || 0],
+        ["Reservation Room Cash", revenueData?.details.reservationRoomRevenue || 0],
+        ["Deposit Cash", revenueData?.details.depositeRevenue || 0],
+        ["Packages Cash", revenueData?.details.packagesRevenue || 0],
+        ["Membership Cash", revenueData?.details.membershipRevenue || 0],
+        ["Orders Paid Cash", revenueData?.details.orderPaid || 0],
+        ["Orders Cost Cash", revenueData?.details.orderCost || 0],
+        ["Revenue  Cash", revenueData?.details.revenueChildSum || 0],
+        ["Expenses Cash", revenueData?.details.expenseSum || 0],
+        ["Purchases Cash", revenueData?.details.purchasesSum || 0],
+      ],
+      "pi pi-money-bill",
+    );
   }
 
   private async handleClientsMetrics(filterQueryDto: FiltersDashboredDto) {
@@ -144,7 +187,7 @@ export class DashboredController {
       this.dashboredService.getAllExapsesCoursesCost(filterQueryDto),
       this.dashboredService.getAllExapsesCharteredAccountantFees(filterQueryDto),
       this.dashboredService.getAllExapsesLoans(filterQueryDto),
-      this.dashboredService.getAllExapsesOther(filterQueryDto),
+      this.dashboredService.getAllExapsesPlaceOther(filterQueryDto),
     ]);
 
     return this.createMetrics(
@@ -180,7 +223,7 @@ export class DashboredController {
       this.dashboredService.getAllRevenueCoursesNetProfit(filterQueryDto),
       this.dashboredService.getAllRevenueElectronicIncomeInvoices(filterQueryDto),
       this.dashboredService.getAllRevenueElectronicExpensesInvoices(filterQueryDto),
-      this.dashboredService.getAllRevenueOther(filterQueryDto),
+      this.dashboredService.getAllAnotherRevenue(filterQueryDto),
     ]);
 
     return this.createMetrics(
@@ -195,6 +238,7 @@ export class DashboredController {
         ["Total courses net profit", getValue(revenueResults[7], "totalRevenue")],
         ["Total electronic income invoices", getValue(revenueResults[8], "totalRevenue")],
         ["Total electronic expenses invoices", getValue(revenueResults[9], "totalRevenue")],
+        ["Total onther Revenue", getValue(revenueResults[10], "totalRevenue")],
       ],
       "pi pi-money-bill",
     );
@@ -266,9 +310,6 @@ export class DashboredController {
       this.dashboredService.getTotalPaidOrders(filterQueryDto),
       this.dashboredService.getTotalCostOrders(filterQueryDto),
       this.dashboredService.getTotalHoldOrders(filterQueryDto),
-    ]);
-
-    const totalOrderPrice = Promise.all([
       this.dashboredService.getTotalOrderPriceOrders(filterQueryDto),
     ]);
 
@@ -277,12 +318,11 @@ export class DashboredController {
         ["All Orders Paid", getValue(orderTotals[0], "total")],
         ["All Orders Cost", getValue(orderTotals[1], "total")],
         ["All Orders Hold", getValue(orderTotals[2], "total")],
-        ["All Amount Orders Kitchen", getValue(totalOrderPrice, "total")],
+        ["All Amount Orders Kitchen", getValue(orderTotals[3], "total")],
         [
           "All Orders Kitchen",
           getValue(orderTotals[0], "total") + getValue(orderTotals[1], "total"),
         ],
-        ,
       ],
       "pi pi-inbox",
     );
@@ -402,6 +442,27 @@ export class DashboredController {
     );
   }
 
+  private async handleRevenueDepositMetrics(
+    filterQueryDto: FiltersDashboredDto,
+    hasAccess: boolean,
+  ) {
+    if (!hasAccess) return [];
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    const [totalCompletedDeskArea, totalCancelledDeskArea] = await Promise.all([
+      this.dashboredService.getAllTotalDeposit(filterQueryDto),
+      this.dashboredService.getAllTotalCancelledDeposit(filterQueryDto),
+    ]);
+
+    return this.createMetrics(
+      [
+        ["All Completed Deposit Revenue", getValue(totalCompletedDeskArea, "totalRevenue")],
+        ["All Cancelled Deposit", getValue(totalCancelledDeskArea, "totalRevenue")],
+      ],
+      "pi pi-box",
+    );
+  }
+
   private async handleRevenueRoomsMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
     if (!hasAccess) return [];
     const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
@@ -462,5 +523,188 @@ export class DashboredController {
     ]);
 
     return this.createMetrics([["All Offers", getValue(totalOffer, "count")]], "pi pi-box");
+  }
+
+  async getDealsPaymentMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, vodafone, visa, instapay] = await Promise.all([
+      this.dashboredService.getCashRevenueForDeals(filterQueryDto),
+      this.dashboredService.getVisaRevenueForDeals(filterQueryDto),
+      this.dashboredService.getVodafoneCachRevenueForDeals(filterQueryDto),
+      this.dashboredService.getInstapayRevenueForDeals(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Deals Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Deals Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Deals Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Deals Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-credit-card",
+    );
+  }
+
+  async getDeskAreaPaymentMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, vodafone, visa, instapay] = await Promise.all([
+      this.dashboredService.getCashRevenueForDeskAreas(filterQueryDto),
+      this.dashboredService.getVodafoneCachRevenueForDeskAreas(filterQueryDto),
+      this.dashboredService.getVisaRevenueForDeskAreas(filterQueryDto),
+      this.dashboredService.getInstapayRevenueForDeskAreas(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Deskarea Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Deskarea Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Deskarea Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Deskarea Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-credit-card",
+    );
+  }
+
+  async getReservationRoomPaymentMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, vodafone, visa, instapay] = await Promise.all([
+      this.dashboredService.getReservationRoomCashRevenue(filterQueryDto),
+      this.dashboredService.getReservationRoomVodafoneRevenue(filterQueryDto),
+      this.dashboredService.getReservationRoomVisaRevenue(filterQueryDto),
+      this.dashboredService.getReservationRoomInstaRevenue(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Reservation Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Reservation Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Reservation Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Reservation Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-home",
+    );
+  }
+
+  async getAssignesPackagesPaymentMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, vodafone, visa, instapay] = await Promise.all([
+      this.dashboredService.getAssignesPackagesCashRevenue(filterQueryDto),
+      this.dashboredService.getAssignesPackagesVodafoneRevenue(filterQueryDto),
+      this.dashboredService.getAssignesPackagesVisaRevenue(filterQueryDto),
+      this.dashboredService.getAssignesPackagesInstaRevenue(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Packages Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Packages Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Packages Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Packages Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-briefcase",
+    );
+  }
+
+  async getMembershipPaymentMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, instapay, visa, vodafone] = await Promise.all([
+      this.dashboredService.getAssignesMemberShipCachRevenue(filterQueryDto),
+      this.dashboredService.getAssignesMemberShipVisaRevenue(filterQueryDto),
+      this.dashboredService.getAssignesMemberShipInstaRevenue(filterQueryDto),
+      this.dashboredService.getAssignesMemberShipVodafoneRevenue(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Membership Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Membership Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Membership Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Membership Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-id-card",
+    );
+  }
+
+  async getSharedMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, instapay, visa, vodafone] = await Promise.all([
+      this.dashboredService.getSharedCachRevenue(filterQueryDto),
+      this.dashboredService.getSharedInstaRevenue(filterQueryDto),
+      this.dashboredService.getSharedVisaRevenue(filterQueryDto),
+      this.dashboredService.getSharedVodafoneRevenue(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Shared Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Shared Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Shared Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Shared Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-id-card",
+    );
+  }
+
+  async getOrderMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, instapay, visa, vodafone] = await Promise.all([
+      this.dashboredService.getOrderCachRevenue(filterQueryDto),
+      this.dashboredService.getOrderInstaRevenue(filterQueryDto),
+      this.dashboredService.getOrderVisaRevenue(filterQueryDto),
+      this.dashboredService.getOrderVodafoneRevenue(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Order Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Order Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Order Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Order Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-id-card",
+    );
+  }
+  async getDepositeMetrics(filterQueryDto: FiltersDashboredDto, hasAccess: boolean) {
+    if (!hasAccess) return [];
+
+    const [cash, instapay, visa, vodafone] = await Promise.all([
+      this.dashboredService.getDepositeCachRevenue(filterQueryDto),
+      this.dashboredService.getDepositeVisaRevenue(filterQueryDto),
+      this.dashboredService.getDepositeInstaRevenue(filterQueryDto),
+      this.dashboredService.getDepositeVodafoneRevenue(filterQueryDto),
+    ]);
+
+    const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
+
+    return this.createMetrics(
+      [
+        ["Cash Deposite Revenue", getValue(cash, "totalRevenue")],
+        ["Vodafone Deposite Revenue", getValue(vodafone, "totalRevenue")],
+        ["Visa Deposite Revenue", getValue(visa, "totalRevenue")],
+        ["Instapay Deposite Revenue", getValue(instapay, "totalRevenue")],
+      ],
+      "pi pi-id-card",
+    );
   }
 }
