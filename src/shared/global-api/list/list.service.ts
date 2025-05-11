@@ -96,7 +96,7 @@ export class ListService {
   async getEntityList(module: string) {
     if (module === "user") return await this.usersService.getList({ status: "active" });
     if (module === "room") return await this.roomService.getList();
-    if (module === "categories") return await this.categoryService.findList();
+    if (module === "categories") return await this.categoryService.getList();
     if (module === "global-offer-shared") return await this.generalOfferService.findShared();
     if (module === "global-offer-deskarea") return await this.generalOfferService.findDeskArea();
     if (module === "global-offer-membership")

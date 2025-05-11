@@ -20,7 +20,7 @@ export class ProductService {
 
   // Create a new product
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const categories = await this.categoryService.findMany(createProductDto.category_ids);
+    const categories = await this.categoryService.findByIds(createProductDto.category_ids);
     if (!categories) {
       // If the product is not found, throw a NotFoundException
       throw new NotFoundException(`categories with id ${createProductDto.category_ids} not found`);
@@ -96,7 +96,7 @@ export class ProductService {
   }
 
   async updateWithManyRelation(updateProductDto: UpdateProductDto) {
-    const categories = await this.categoryService.findMany(updateProductDto.category_ids);
+    const categories = await this.categoryService.findByIds(updateProductDto.category_ids);
 
     if (!categories) {
       // If the product is not found, throw a NotFoundException
