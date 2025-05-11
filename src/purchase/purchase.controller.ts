@@ -3,14 +3,14 @@ import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.g
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
-import { CreateReturnsDto } from "./dto/create-returns.dto";
-import { UpdateReturnsDto } from "./dto/update-returns.dto";
-import { ReturnsService } from "./returns.service";
+import { CreatePurchaseDto } from "./dto/create-purchase.dto";
+import { UpdatePurchaseDto } from "./dto/update-purchase.dto";
+import { PurchaseService } from "./purchase.service";
 
 @UseGuards(AuthorizationGuard)
-@Controller("returns")
-export class ReturnsController implements SelectOptions, RelationOptions {
-  constructor(private readonly service: ReturnsService) {}
+@Controller("purchase")
+export class PurchaseController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: PurchaseService) {}
 
   public selectOptions(): Record<string, boolean> {
     return {
@@ -19,9 +19,9 @@ export class ReturnsController implements SelectOptions, RelationOptions {
       weight_kg: true,
       weight_g: true,
       weight_product: true,
-      return_price: true,
+      purchase_price: true,
       total: true,
-      return_qty: true,
+      purchase_qty: true,
     };
   }
 
@@ -39,7 +39,7 @@ export class ReturnsController implements SelectOptions, RelationOptions {
   @HttpCode(200)
   @Permissions([
     {
-      resource: Resource.Returns,
+      resource: Resource.Purchases,
       actions: [Permission.INDEX],
     },
   ])
@@ -50,52 +50,52 @@ export class ReturnsController implements SelectOptions, RelationOptions {
   @Post("/store")
   @Permissions([
     {
-      resource: Resource.Returns,
+      resource: Resource.Purchases,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createReturnsDto: CreateReturnsDto, @Req() req: Request) {
+  async create(@Body() createPurchaseDto: CreatePurchaseDto, @Req() req: Request) {
     return await this.service.create({
-      type_store: createReturnsDto.type_store,
-      weight_kg: createReturnsDto.weight_kg,
-      weight_g: createReturnsDto.weight_g,
-      weight_product: createReturnsDto.weight_product,
-      total: createReturnsDto.total,
-      return_qty: createReturnsDto.return_qty,
-      note: createReturnsDto.note,
+      type_store: createPurchaseDto.type_store,
+      weight_kg: createPurchaseDto.weight_kg,
+      weight_g: createPurchaseDto.weight_g,
+      weight_product: createPurchaseDto.weight_product,
+      total: createPurchaseDto.total,
+      purchase_qty: createPurchaseDto.purchase_qty,
+      note: createPurchaseDto.note,
       product: req["product"],
-      return_price: req["return_price"],
+      purchase_price: req["purchase_price"],
       createdBy: req["createdBy"],
-    } as CreateReturnsDto);
+    } as CreatePurchaseDto);
   }
 
   @Put("/update")
   @Permissions([
     {
-      resource: Resource.Returns,
+      resource: Resource.Purchases,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateReturnsDto: UpdateReturnsDto, @Req() req: Request) {
+  async update(@Body() updatePurchaseDto: UpdatePurchaseDto, @Req() req: Request) {
     return await this.service.update({
-      id: updateReturnsDto.id,
-      type_store: updateReturnsDto.type_store,
-      weight_kg: updateReturnsDto.weight_kg,
-      weight_g: updateReturnsDto.weight_g,
-      weight_product: updateReturnsDto.weight_product,
-      total: updateReturnsDto.total,
-      return_qty: updateReturnsDto.return_qty,
-      note: updateReturnsDto.note,
-      return_price: req["return_price"],
+      id: updatePurchaseDto.id,
+      type_store: updatePurchaseDto.type_store,
+      weight_kg: updatePurchaseDto.weight_kg,
+      weight_g: updatePurchaseDto.weight_g,
+      weight_product: updatePurchaseDto.weight_product,
+      total: updatePurchaseDto.total,
+      purchase_qty: updatePurchaseDto.purchase_qty,
+      note: updatePurchaseDto.note,
+      purchase_price: req["purchase_price"],
       product: req["product"],
       createdBy: req["createdBy"],
-    } as UpdateReturnsDto);
+    } as UpdatePurchaseDto);
   }
 
   @Delete("/delete")
   @Permissions([
     {
-      resource: Resource.Returns,
+      resource: Resource.Purchases,
       actions: [Permission.DELETE],
     },
   ])

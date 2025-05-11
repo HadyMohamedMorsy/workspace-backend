@@ -10,7 +10,7 @@ import {
 } from "typeorm";
 
 @Entity()
-export class Returns {
+export class Purchase {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,7 +18,7 @@ export class Returns {
   type_store: string;
 
   @Column({ nullable: true })
-  return_price: number;
+  purchase_price: number;
 
   @Column({
     type: "decimal",
@@ -35,7 +35,7 @@ export class Returns {
   weight_product: number;
 
   @Column()
-  return_qty: number;
+  purchase_qty: number;
 
   @Column()
   total: number;

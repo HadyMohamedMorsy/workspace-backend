@@ -1,5 +1,7 @@
 import { Transform, Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
+import { Product } from "src/products/product.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateReturnsDto {
   @IsString()
@@ -49,4 +51,8 @@ export class CreateReturnsDto {
   @Type(() => Number)
   @IsNotEmpty()
   return_qty: number;
+
+  createdBy: User;
+
+  product: Product;
 }

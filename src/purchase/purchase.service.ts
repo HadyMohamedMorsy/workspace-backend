@@ -4,36 +4,36 @@ import { BaseService } from "src/shared/base/base-crud";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
 import { Repository, SelectQueryBuilder } from "typeorm";
-import { CreateReturnsDto } from "./dto/create-returns.dto";
-import { UpdateReturnsDto } from "./dto/update-returns.dto";
-import { Returns } from "./returns.entity";
+import { CreatePurchaseDto } from "./dto/create-purchase.dto";
+import { UpdatePurchaseDto } from "./dto/update-purchase.dto";
+import { Purchase } from "./purchase.entity";
 
 @Injectable()
-export class ReturnsService
-  extends BaseService<Returns, CreateReturnsDto, UpdateReturnsDto>
-  implements ICrudService<Returns, CreateReturnsDto, UpdateReturnsDto>
+export class PurchaseService
+  extends BaseService<Purchase, CreatePurchaseDto, UpdatePurchaseDto>
+  implements ICrudService<Purchase, CreatePurchaseDto, UpdatePurchaseDto>
 {
   constructor(
     readonly apiFeaturesService: APIFeaturesService,
-    @InjectRepository(Returns)
-    repository: Repository<Returns>,
+    @InjectRepository(Purchase)
+    repository: Repository<Purchase>,
   ) {
     super(repository, apiFeaturesService);
   }
 
   async findUserAll(userId: number) {
-    const queryBuilder = this.repository.createQueryBuilder("returns");
-    queryBuilder.leftJoinAndSelect("returns.user", "user");
-    queryBuilder.leftJoinAndSelect("returns.createdBy", "createdBy");
-    queryBuilder.where("returns.userId = :userId", { userId });
-    const [returns, total] = await queryBuilder.getManyAndCount();
+    const queryBuilder = this.repository.createQueryBuilder("purchase");
+    queryBuilder.leftJoinAndSelect("purchase.user", "user");
+    queryBuilder.leftJoinAndSelect("purchase.createdBy", "createdBy");
+    queryBuilder.where("purchase.userId = :userId", { userId });
+    const [purchases, total] = await queryBuilder.getManyAndCount();
     return {
-      data: returns,
+      data: purchases,
       total,
     };
   }
 
-  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<Returns>, filteredRecord?: any) {
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<Purchase>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     if (filteredRecord.product_id) {
       queryBuilder
