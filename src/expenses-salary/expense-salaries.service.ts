@@ -40,7 +40,7 @@ export class ExpensesSalariesService {
   }
 
   private async validateUser(userId: number): Promise<User> {
-    const user = await this.usersService.findOneById(userId);
+    const user = await this.usersService.findOne(userId);
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
@@ -108,7 +108,7 @@ export class ExpensesSalariesService {
     const { user_id, ...updateDto } = updateExpensesSalariesDto;
 
     if (updateExpensesSalariesDto.type_sallary === TypeSallary.Internal) {
-      user = await this.usersService.findOneById(user_id);
+      user = await this.usersService.findOne(user_id);
       if (!user) {
         throw new NotFoundException(`user is not found `);
       }

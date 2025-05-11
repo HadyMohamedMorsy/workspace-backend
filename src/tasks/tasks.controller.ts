@@ -1,17 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateTaskDto } from "./dto/create-tasks.dto";
 import { UpdateTaskDto } from "./dto/update-tasks.dto";
@@ -19,12 +9,37 @@ import { TaskService } from "./tasks.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("task")
-export class TaskController {
-  constructor(private readonly taskService: TaskService) {}
+export class TaskController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: TaskService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      name: true,
+      note: true,
+      status: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      user: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Task,
@@ -32,12 +47,11 @@ export class TaskController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.taskService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Task,
@@ -45,11 +59,10 @@ export class TaskController {
     },
   ])
   async findByUserAll(@Body() filterQueryDto: any) {
-    return this.taskService.findUserAll(filterQueryDto);
+    return this.service.findUserAll(filterQueryDto);
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Task,
@@ -57,14 +70,19 @@ export class TaskController {
     },
   ])
   async create(@Body() createTaskDto: CreateTaskDto, @Req() req: Request) {
-    const user = req["assignToUser"];
-    const createdBy = req["createdBy"];
-    const payload = { ...createTaskDto, user, createdBy };
-    return await this.taskService.create(payload);
+    return await this.service.create(
+      {
+        name: createTaskDto.name,
+        note: createTaskDto.note,
+        user: req["assignToUser"],
+        createdBy: req["createdBy"],
+      } as CreateTaskDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Task,
@@ -72,21 +90,27 @@ export class TaskController {
     },
   ])
   async update(@Body() updateTaskDto: UpdateTaskDto, @Req() req: Request) {
-    const user = req["user"];
-    const createdBy = req["createdBy"];
-    const payload = { ...updateTaskDto, user, createdBy };
-    return await this.taskService.update(payload);
+    return await this.service.update(
+      {
+        id: updateTaskDto.id,
+        name: updateTaskDto.name,
+        note: updateTaskDto.note,
+        user: req["assignToUser"],
+        createdBy: req["createdBy"],
+      } as UpdateTaskDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Task,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.taskService.remove(bodyDelete.id);
+  public delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

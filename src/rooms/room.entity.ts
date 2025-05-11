@@ -1,7 +1,16 @@
 import { Deals } from "src/deals/deals.entity";
 import { OfferPackages } from "src/offer-packages/offer-package.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity()
 export class Room {
@@ -31,6 +40,10 @@ export class Room {
 
   @OneToMany(() => Deals, deals => deals.room)
   deal_room: OfferPackages[];
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

@@ -18,6 +18,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -74,10 +75,10 @@ export class User {
   })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: 0 })
   annual_start: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: 0 })
   annual_increase: number;
 
   @OneToMany(() => Task, task => task.user)
@@ -133,8 +134,11 @@ export class User {
   @OneToMany(() => ExpenseSalaries, salary => salary.user)
   salaries: User[];
 
-  @Column({ type: "enum", enum: UserStatus, nullable: true })
+  @Column({ type: "enum", enum: UserStatus, nullable: true, default: UserStatus.ACTIVE })
   status: UserStatus;
+
+  @ManyToOne(() => User)
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

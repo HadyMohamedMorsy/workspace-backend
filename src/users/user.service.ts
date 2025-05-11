@@ -1,67 +1,25 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { HashingProvider } from "src/auth/providers/hashing.provider";
-import { Role, UserStatus } from "src/shared/enum/global-enum";
+import { BaseService } from "src/shared/base/base-crud";
+import { UserStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { Repository } from "typeorm";
-import { CreateUserDto } from "./dtos/create-user.dto";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
+import { UserDto } from "./dtos/create-user.dto";
 import { PatchUserDto } from "./dtos/patch-user.dto";
-import {
-  ACCOUNTANT,
-  COMMUNITY_OFFICER,
-  FOUNDER,
-  GENERALMANGER,
-  OPERATIONMANGER,
-  SALES,
-  TECHNICALSUPPORT,
-} from "./permissions-default";
 import { User } from "./user.entity";
+
 @Injectable()
-export class UserService {
+export class UserService
+  extends BaseService<User, UserDto, PatchUserDto>
+  implements ICrudService<User, UserDto, PatchUserDto>
+{
   constructor(
-    @Inject(forwardRef(() => HashingProvider))
-    private readonly hashingProvider: HashingProvider,
-    private readonly apiFeaturesService: APIFeaturesService,
+    apiFeaturesService: APIFeaturesService,
     @InjectRepository(User)
-    private readonly repository: Repository<User>,
-  ) {}
-
-  public async findAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService.setRepository(User).buildQuery(filterData);
-
-    queryBuilder.leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
-      typeOrder: "HOLD",
-    });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  public async findList() {
-    const users = await this.repository.find({ where: { status: UserStatus.ACTIVE } });
-    return {
-      data: users,
-    };
-  }
-
-  public async findOneById(id: number): Promise<User> {
-    const user = await this.repository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`${user} with id ${id} not found`);
-    }
-    return user;
+    repository: Repository<User>,
+  ) {
+    super(repository, apiFeaturesService);
   }
 
   public async findOneByEmail(email: string) {
@@ -69,44 +27,16 @@ export class UserService {
     if (!user) {
       throw new UnauthorizedException(`${email} not found`);
     }
-    return user;
-  }
-
-  public async createUser(createUserDto: CreateUserDto) {
-    delete createUserDto.password_confirmation;
-
-    const rolePermissionsMap = {
-      [Role.TECHNICAL_SUPPORT]: TECHNICALSUPPORT,
-      [Role.FOUNDER]: FOUNDER,
-      [Role.GENERAL_MANAGER]: GENERALMANGER,
-      [Role.OPERATION_MANAGER]: OPERATIONMANGER,
-      [Role.COMMUNITY_OFFICER]: COMMUNITY_OFFICER,
-      [Role.ACCOUNTANT]: ACCOUNTANT,
-      [Role.SALES]: SALES,
-    };
-
-    createUserDto.permission = rolePermissionsMap[createUserDto.role] || null;
-    createUserDto.password = await this.hashingProvider.hashPassword(createUserDto.password);
-    const newUser = this.repository.create(createUserDto);
-    const user = await this.repository.save(newUser);
-    delete user.password;
-    return user;
-  }
-
-  async updateUser(patch: PatchUserDto) {
-    if (patch.password) {
-      patch.password = await this.hashingProvider.hashPassword(patch.password);
-      delete patch.password_confirmation;
+    if (user.status === UserStatus.INACTIVE) {
+      throw new UnauthorizedException(`${email} is inactive`);
     }
-
-    await this.repository.update(patch.id, patch);
-    const user = await this.repository.findOne({ where: { id: patch.id } });
-    delete user.password;
     return user;
   }
 
-  public async delete(userId: number) {
-    await this.repository.delete(userId);
-    return { deleted: true, userId };
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder.leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
+      typeOrder: "HOLD",
+    });
   }
 }

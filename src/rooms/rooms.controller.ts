@@ -1,18 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
@@ -20,12 +9,34 @@ import { RoomsService } from "./rooms.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("rooms")
-export class RoomsController {
-  constructor(private readonly roomsService: RoomsService) {}
+export class RoomsController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: RoomsService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      name: true,
+      featured_image: true,
+      capacity: true,
+      price: true,
+      note: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Rooms,
@@ -33,45 +44,62 @@ export class RoomsController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.roomsService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/lists", "/api/v1/rooms-filters-calender"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Rooms,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createRoomDto: CreateRoomDto) {
-    return await this.roomsService.create(createRoomDto);
+  async create(@Body() createRoomDto: CreateRoomDto, @Req() req: Request) {
+    return await this.service.create(
+      {
+        name: createRoomDto.name,
+        featured_image: createRoomDto.featured_image,
+        capacity: createRoomDto.capacity,
+        price: createRoomDto.price,
+        note: createRoomDto.note,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/lists", "/api/v1/rooms-filters-calender"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Rooms,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateRoomDto: UpdateRoomDto) {
-    return await this.roomsService.update(updateRoomDto);
+  async update(@Body() updateRoomDto: UpdateRoomDto, @Req() req: Request) {
+    return await this.service.update(
+      {
+        id: updateRoomDto.id,
+        name: updateRoomDto.name,
+        featured_image: updateRoomDto.featured_image,
+        capacity: updateRoomDto.capacity,
+        price: updateRoomDto.price,
+        note: updateRoomDto.note,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/lists", "/api/v1/rooms-filters-calender"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Rooms,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.roomsService.remove(bodyDelete.id);
+  public delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

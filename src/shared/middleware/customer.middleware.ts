@@ -31,7 +31,7 @@ export class CustomerMiddleware implements NestMiddleware {
         customer = await this.studentActivityService.findOne(customer_id);
         break;
       case TypeUser.User:
-        customer = await this.userService.findOneById(customer_id);
+        customer = await this.userService.findOne(customer_id);
         break;
       default:
         throw new Error("Invalid user type");

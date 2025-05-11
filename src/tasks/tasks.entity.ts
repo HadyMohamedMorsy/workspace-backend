@@ -20,8 +20,8 @@ export class Task {
   })
   user: User;
 
-  @Column({ type: "enum", enum: TasksStatus })
-  status: TasksStatus;
+  @Column({ type: "enum", enum: TasksStatus, default: TasksStatus.ACTIVE })
+  status: TasksStatus = TasksStatus.ACTIVE;
 
   @ManyToOne(() => User, user => user.createdByTasks, {
     onDelete: "CASCADE",

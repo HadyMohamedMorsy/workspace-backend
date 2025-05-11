@@ -26,7 +26,7 @@ export class AuthService {
   }
 
   async getUserPermissions(userId: number) {
-    const user = await this.usersService.findOneById(userId);
+    const user = await this.usersService.findOne(userId);
     if (!user) throw new BadRequestException("User Is Not Exist");
     return user.permission;
   }

@@ -1,17 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateVacationDto } from "./dto/create-vacation.dto";
 import { UpdateVacationDto } from "./dto/update-vacation.dto";
@@ -19,12 +9,36 @@ import { VacationService } from "./vacation.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("vacation")
-export class VacationController {
-  constructor(private readonly vacationService: VacationService) {}
+export class VacationController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: VacationService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      selected_day: true,
+      note: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      user: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Vacation,
@@ -32,12 +46,11 @@ export class VacationController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.vacationService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Vacation,
@@ -45,11 +58,10 @@ export class VacationController {
     },
   ])
   async findByUserAll(@Body() filterQueryDto: any) {
-    return this.vacationService.findUserAll(filterQueryDto);
+    return this.service.findUserAll(filterQueryDto);
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Vacation,
@@ -57,14 +69,19 @@ export class VacationController {
     },
   ])
   async create(@Body() createVacationDto: CreateVacationDto, @Req() req: Request) {
-    const user = req["user"];
-    const createdBy = req["createdBy"];
-    const payload = { ...createVacationDto, user, createdBy };
-    return await this.vacationService.create(payload);
+    return await this.service.create(
+      {
+        note: createVacationDto.note,
+        user: req["assignToUser"],
+        createdBy: req["createdBy"],
+        selected_day: createVacationDto.selected_day,
+      } as CreateVacationDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Vacation,
@@ -72,21 +89,27 @@ export class VacationController {
     },
   ])
   async update(@Body() updateVacationDto: UpdateVacationDto, @Req() req: Request) {
-    const user = req["user"];
-    const createdBy = req["createdBy"];
-    const payload = { ...updateVacationDto, user, createdBy };
-    return await this.vacationService.update(payload);
+    return await this.service.update(
+      {
+        id: updateVacationDto.id,
+        note: updateVacationDto.note,
+        selected_day: updateVacationDto.selected_day,
+        user: req["assignToUser"],
+        createdBy: req["createdBy"],
+      } as UpdateVacationDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Vacation,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }) {
-    return this.vacationService.remove(bodyDelete.id);
+  public delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

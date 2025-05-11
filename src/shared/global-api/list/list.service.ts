@@ -94,8 +94,8 @@ export class ListService {
   }
 
   async getEntityList(module: string) {
-    if (module === "user") return await this.usersService.findList();
-    if (module === "room") return await this.roomService.findList();
+    if (module === "user") return await this.usersService.getList({ status: "active" });
+    if (module === "room") return await this.roomService.getList();
     if (module === "categories") return await this.categoryService.findList();
     if (module === "global-offer-shared") return await this.generalOfferService.findShared();
     if (module === "global-offer-deskarea") return await this.generalOfferService.findDeskArea();
@@ -112,7 +112,7 @@ export class ListService {
   }
 
   async filterRoomsCalender() {
-    const rooms = await this.roomService.findList();
+    const rooms = await this.roomService.getList();
     return rooms.data.map((room, index) => ({
       key: index.toString(),
       label: room.name.charAt(0).toUpperCase() + room.name.slice(1),

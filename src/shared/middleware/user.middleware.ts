@@ -13,7 +13,7 @@ export class UserMiddleware implements NestMiddleware {
       throw new BadRequestException("Missing user-id in headers");
     }
 
-    const user = await this.userService.findOneById(+userId);
+    const user = await this.userService.findOne(+userId);
     if (!user) {
       throw new BadRequestException(`User with ID ${userId} not found`);
     }
