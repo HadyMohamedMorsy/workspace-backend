@@ -1,31 +1,48 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 import { ProductService } from "./products.service";
 
 @UseGuards(AuthorizationGuard)
-@Controller("product")
-export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+@Controller("products")
+export class ProductController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: ProductService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      code: true,
+      name: true,
+      type: true,
+      store: true,
+      selling_price: true,
+      purshase_price: true,
+      featured_image: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      categories: {
+        id: true,
+        name: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Product,
@@ -33,55 +50,69 @@ export class ProductController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.productService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules([
-    "/api/v1/purchases",
-    "/api/v1/returns",
-    "/api/v1/category",
-    "/api/v1/dashboard",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Product,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateProductDto) {
-    return await this.productService.create(createProductDto);
+  async create(@Body() create: CreateProductDto, @Req() req: Request) {
+    return await this.service.create(
+      {
+        code: create.code,
+        name: create.name,
+        featured_image: create.featured_image,
+        type: create.type,
+        store: create.store,
+        selling_price: create.selling_price,
+        purshase_price: create.purshase_price,
+        categories: req["categories"],
+        createdBy: req["createdBy"],
+      } as CreateProductDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
-  @ClearCacheAnotherModules([
-    "/api/v1/purchases",
-    "/api/v1/returns",
-    "/api/v1/category",
-    "/api/v1/dashboard",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Product,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateProductDto) {
-    return await this.productService.updateWithManyRelation(updateProductDto);
+  async update(@Body() update: UpdateProductDto, @Req() req: Request) {
+    return await this.service.updateProduct(
+      {
+        id: update.id,
+        code: update.code,
+        name: update.name,
+        featured_image: update.featured_image,
+        type: update.type,
+        store: update.store,
+        selling_price: update.selling_price,
+        purshase_price: update.purshase_price,
+        product: req["product"],
+        categories: req["categories"],
+        createdBy: req["createdBy"],
+      } as UpdateProductDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/purchases", "/api/v1/returns", "/api/v1/category"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Product,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.productService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

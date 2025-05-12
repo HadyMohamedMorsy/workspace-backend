@@ -1,11 +1,14 @@
 import { Category } from "src/categories/category.entity";
 import { Purchases } from "src/purchases/purchases.entity";
 import { Returns } from "src/returns/returns.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -42,6 +45,10 @@ export class Product {
 
   @UpdateDateColumn()
   updated_at: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
 
   @ManyToMany(() => Category, category => category.products)
   @JoinTable()
