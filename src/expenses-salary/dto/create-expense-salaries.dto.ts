@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from "class-validator";
 import { TypeSallary } from "src/shared/enum/global-enum";
+import { User } from "src/users/user.entity";
 
 export class CreateExpenseSalariesDto {
   @IsEnum(TypeSallary, {
@@ -24,6 +25,11 @@ export class CreateExpenseSalariesDto {
   @Type(() => Number)
   @IsNotEmpty()
   rewards: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  net_sallary: number;
 
   @ValidateIf(obj => obj.type === TypeSallary.Internal)
   @IsNumber()
@@ -52,4 +58,8 @@ export class CreateExpenseSalariesDto {
   @Type(() => Number)
   @IsNotEmpty()
   user_id: number;
+
+  createdBy: User;
+
+  user: User;
 }

@@ -1,16 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateExpenseSalariesDto } from "./dto/create-expense-salaries.dto";
 import { UpdateExpenseSalariesDto } from "./dto/update-expense-salaries.dto";
@@ -18,12 +9,43 @@ import { ExpensesSalariesService } from "./expense-salaries.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("salary")
-export class ExpensesSalariesController {
-  constructor(private readonly expensesSalariesService: ExpensesSalariesService) {}
+export class ExpensesSalariesController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: ExpensesSalariesService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      name: true,
+      sallary: true,
+      net_sallary: true,
+      annual: true,
+      destination: true,
+      incentives: true,
+      rewards: true,
+      discounts: true,
+      type_sallary: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      user: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesSalaries,
@@ -31,55 +53,75 @@ export class ExpensesSalariesController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.expensesSalariesService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
-  @Post("/user")
+  @Get("/list-salaries")
+  async findList() {
+    return this.service.getList();
+  }
+
+  @Post("/show")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.ExpensesSalaries,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findByUserAll(@Body() filterQueryDto: any) {
-    return this.expensesSalariesService.findByUserAll(filterQueryDto);
+  async show(@Body() filterQueryDto: any) {
+    return this.service.findOne(filterQueryDto);
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesSalaries,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateExpenseSalariesDto) {
-    return await this.expensesSalariesService.create(createProductDto);
+  async create(@Body() create: CreateExpenseSalariesDto, @Req() req: Request) {
+    return await this.service.create({
+      sallary: create.sallary,
+      incentives: create.incentives,
+      destination: create.destination,
+      name: create.name,
+      rewards: create.rewards,
+      discounts: create.discounts,
+      type_sallary: create.type_sallary,
+      user: req["user"],
+      net_sallary: req["net_sallary"],
+      annual: req["annual"],
+      createdBy: req["createdBy"],
+    } as CreateExpenseSalariesDto);
   }
 
-  @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.ExpensesSalaries,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateExpenseSalariesDto) {
-    return await this.expensesSalariesService.update(updateProductDto);
+  async update(@Body() udpate: UpdateExpenseSalariesDto, @Req() req: Request) {
+    return await this.service.update({
+      id: udpate.id,
+      name: udpate.name,
+      sallary: udpate.sallary,
+      destination: udpate.destination,
+      incentives: udpate.incentives,
+      rewards: udpate.rewards,
+      discounts: udpate.discounts,
+      type_sallary: udpate.type_sallary,
+      user: req["user"],
+      net_sallary: req["net_sallary"],
+      annual: req["annual"],
+      createdBy: req["createdBy"],
+    });
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesSalaries,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.expensesSalariesService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }
