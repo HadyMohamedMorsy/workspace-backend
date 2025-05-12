@@ -3,6 +3,7 @@ import { Type } from "class-transformer";
 import { IsInt, IsNotEmpty } from "class-validator";
 import { CreateCoWorkingSpaceDto } from "./create-offer-co-working-space.dto";
 
+// Update-specific DTO
 export class UpdateCoWorkingSpaceDto extends PartialType(CreateCoWorkingSpaceDto) {
   @IsInt()
   @Type(() => Number)
