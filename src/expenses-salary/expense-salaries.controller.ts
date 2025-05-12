@@ -75,19 +75,23 @@ export class ExpensesSalariesController implements SelectOptions, RelationOption
     },
   ])
   async create(@Body() create: CreateExpenseSalariesDto, @Req() req: Request) {
-    return await this.service.create({
-      sallary: create.sallary,
-      incentives: create.incentives,
-      destination: create.destination,
-      name: create.name,
-      rewards: create.rewards,
-      discounts: create.discounts,
-      type_sallary: create.type_sallary,
-      user: req["user"],
-      net_sallary: req["net_sallary"],
-      annual: req["annual"],
-      createdBy: req["createdBy"],
-    } as CreateExpenseSalariesDto);
+    return await this.service.create(
+      {
+        sallary: create.sallary,
+        incentives: create.incentives,
+        destination: create.destination,
+        name: create.name,
+        rewards: create.rewards,
+        discounts: create.discounts,
+        type_sallary: create.type_sallary,
+        user: req["user"],
+        net_sallary: req["net_sallary"],
+        annual: req["annual"],
+        createdBy: req["createdBy"],
+      } as CreateExpenseSalariesDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Put("/update")
@@ -98,20 +102,24 @@ export class ExpensesSalariesController implements SelectOptions, RelationOption
     },
   ])
   async update(@Body() udpate: UpdateExpenseSalariesDto, @Req() req: Request) {
-    return await this.service.update({
-      id: udpate.id,
-      name: udpate.name,
-      sallary: udpate.sallary,
-      destination: udpate.destination,
-      incentives: udpate.incentives,
-      rewards: udpate.rewards,
-      discounts: udpate.discounts,
-      type_sallary: udpate.type_sallary,
-      user: req["user"],
-      net_sallary: req["net_sallary"],
-      annual: req["annual"],
-      createdBy: req["createdBy"],
-    });
+    return await this.service.update(
+      {
+        id: udpate.id,
+        name: udpate.name,
+        sallary: udpate.sallary,
+        destination: udpate.destination,
+        incentives: udpate.incentives,
+        rewards: udpate.rewards,
+        discounts: udpate.discounts,
+        type_sallary: udpate.type_sallary,
+        user: req["user"],
+        net_sallary: req["net_sallary"],
+        annual: req["annual"],
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")

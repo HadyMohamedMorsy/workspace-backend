@@ -1,164 +1,95 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { GeneralOffer } from "src/general-offer/generalOffer.entity";
-import { RoomsService } from "src/rooms/rooms.service";
+import { BaseService } from "src/shared/base/base-crud";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { Repository } from "typeorm";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateOfferPackagesDto } from "./dto/create-offer-packages.dto";
 import { UpdateOfferPackagesDto } from "./dto/update-offer-packages.dto";
 import { OfferPackages } from "./offer-package.entity";
 
+type RelationConfig = {
+  relationPath: string;
+  alias: string;
+  selectFields: string[];
+};
+
 @Injectable()
-export class OfferPackagesService {
+export class OfferPackagesService
+  extends BaseService<OfferPackages, CreateOfferPackagesDto, UpdateOfferPackagesDto>
+  implements ICrudService<OfferPackages, CreateOfferPackagesDto, UpdateOfferPackagesDto>
+{
   constructor(
     @InjectRepository(OfferPackages)
-    private offerpackagesRepository: Repository<OfferPackages>,
-    protected readonly apiFeaturesService: APIFeaturesService,
-    protected readonly roomService: RoomsService,
-  ) {}
-
-  // Create a new record
-  async create(createOfferpackagesDto: CreateOfferPackagesDto): Promise<OfferPackages> {
-    const room = await this.roomService.findOne(createOfferpackagesDto.room_id);
-    const offerpackages = this.offerpackagesRepository.create({
-      ...createOfferpackagesDto,
-      room,
-    });
-    return await this.offerpackagesRepository.save(offerpackages);
+    repository: Repository<OfferPackages>,
+    apiFeaturesService: APIFeaturesService,
+  ) {
+    super(repository, apiFeaturesService);
   }
 
-  // Get all records
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(OfferPackages)
-      .buildQuery(filterData);
+  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
+    const queryBuilder = this.repository.createQueryBuilder("offerPackage");
 
-    queryBuilder.leftJoin("e.room", "er").addSelect(["er.id", "er.name"]);
+    queryBuilder
+      .leftJoin(`offerPackage.assignesPackages`, "assignedPackage")
+      .leftJoin(`assignedPackage.${relationConfig.relationPath}`, relationConfig.alias)
+      .where("offerPackage.id = :id", { id: filterData.id })
+      .select([
+        "offerPackage",
+        "assignedPackage",
+        ...relationConfig.selectFields.map(f => `${relationConfig.alias}.${f}`),
+      ]);
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
+    const [data, totalRecords] = await queryBuilder.getManyAndCount();
+    return this.response(data, totalRecords);
+  }
 
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
+  async findRelatedIndividuals(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "individual",
+      alias: "individual",
+      selectFields: ["id"],
+    });
+  }
+
+  async findRelatedCompanies(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "company",
+      alias: "company",
+      selectFields: ["id"],
+    });
+  }
+
+  async findRelatedStudentActivities(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "studentActivity",
+      alias: "activity",
+      selectFields: ["id"],
+    });
+  }
+
+  async findRelatedRooms(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "room",
+      alias: "room",
+      selectFields: ["id"],
+    });
   }
 
   async findList() {
-    const offers = await this.offerpackagesRepository.find({
+    const packages = await this.repository.find({
       relations: ["room"],
     });
     return {
-      data: offers,
+      data: packages,
     };
   }
 
-  // Get record by ID
-  async findOne(id: number): Promise<OfferPackages> {
-    return this.offerpackagesRepository.findOne({ where: { id } });
-  }
-
-  async findOneRelatedIndividual(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignesPackages", "ea")
-      .leftJoinAndSelect("ea.individual", "ei")
-      .andWhere("e.id = :offer_id", {
-        offer_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findOneRelatedCompany(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignesPackages", "ea")
-      .leftJoinAndSelect("ea.company", "ec")
-      .andWhere("e.id = :offer_package_id", {
-        offer_package_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findOneRelatedStudentActivity(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignesPackages", "ea")
-      .leftJoinAndSelect("ea.studentActivity", "es")
-      .andWhere("e.id = :offer_package_id", {
-        offer_package_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-  async findOneRelatedRoom(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignesPackages", "ea")
-      .leftJoinAndSelect("ea.room", "es")
-      .andWhere("e.id = :offer_package_id", {
-        offer_package_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  // Update a record
-  async update(updateOfferpackagesDto: UpdateOfferPackagesDto) {
-    const room = await this.roomService.findOne(updateOfferpackagesDto.room_id);
-
-    await this.offerpackagesRepository.update(updateOfferpackagesDto.id, {
-      ...updateOfferpackagesDto,
-      room,
-    });
-    return this.offerpackagesRepository.findOne({ where: { id: updateOfferpackagesDto.id } });
-  }
-
-  // Delete a record
-  async remove(id: number) {
-    await this.offerpackagesRepository.delete(id);
+  override queryRelationIndex(
+    queryBuilder?: SelectQueryBuilder<OfferPackages>,
+    filteredRecord?: any,
+  ) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder.leftJoin("e.room", "er").addSelect(["er.id", "er.name"]);
   }
 }

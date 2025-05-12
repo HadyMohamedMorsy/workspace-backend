@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -45,6 +46,10 @@ export class ExpenseSalaries {
     onDelete: "CASCADE",
   })
   user: User;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { BaseService } from "src/shared/base/base-crud";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
-import { Repository } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateExpenseSalariesDto } from "./dto/create-expense-salaries.dto";
 import { UpdateExpenseSalariesDto } from "./dto/update-expense-salaries.dto";
 import { ExpenseSalaries } from "./expense-salaries.entity";
@@ -26,5 +26,22 @@ export class ExpensesSalariesService
       where: { user: { id: userId } },
       order: { created_at: "DESC" },
     });
+  }
+
+  override queryRelationIndex(
+    queryBuilder?: SelectQueryBuilder<ExpenseSalaries>,
+    filteredRecord?: any,
+  ) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder
+      .leftJoin("e.user", "ep")
+      .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"]);
+
+    if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filteredRecord.customFilters.start_date,
+        end_date: filteredRecord.customFilters.end_date,
+      });
+    }
   }
 }

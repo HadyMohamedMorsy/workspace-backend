@@ -1,9 +1,11 @@
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Room } from "src/rooms/room.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -28,6 +30,10 @@ export class OfferPackages {
     onDelete: "CASCADE",
   })
   room: Room;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
 
   @OneToMany(() => AssignesPackages, assignesPackages => assignesPackages.packages)
   assignesPackages: AssignesPackages;
