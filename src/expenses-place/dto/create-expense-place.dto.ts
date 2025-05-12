@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateExpensePlaceDto {
   @IsString()
@@ -10,4 +11,6 @@ export class CreateExpensePlaceDto {
   @IsOptional()
   @Type(() => Number)
   total: number;
+
+  createdBy: User;
 }

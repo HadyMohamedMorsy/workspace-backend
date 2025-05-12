@@ -1,18 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateExpensePlaceChildDto } from "./dto/create-expense-place-child.dto";
 import { UpdateExpensePlaceChildDto } from "./dto/update-expense-place-child.dto";
@@ -20,12 +9,35 @@ import { ExpensesPlaceChildService } from "./expense-place-child.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("expenses-child-place")
-export class ExpensesPlaceChildController {
-  constructor(private readonly expensesPlaceChildService: ExpensesPlaceChildService) {}
+export class ExpensesPlaceChildController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: ExpensesPlaceChildService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      cost: true,
+      featured_image: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      expensePlace: {
+        id: true,
+        name: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
@@ -33,44 +45,58 @@ export class ExpensesPlaceChildController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.expensesPlaceChildService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/expenses-place"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createExpenseDto: CreateExpensePlaceChildDto) {
-    return await this.expensesPlaceChildService.create(createExpenseDto);
+  async create(@Body() create: CreateExpensePlaceChildDto, @Req() req: Request) {
+    return await this.service.create(
+      {
+        cost: create.cost,
+        featured_image: create.featured_image,
+        expensePlace: req["expensePlace"],
+        createdBy: req["createdBy"],
+      } as CreateExpensePlaceChildDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/expenses-place"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateExpenseDto: UpdateExpensePlaceChildDto) {
-    return await this.expensesPlaceChildService.update(updateExpenseDto);
+  async update(@Body() update: UpdateExpensePlaceChildDto, @Req() req: Request) {
+    return await this.service.update(
+      {
+        id: update.id,
+        cost: update.cost,
+        featured_image: update.featured_image,
+        expensePlace: req["expensePlace"],
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.expensesPlaceChildService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

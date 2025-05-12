@@ -1,7 +1,10 @@
+import { User } from "src/users/user.entity";
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -27,6 +30,10 @@ export class ExpensePlace {
 
   @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
 
   @UpdateDateColumn({
     type: "timestamp",

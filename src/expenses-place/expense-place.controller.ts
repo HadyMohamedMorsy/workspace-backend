@@ -1,16 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateExpensePlaceDto } from "./dto/create-expense-place.dto";
 import { UpdateExpensePlaceDto } from "./dto/update-expense-place.dto";
@@ -18,12 +9,30 @@ import { ExpensesPlaceService } from "./expense-place.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("expenses-place")
-export class ExpensesPlaceController {
-  constructor(private readonly expensesPlaceService: ExpensesPlaceService) {}
+export class ExpensesPlaceController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: ExpensesPlaceService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      name: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
@@ -31,42 +40,56 @@ export class ExpensesPlaceController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.expensesPlaceService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateExpensePlaceDto) {
-    return await this.expensesPlaceService.create(createProductDto);
+  async create(@Body() create: CreateExpensePlaceDto, @Req() req: Request) {
+    return await this.service.create(
+      {
+        name: create.name,
+        total: create.total,
+        createdBy: req["createdBy"],
+      } as CreateExpensePlaceDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateExpensePlaceDto) {
-    return await this.expensesPlaceService.update(updateProductDto);
+  async update(@Body() updateExpensePlaceDto: UpdateExpensePlaceDto, @Req() req: Request) {
+    return await this.service.update(
+      {
+        id: updateExpensePlaceDto.id,
+        name: updateExpensePlaceDto.name,
+        total: updateExpensePlaceDto.total,
+        createdBy: req["createdBy"],
+      } as UpdateExpensePlaceDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ExpensesPlace,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.expensesPlaceService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }
