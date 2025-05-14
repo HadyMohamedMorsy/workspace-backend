@@ -4,7 +4,6 @@ import { CompanyService } from "src/companies/company.service";
 import { IndividualService } from "src/individual/individual.service";
 import { StudentActivityService } from "src/student-activity/studentActivity.service";
 import { UserService } from "src/users/user.service";
-import { TypeUser } from "../enum/global-enum";
 
 @Injectable()
 export class CustomerMiddleware implements NestMiddleware {
@@ -16,29 +15,26 @@ export class CustomerMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { type_user, customer_id } = req.body; // Assuming these are in the body of the request
+    const { customer_id } = req.body;
 
-    let customer;
+    try {
+      // Fetch all customer types
+      const [individual, company, studentActivity, user] = await Promise.all([
+        this.individualService.findOne(customer_id),
+        this.companyService.findOne(customer_id),
+        this.studentActivityService.findOne(customer_id),
+        this.userService.findOne(customer_id),
+      ]);
 
-    switch (type_user) {
-      case TypeUser.Individual:
-        customer = await this.individualService.findOne(customer_id);
-        break;
-      case TypeUser.Company:
-        customer = await this.companyService.findOne(customer_id);
-        break;
-      case TypeUser.StudentActivity:
-        customer = await this.studentActivityService.findOne(customer_id);
-        break;
-      case TypeUser.User:
-        customer = await this.userService.findOne(customer_id);
-        break;
-      default:
-        throw new Error("Invalid user type");
+      // Set all customer types in request
+      req["individual"] = individual;
+      req["company"] = company;
+      req["studentActivity"] = studentActivity;
+      req["user"] = user;
+
+      next();
+    } catch (error) {
+      next(error);
     }
-
-    req["customer"] = customer;
-
-    next();
   }
 }

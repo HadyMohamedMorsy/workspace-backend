@@ -13,6 +13,8 @@ import { UsersModule } from "src/users/users.module";
 import { DealsController } from "./deals.controller";
 import { Deals } from "./deals.entity";
 import { DealsService } from "./deals.service";
+import { DealsMiddleware } from "./middleware/deals.middleware";
+import { DepositMiddleware } from "./middleware/deposit.middleware";
 
 @Module({
   imports: [
@@ -28,11 +30,17 @@ import { DealsService } from "./deals.service";
     TypeOrmModule.forFeature([Deals]),
   ],
   controllers: [DealsController],
-  providers: [DealsService],
+  providers: [DealsService, DealsMiddleware, DepositMiddleware],
   exports: [DealsService],
 })
 export class DealsModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CustomerMiddleware).forRoutes("deals/store");
+    consumer
+      .apply(CustomerMiddleware)
+      .forRoutes("deals/store")
+      .apply(DealsMiddleware)
+      .forRoutes("deals/store", "deals/update")
+      .apply(DepositMiddleware)
+      .forRoutes("deals/store-deposite");
   }
 }

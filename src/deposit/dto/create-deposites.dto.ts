@@ -8,11 +8,6 @@ import { DepositeStatus, PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 
 export class CreateDepositeDto {
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  entity_id: number;
-
   @IsEnum(DepositeStatus)
   @IsOptional()
   status: DepositeStatus = DepositeStatus.COMPLETE;

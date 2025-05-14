@@ -1,11 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Company } from "src/companies/company.entity";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
-import { Individual } from "src/individual/individual.entity";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { StudentActivity } from "src/student-activity/StudentActivity.entity";
-import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import { AssignGeneralOffer } from "./assignes-general-offer.entity";
 import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.dto";
@@ -21,25 +17,8 @@ export class AssignGeneralOfferservice {
   ) {}
 
   // Create a new record
-  async create(
-    create: CreateAssignGeneralOfferDto,
-    reqBody: {
-      customer: Individual | Company | StudentActivity;
-      createdBy: User;
-    },
-  ): Promise<AssignGeneralOffer> {
-    const generalOffer = await this.generalOfferService.findOne(create.offer_id);
-
-    if (!generalOffer) {
-      throw new NotFoundException(`${generalOffer} with  not found`);
-    }
-
-    const assignGeneralOffer = this.assignGeneralOfferRepository.create({
-      ...create,
-      createdBy: reqBody.createdBy,
-      [create.type_user]: reqBody.customer,
-      generalOffer,
-    });
+  async create(create: CreateAssignGeneralOfferDto): Promise<AssignGeneralOffer> {
+    const assignGeneralOffer = this.assignGeneralOfferRepository.create(create);
     return await this.assignGeneralOfferRepository.save(assignGeneralOffer);
   }
 

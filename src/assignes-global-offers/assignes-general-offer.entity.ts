@@ -7,11 +7,9 @@ import { Individual } from "src/individual/individual.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
-import { TypeUser } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
-  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
@@ -39,12 +37,6 @@ export class AssignGeneralOffer {
     onDelete: "CASCADE",
   })
   studentActivity: StudentActivity;
-
-  @Column({
-    type: "enum",
-    enum: TypeUser,
-  })
-  type_user: TypeUser;
 
   @ManyToOne(() => GeneralOffer, generalOffer => generalOffer.assignessOffers, {
     onDelete: "CASCADE",

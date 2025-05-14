@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, SelectQueryBuilder } from "typeorm";
-import { BaseService } from "../../shared/base/base-crud";
+import { BaseService } from "../../shared/base/base";
 import { APIFeaturesService } from "../../shared/filters/filter.service";
 import { ICrudService } from "../../shared/interface/crud-service.interface";
 import { CreateRevenueChildDto } from "./dto/create-revenue-child.dto";

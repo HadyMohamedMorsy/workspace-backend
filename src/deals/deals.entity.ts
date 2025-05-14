@@ -4,7 +4,7 @@ import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Room } from "src/rooms/room.entity";
-import { PaymentMethod, ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
@@ -26,12 +26,6 @@ export class Deals {
 
   @Column({ type: "enum", enum: ReservationStatus, nullable: true })
   status: ReservationStatus;
-
-  @Column({
-    type: "enum",
-    enum: TypeUser,
-  })
-  type_user: TypeUser;
 
   @Column()
   hours: number;
