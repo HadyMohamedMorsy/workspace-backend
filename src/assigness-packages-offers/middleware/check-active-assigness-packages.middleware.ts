@@ -3,30 +3,30 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { NextFunction, Request, Response } from "express";
 import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { Repository } from "typeorm";
-import { AssignesMembership } from "../assignes-membership.entity";
+import { AssignesPackages } from "../assignes-packages.entity";
 
 @Injectable()
-export class checkAssignMemebershipMiddleware implements NestMiddleware {
+export class CheckActiveAssignessPackagesMiddleware implements NestMiddleware {
   constructor(
-    @InjectRepository(AssignesMembership)
-    private readonly assignesMembershipRepository: Repository<AssignesMembership>,
+    @InjectRepository(AssignesPackages)
+    private assignesPackagesRepository: Repository<AssignesPackages>,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     const customerType = Object.keys(TypeUser).find(type => req[type]);
     const customer = req[customerType];
 
-    const existingActiveMembership = await this.assignesMembershipRepository.findOne({
+    const existingActivePackage = await this.assignesPackagesRepository.findOne({
       where: {
         [customerType]: customer,
-        memeberShip: { id: req.body.membership_id },
+        packages: { id: req.body.package_id },
         status: ReservationStatus.ACTIVE,
       },
     });
 
-    if (existingActiveMembership) {
+    if (existingActivePackage) {
       throw new ConflictException(
-        "An active membership already exists for this customer and membership.",
+        "An active package already exists for this customer and package.",
       );
     }
     next();
