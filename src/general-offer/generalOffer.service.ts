@@ -1,212 +1,132 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as moment from "moment";
+import { BaseService } from "src/shared/base/base";
 import { PRODUCT_TYPE } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { Repository } from "typeorm";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateGeneralOfferDto } from "./dto/create-general-offer.dto";
 import { UpdateGeneralOfferDto } from "./dto/update-general-offer.dto";
 import { GeneralOffer } from "./generalOffer.entity";
 
+type RelationConfig = {
+  relationPath: string;
+  alias: string;
+  selectFields: string[];
+  filterField: string;
+};
+
 @Injectable()
-export class GeneralOfferService {
+export class GeneralOfferService
+  extends BaseService<GeneralOffer, CreateGeneralOfferDto, UpdateGeneralOfferDto>
+  implements ICrudService<GeneralOffer, CreateGeneralOfferDto, UpdateGeneralOfferDto>
+{
   constructor(
     @InjectRepository(GeneralOffer)
-    private generalOfferRepository: Repository<GeneralOffer>,
+    repository: Repository<GeneralOffer>,
     protected readonly apiFeaturesService: APIFeaturesService,
-  ) {}
+  ) {
+    super(repository, apiFeaturesService);
+  }
 
-  // Create a new record
-  async create(createGeneralOfferDto: CreateGeneralOfferDto): Promise<GeneralOffer> {
-    const generalOffer = this.generalOfferRepository.create(createGeneralOfferDto);
-    return await this.generalOfferRepository.save(generalOffer);
+  private async findOffersByProductType(productType: PRODUCT_TYPE) {
+    const now = moment();
+    const offers = await this.repository
+      .createQueryBuilder("offer")
+      .where("offer.product = :productType", { productType })
+      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
+        now: now.toDate(),
+      })
+      .getMany();
+
+    return {
+      data: offers,
+    };
   }
 
   async findShared() {
-    const now = moment();
-
-    const offers = await this.generalOfferRepository
-      .createQueryBuilder("offer")
-      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Shared })
-      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
-        now: now.toDate(),
-      })
-      .getMany();
-    return {
-      data: offers,
-    };
+    return this.findOffersByProductType(PRODUCT_TYPE.Shared);
   }
+
   async findDeskArea() {
-    const now = moment();
-
-    const offers = await this.generalOfferRepository
-      .createQueryBuilder("offer")
-      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Deskarea })
-      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
-        now: now.toDate(),
-      })
-      .getMany();
-
-    return {
-      data: offers,
-    };
+    return this.findOffersByProductType(PRODUCT_TYPE.Deskarea);
   }
+
   async findMembership() {
-    const now = moment();
-
-    const offers = await this.generalOfferRepository
-      .createQueryBuilder("offer")
-      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Membership })
-      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
-        now: now.toDate(),
-      })
-      .getMany();
-
-    return {
-      data: offers,
-    };
+    return this.findOffersByProductType(PRODUCT_TYPE.Membership);
   }
+
   async findDeals() {
-    const now = moment();
-
-    const offers = await this.generalOfferRepository
-      .createQueryBuilder("offer")
-      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Deals })
-      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
-        now: now.toDate(),
-      })
-      .getMany();
-
-    return {
-      data: offers,
-    };
+    return this.findOffersByProductType(PRODUCT_TYPE.Deals);
   }
+
   async findPackages() {
-    const now = moment();
-
-    const offers = await this.generalOfferRepository
-      .createQueryBuilder("offer")
-      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Packages })
-      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
-        now: now.toDate(),
-      })
-      .getMany();
-
-    return {
-      data: offers,
-    };
+    return this.findOffersByProductType(PRODUCT_TYPE.Packages);
   }
+
   async findRooms() {
-    const now = moment();
-
-    const offers = await this.generalOfferRepository
-      .createQueryBuilder("offer")
-      .where("offer.product = :productType", { productType: PRODUCT_TYPE.Room })
-      .andWhere("offer.start_date <= :now AND offer.end_date > :now", {
-        now: now.toDate(),
-      })
-      .getMany();
-
-    return {
-      data: offers,
-    };
+    return this.findOffersByProductType(PRODUCT_TYPE.Room);
   }
 
-  // Get all records
-  async findAll(filterData) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder.leftJoinAndSelect("e.createdBy", "createdBy");
   }
 
-  // Get record by ID
-  async findOne(id: number): Promise<GeneralOffer> {
-    return this.generalOfferRepository.findOne({ where: { id } });
-  }
-
-  async findOneRelatedIndividual(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
+  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
     const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
 
     queryBuilder
-      .leftJoinAndSelect("e.assignessOffers", "ea")
-      .leftJoinAndSelect("ea.individual", "ei")
-      .andWhere("e.id = :offer_id", {
-        offer_id: filterData.id,
+      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
+        [relationConfig.filterField]: filterData[relationConfig.filterField],
       });
+
+    this.queryRelationIndex(queryBuilder);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
+    return this.response(filteredRecord, totalRecords);
   }
 
-  async findOneRelatedCompany(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignessOffers", "ea")
-      .leftJoinAndSelect("ea.company", "ec")
-      .andWhere("e.id = :offer_id", {
-        offer_id: filterData.id,
+  async findOneRelated(filterData: any) {
+    if (filterData.individual_id) {
+      return this.findRelatedEntities(filterData, {
+        relationPath: "individual",
+        alias: "individual",
+        selectFields: ["id", "firstName", "lastName"],
+        filterField: "individual_id",
       });
+    }
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findOneRelatedStudentActivity(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignessOffers", "ea")
-      .leftJoinAndSelect("ea.studentActivity", "es")
-      .andWhere("e.id = :offer_id", {
-        offer_id: filterData.id,
+    if (filterData.company_id) {
+      return this.findRelatedEntities(filterData, {
+        relationPath: "company",
+        alias: "company",
+        selectFields: ["id", "name"],
+        filterField: "company_id",
       });
+    }
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
+    if (filterData.studentActivity_id) {
+      return this.findRelatedEntities(filterData, {
+        relationPath: "studentActivity",
+        alias: "studentActivity",
+        selectFields: ["id", "name"],
+        filterField: "studentActivity_id",
+      });
+    }
 
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
+    if (filterData.user_id) {
+      return this.findRelatedEntities(filterData, {
+        relationPath: "createdBy",
+        alias: "user",
+        selectFields: ["id", "firstName", "lastName"],
+        filterField: "user_id",
+      });
+    }
 
-  // Update a record
-  async update(updateGeneralOfferDto: UpdateGeneralOfferDto) {
-    await this.generalOfferRepository.update(updateGeneralOfferDto.id, updateGeneralOfferDto);
-    return this.generalOfferRepository.findOne({ where: { id: updateGeneralOfferDto.id } });
-  }
-
-  // Delete a record
-  async remove(id: number) {
-    await this.generalOfferRepository.delete(id);
+    return this.findOne(filterData);
   }
 }
