@@ -14,7 +14,8 @@ import { UsersModule } from "src/users/users.module";
 import { AssignesMembershipController } from "./assignes-membership.controller";
 import { AssignesMembership } from "./assignes-membership.entity";
 import { AssignesMembershipService } from "./assignes-membership.service";
-import { CheckActiveMembershipMiddleware } from "./middleware/check-active-assigness-membership";
+import { AssignesMembershipMiddleware } from "./middleware/assigness-membership.middleware copy";
+import { DepositMiddleware } from "./middleware/deposit.middleware";
 
 @Module({
   imports: [
@@ -36,8 +37,17 @@ import { CheckActiveMembershipMiddleware } from "./middleware/check-active-assig
 })
 export class AssignesMembershipModule {
   configure(consumer: MiddlewareConsumer) {
+    // Apply middleware to store route
     consumer
-      .apply(CheckActiveMembershipMiddleware, CustomerMiddleware)
+      .apply(AssignesMembershipMiddleware, CustomerMiddleware)
       .forRoutes("assignes-membership/store");
+
+    // Apply middleware to update route
+    consumer
+      .apply(AssignesMembershipMiddleware, CustomerMiddleware)
+      .forRoutes("assignes-membership/update");
+
+    // Apply middleware to store-deposite route
+    consumer.apply(DepositMiddleware).forRoutes("assignes-membership/store-deposite");
   }
 }

@@ -1,28 +1,29 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
+import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
-import { RoomsService } from "src/rooms/rooms.service";
+import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
 import { TypeUser } from "src/shared/enum/global-enum";
 
 @Injectable()
-export class DealsMiddleware implements NestMiddleware {
+export class AssignesMembershipMiddleware implements NestMiddleware {
   constructor(
     private readonly generalOffer: GeneralOfferService,
+    protected readonly offerCoWorkingSpaceService: OfferCoWorkingSpaceService,
     private readonly assignOfferservice: AssignGeneralOfferservice,
-    private readonly roomService: RoomsService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { offer_id, room_id } = req.body;
-
-    const [offer, room] = await Promise.all([
-      offer_id ? this.generalOffer.findOne(offer_id) : null,
-      room_id ? this.roomService.findOne(room_id) : null,
-    ]);
-
     const customerType = Object.keys(TypeUser).find(type => req[type]);
     const customer = req[customerType];
+
+    const [offer, memeberShip] = await Promise.all([
+      req.body.offer_id ? this.generalOffer.findOne(req.body.offer_id) : null,
+      req.body.membership_id
+        ? this.offerCoWorkingSpaceService.findOne(req.body.membership_id)
+        : null,
+    ]);
 
     const assignOffer = offer
       ? await this.assignOfferservice.create({
@@ -33,7 +34,13 @@ export class DealsMiddleware implements NestMiddleware {
       : null;
 
     req["assignGeneralOffer"] = assignOffer;
-    req["room"] = room;
+    req["memeberShip"] = memeberShip;
+    req["totalPrice"] = this.#calcTotalPrice(memeberShip.price, offer);
+
     next();
+  }
+
+  #calcTotalPrice(basePrice: number, offer: GeneralOffer) {
+    return !offer ? basePrice : basePrice - (basePrice * offer.discount) / 100;
   }
 }

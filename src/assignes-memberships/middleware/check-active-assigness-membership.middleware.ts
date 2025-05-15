@@ -1,41 +1,25 @@
 import { ConflictException, Injectable, NestMiddleware } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { NextFunction, Request, Response } from "express";
-import { ReservationStatus } from "src/shared/enum/global-enum";
+import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
 import { Repository } from "typeorm";
 import { AssignesMembership } from "../assignes-membership.entity";
 
 @Injectable()
-export class CheckActiveMembershipMiddleware implements NestMiddleware {
+export class AssignesMembershipMiddleware implements NestMiddleware {
   constructor(
     @InjectRepository(AssignesMembership)
     private readonly assignesMembershipRepository: Repository<AssignesMembership>,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { customer_id, membership_id, type_user } = req.body;
-
-    if (!["individual", "company", "studentActivity"].includes(type_user)) {
-      throw new Error("Invalid customer type");
-    }
-
-    let customerCondition: any;
-    switch (type_user) {
-      case "individual":
-        customerCondition = { individual: { id: customer_id } };
-        break;
-      case "company":
-        customerCondition = { company: { id: customer_id } };
-        break;
-      case "studentActivity":
-        customerCondition = { studentActivity: { id: customer_id } };
-        break;
-    }
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    const customer = req[customerType];
 
     const existingActiveMembership = await this.assignesMembershipRepository.findOne({
       where: {
-        ...customerCondition,
-        memeberShip: { id: membership_id },
+        [customerType]: customer,
+        memeberShip: { id: req.body.membership_id },
         status: ReservationStatus.ACTIVE,
       },
     });
@@ -45,7 +29,6 @@ export class CheckActiveMembershipMiddleware implements NestMiddleware {
         "An active membership already exists for this customer and membership.",
       );
     }
-
     next();
   }
 }

@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { DealsService } from "./deals.service";
@@ -10,7 +9,7 @@ import { UpdateDealsDto } from "./dto/update-deals.dto";
 @UseGuards(AuthorizationGuard)
 @Controller("deals")
 export class DealsController {
-  constructor(private readonly dealsService: DealsService) {}
+  constructor(private readonly service: DealsService) {}
 
   @Post("/index")
   @HttpCode(200)
@@ -21,7 +20,7 @@ export class DealsController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/individual")
@@ -33,7 +32,7 @@ export class DealsController {
     },
   ])
   async findIndividuaDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByIndividualAll(filterQueryDto);
+    return this.service.findDealsByIndividualAll(filterQueryDto);
   }
 
   @Post("/studentActivity")
@@ -45,7 +44,7 @@ export class DealsController {
     },
   ])
   async findStudentDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByStudentActivityAll(filterQueryDto);
+    return this.service.findDealsByStudentActivityAll(filterQueryDto);
   }
 
   @Post("/company")
@@ -57,7 +56,7 @@ export class DealsController {
     },
   ])
   async findCompanyDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByComapnyAll(filterQueryDto);
+    return this.service.findDealsByComapnyAll(filterQueryDto);
   }
 
   @Post("/user")
@@ -69,7 +68,7 @@ export class DealsController {
     },
   ])
   async findUserDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByUserAll(filterQueryDto);
+    return this.service.findDealsByUserAll(filterQueryDto);
   }
 
   @Post("/store")
@@ -81,7 +80,7 @@ export class DealsController {
   ])
   async create(@Body() createDealsDto: CreateDealsDto, @Req() req: Request) {
     const customerType = Object.keys(TypeUser).find(type => req[type]);
-    return await this.dealsService.create({
+    return await this.service.create({
       hours: +createDealsDto.hours,
       start_date: createDealsDto.start_date,
       end_date: createDealsDto.end_date,
@@ -108,7 +107,7 @@ export class DealsController {
   ])
   async update(@Body() update: UpdateDealsDto, @Req() req: Request) {
     const customerType = Object.keys(TypeUser).find(type => req[type]);
-    return await this.dealsService.update({
+    return await this.service.update({
       id: update.id,
       deposites: update.deposites,
       [customerType]: req[customerType],
@@ -136,9 +135,9 @@ export class DealsController {
       actions: [Permission.CREATE],
     },
   ])
-  async createDeposite(@Body() createDealsDto: CreateDepositeDto, @Req() req: Request) {
-    return await this.dealsService.update({
-      id: createDealsDto.deal.id,
+  async createDeposite(@Body() createDealsDto: { deal_id: number }, @Req() req: Request) {
+    return await this.service.update({
+      id: createDealsDto.deal_id,
       deposites: req["deposite"],
     });
   }
@@ -151,6 +150,6 @@ export class DealsController {
     },
   ])
   async delete(@Body() id: number) {
-    return this.dealsService.delete(id);
+    return this.service.delete(id);
   }
 }

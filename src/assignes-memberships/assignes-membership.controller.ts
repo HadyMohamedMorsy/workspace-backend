@@ -1,20 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { AssignesMembershipService } from "./assignes-membership.service";
 import { CreateAssignesMembershipDto } from "./dto/create-assignes-membership.dto";
@@ -22,12 +9,58 @@ import { UpdateAssignesMembershipDto } from "./dto/update-assignes-membership.dt
 
 @UseGuards(AuthorizationGuard)
 @Controller("assignes-membership")
-export class AssignesMembershipController {
-  constructor(private readonly assignesMembershipService: AssignesMembershipService) {}
+export class AssignesMembershipController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: AssignesMembershipService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      name: true,
+      start_date: true,
+      end_date: true,
+      total_price: true,
+      used: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      assignGeneralOffer: {
+        id: true,
+        name: true,
+        price: true,
+      },
+      memeberShip: {
+        id: true,
+        name: true,
+        price: true,
+      },
+      deposites: {
+        id: true,
+        total_price: true,
+        status: true,
+        payment_method: true,
+      },
+      shared: {
+        id: true,
+        name: true,
+        price: true,
+      },
+      deskarea: {
+        id: true,
+        name: true,
+        price: true,
+      },
+    };
+  }
 
   @Post("/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -35,12 +68,11 @@ export class AssignesMembershipController {
     },
   ])
   async findIndividualAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByIndividual(filterQueryDto);
+    return this.service.findAssignesByIndividual(filterQueryDto);
   }
 
   @Post("/company")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -48,12 +80,11 @@ export class AssignesMembershipController {
     },
   ])
   async findCompanyAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByCompany(filterQueryDto);
+    return this.service.findAssignesByCompany(filterQueryDto);
   }
 
   @Post("/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -61,12 +92,11 @@ export class AssignesMembershipController {
     },
   ])
   async findStudentActivityAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByStudentActivity(filterQueryDto);
+    return this.service.findAssignesByStudentActivity(filterQueryDto);
   }
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -74,86 +104,86 @@ export class AssignesMembershipController {
     },
   ])
   async findUserAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByUser(filterQueryDto);
+    return this.service.findAssignesByUser(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
       actions: [Permission.CREATE],
     },
   ])
-  async create(
-    @Body() createAssignesMembershipDto: CreateAssignesMembershipDto,
-    @Req() req: Request,
-  ) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.assignesMembershipService.create(createAssignesMembershipDto, {
-      customer,
-      createdBy,
-    });
+  async create(@Body() create: CreateAssignesMembershipDto, @Req() req: Request) {
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.create(
+      {
+        start_date: create.start_date,
+        end_date: create.end_date,
+        createdBy: req["createdBy"],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        memeberShip: req["memeberShip"],
+        total_price: req["totalPrice"],
+        used: 0,
+        [customerType]: req[customerType],
+        remaining: +req["memeberShip"].days,
+        total_used: +req["memeberShip"].days,
+      } as CreateAssignesMembershipDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Post("/store-deposite")
-  @ClearCacheAnotherModules(["/api/v1/deposite"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Deposite,
       actions: [Permission.CREATE],
     },
   ])
-  async createDeposite(
-    @Body() createAssignesMembershipDepositeDto: CreateDepositeDto,
-    @Req() req: Request,
-  ) {
-    const createdBy = req["createdBy"];
-    return await this.assignesMembershipService.createDeposite(
-      createAssignesMembershipDepositeDto,
-      createdBy,
-    );
+  async createDeposite(@Body() create: { membership_id: number }, @Req() req: Request) {
+    return await this.service.update({
+      id: create.membership_id,
+      deposites: req["deposite"],
+    });
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
-    return await this.assignesMembershipService.update(updateAssignesMembershipDto);
-  }
-
-  @Post("/update-entity")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignesMembership,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async updateEntity(@Body() updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
-    return await this.assignesMembershipService.updateEntity(updateAssignesMembershipDto);
+  async update(@Body() update: UpdateAssignesMembershipDto, @Req() req: Request) {
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.update(
+      {
+        id: update.id,
+        start_date: update.start_date,
+        end_date: update.end_date,
+        createdBy: req["createdBy"],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        memeberShip: req["memeberShip"],
+        total_price: req["totalPrice"],
+        [customerType]: req[customerType],
+        remaining: +req["memeberShip"].days,
+        total_used: +req["memeberShip"].days,
+        used: update.used,
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.assignesMembershipService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

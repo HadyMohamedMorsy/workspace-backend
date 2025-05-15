@@ -25,7 +25,7 @@ export class AssignesMembership {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "enum", enum: ReservationStatus })
+  @Column({ type: "enum", enum: ReservationStatus, default: ReservationStatus.ACTIVE })
   status: ReservationStatus;
 
   @ManyToOne(() => Individual, individual => individual.assign_memberships, {
