@@ -1,33 +1,29 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { BaseService } from "src/shared/base/base";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { Repository } from "typeorm";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { Company } from "./company.entity";
 import { CreateCompanyDto } from "./dto/create-company.dto";
 import { UpdateCompanyDto } from "./dto/update-company.dto";
 
 @Injectable()
-export class CompanyService {
+export class CompanyService
+  extends BaseService<Company, CreateCompanyDto, UpdateCompanyDto>
+  implements ICrudService<Company, CreateCompanyDto, UpdateCompanyDto>
+{
   constructor(
     @InjectRepository(Company)
-    private companyRepository: Repository<Company>,
+    repository: Repository<Company>,
     protected readonly apiFeaturesService: APIFeaturesService,
-  ) {}
-
-  // Create a new product
-  async create(createCompanyDto: CreateCompanyDto) {
-    const company = this.companyRepository.create(createCompanyDto);
-    if (company) {
-      const newClient = await this.companyRepository.save(company);
-      return await this.findOne(newClient.id);
-    }
+  ) {
+    super(repository, apiFeaturesService);
   }
 
-  // Get all products
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Company).buildQuery(filterData);
-
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
       .leftJoinAndSelect("e.assign_memberships", "ep", "ep.status = :status_memeber", {
         status_memeber: ReservationStatus.ACTIVE,
@@ -43,15 +39,6 @@ export class CompanyService {
       .leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
         typeOrder: "HOLD",
       });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
   }
 
   async findByUserAll(filterData) {
@@ -62,38 +49,11 @@ export class CompanyService {
       .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
       .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
 
+    this.queryRelationIndex(queryBuilder);
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
-  }
-
-  // Get product by ID
-  async findOne(id: number): Promise<Company> {
-    const company = await this.companyRepository.findOne({
-      where: { id },
-      relations: ["assignGeneralOffers", "assign_memberships", "assignesPackages", "createdBy"],
-    });
-    if (!company) {
-      throw new NotFoundException(`${company} with id ${id} not found`);
-    }
-    return company;
-  }
-
-  // Update a product
-  async update(updateCompanyDto: UpdateCompanyDto) {
-    await this.companyRepository.update(updateCompanyDto.id, updateCompanyDto);
-    return this.companyRepository.findOne({ where: { id: updateCompanyDto.id } });
-  }
-
-  // Delete a product
-  async remove(companyId: number) {
-    await this.companyRepository.delete(companyId);
+    return this.response(filteredRecord, totalRecords);
   }
 }

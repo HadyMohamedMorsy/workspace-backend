@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateIndividualDto {
   @IsString()
@@ -41,4 +42,10 @@ export class CreateIndividualDto {
   @IsString()
   @IsNotEmpty()
   nationality: string;
+
+  @IsString()
+  @IsOptional()
+  note: string;
+
+  createdBy: User;
 }

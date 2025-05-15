@@ -9,6 +9,7 @@ import {
   ValidateNested,
 } from "class-validator";
 import { CompanyType } from "src/shared/enum/global-enum";
+import { User } from "src/users/user.entity";
 
 export class CreateCompanyDto {
   @IsString()
@@ -72,6 +73,8 @@ export class CreateCompanyDto {
   @ValidateNested({ each: true })
   @Type(() => CreateHolderDto)
   holders: CreateHolderDto[];
+
+  createdBy: User;
 }
 
 export class CreateHolderDto {
