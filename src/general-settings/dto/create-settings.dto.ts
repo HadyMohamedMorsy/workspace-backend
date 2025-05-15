@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateGeneralSettingsDto {
   @IsNumber()
@@ -21,4 +22,6 @@ export class CreateGeneralSettingsDto {
   @Type(() => Number)
   @IsNotEmpty()
   full_day_price_shared: number;
+
+  createdBy: User;
 }
