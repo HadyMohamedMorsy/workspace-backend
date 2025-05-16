@@ -1,18 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Put,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateGeneralSettingsDto } from "./dto/create-settings.dto";
@@ -46,7 +34,6 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.GeneralSettings,
@@ -64,7 +51,6 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.GeneralSettings,
@@ -86,7 +72,6 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
   }
 
   @Put("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.GeneralSettings,
@@ -108,7 +93,6 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.GeneralSettings,

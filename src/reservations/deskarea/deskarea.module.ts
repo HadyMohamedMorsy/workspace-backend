@@ -12,6 +12,8 @@ import { UsersModule } from "src/users/users.module";
 import { DeskareaController } from "./deskarea.controller";
 import { Deskarea } from "./deskarea.entity";
 import { DeskareaService } from "./deskarea.service";
+import { DepositMiddleware } from "./middleware/deposit.middleware";
+import { DeskareaMiddleware } from "./middleware/deskarea.middleware";
 
 @Module({
   imports: [
@@ -31,6 +33,10 @@ import { DeskareaService } from "./deskarea.service";
 })
 export class DeskareaModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CustomerMiddleware).forRoutes("deskarea/store");
+    consumer
+      .apply(CustomerMiddleware, DeskareaMiddleware)
+      .forRoutes("deskarea/store", "deskarea/update")
+      .apply(DepositMiddleware)
+      .forRoutes("deskarea/store-deposit");
   }
 }

@@ -1,19 +1,6 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
@@ -26,7 +13,6 @@ export class OrderController {
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Order,
@@ -39,7 +25,6 @@ export class OrderController {
 
   @Post("/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Order,
@@ -52,7 +37,6 @@ export class OrderController {
 
   @Post("/company")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Order,
@@ -65,7 +49,6 @@ export class OrderController {
 
   @Post("/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Order,
@@ -78,7 +61,6 @@ export class OrderController {
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Order,
@@ -90,16 +72,6 @@ export class OrderController {
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules([
-    "/api/v1/purchases",
-    "/api/v1/returns",
-    "/api/v1/category",
-    "/api/v1/product",
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Order,
@@ -116,16 +88,6 @@ export class OrderController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules([
-    "/api/v1/purchases",
-    "/api/v1/returns",
-    "/api/v1/category",
-    "/api/v1/product",
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Order,
@@ -137,7 +99,6 @@ export class OrderController {
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Order,

@@ -1,32 +1,67 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { DeskareaService } from "./deskarea.service";
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
-import { UpdateDekareaNoteDto } from "./dto/update-deskarea.-note.dto";
+import { UpdateDepositeDto } from "./dto/update-deposite.dto";
 import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
 
 @UseGuards(AuthorizationGuard)
 @Controller("deskarea")
-export class DeskareaController {
-  constructor(private readonly deskareaService: DeskareaService) {}
+export class DeskareaController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: DeskareaService) {}
 
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      selected_day: true,
+      start_hour: true,
+      start_minute: true,
+      start_time: true,
+      end_hour: true,
+      end_minute: true,
+      end_time: true,
+      total_price: true,
+      status: true,
+      created_at: true,
+      updated_at: true,
+      createdBy: true,
+      updatedBy: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      individual: {
+        id: true,
+        name: true,
+        whatsApp: true,
+      },
+      company: {
+        id: true,
+        phone: true,
+        name: true,
+      },
+      studentActivity: {
+        id: true,
+        name: true,
+        whatsApp: true,
+      },
+      user: {
+        id: true,
+        name: true,
+        whatsApp: true,
+      },
+      createdBy: {
+        id: true,
+        name: true,
+        whatsApp: true,
+      },
+    };
+  }
   @Post("/index")
-  @UseInterceptors(CachingInterceptor)
   @HttpCode(200)
   @Permissions([
     {
@@ -35,38 +70,23 @@ export class DeskareaController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,
       actions: [Permission.INDEX],
     },
   ])
-  async findIndividuaDeskareaAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findDeskareaByIndividualAll(filterQueryDto);
-  }
-
-  @Post("/company")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deskarea,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findCompanyDeskareaAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findDeskareaByComapnyAll(filterQueryDto);
+  async findIndividualDeskareaAll(@Body() filterQueryDto: any) {
+    return this.service.findDeskareaByIndividualAll(filterQueryDto);
   }
 
   @Post("/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,
@@ -74,12 +94,23 @@ export class DeskareaController {
     },
   ])
   async findStudentDeskareaAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findDeskareaByStudentActivityAll(filterQueryDto);
+    return this.service.findDeskareaByStudentActivityAll(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.Deskarea,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanyDeskareaAll(@Body() filterQueryDto: any) {
+    return this.service.findDeskareaByCompanyAll(filterQueryDto);
   }
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,
@@ -87,18 +118,10 @@ export class DeskareaController {
     },
   ])
   async findUserDeskareaAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findDeskareaByUserAll(filterQueryDto);
+    return this.service.findDeskareaByUserAll(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assign-general-offer",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,
@@ -106,129 +129,72 @@ export class DeskareaController {
     },
   ])
   async create(@Body() createDeskareaDto: CreateDeskAreaDto, @Req() req: Request) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.deskareaService.create(createDeskareaDto, {
-      customer,
-      createdBy,
-    });
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.create(
+      {
+        selected_day: createDeskareaDto.selected_day,
+        start_hour: createDeskareaDto.start_hour,
+        start_minute: createDeskareaDto.start_minute,
+        start_time: createDeskareaDto.start_time,
+        assignGeneralOffer: req["assignGeneralOffer"],
+        [customerType]: req[customerType],
+        createdBy: req["createdBy"],
+      } as CreateDeskAreaDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/store/reservation")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-membership",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Deskarea,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async update(@Body() update: UpdateDeskAreaDto, @Req() req: Request) {
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.update(
+      {
+        id: update.id,
+        selected_day: update.selected_day,
+        end_hour: update.end_hour,
+        end_minute: update.end_minute,
+        end_time: update.end_time,
+        assignGeneralOffer: req["assignGeneralOffer"],
+        [customerType]: req[customerType],
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
+  }
+
+  @Post("/store-deposit")
+  @Permissions([
+    {
+      resource: Resource.Deposite,
       actions: [Permission.CREATE],
     },
   ])
-  async createReservationByMememberShip(
-    @Body() createSharedAreaDto: CreateDeskAreaDto,
+  async createDeposit(
+    @Body() create: UpdateDepositeDto & { deskarea_id: number },
     @Req() req: Request,
   ) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.deskareaService.createReservationByMememberShip(createSharedAreaDto, {
-      customer,
-      createdBy,
-    });
-  }
-
-  @Post("reservation/individual")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deskarea,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findReservationIndividualAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findReservationsByIndividual(filterQueryDto);
-  }
-
-  @Post("reservation/company")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deskarea,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findReservationCompanyAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findReservationsByCompany(filterQueryDto);
-  }
-
-  @Post("reservation/studentActivity")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deskarea,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findReservationStudentActivityAll(@Body() filterQueryDto: any) {
-    return this.deskareaService.findReservationsByStudentActivity(filterQueryDto);
-  }
-
-  @Post("/update")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assign-general-offer",
-    "/api/v1/assignes-membership",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deskarea,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async update(@Body() updateDeskareaDto: UpdateDeskAreaDto) {
-    return await this.deskareaService.update(updateDeskareaDto);
-  }
-
-  @Post("/update-entity")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assign-general-offer",
-    "/api/v1/assignes-membership",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deskarea,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async updateEntity(@Body() updateDeskareaDto: UpdateDekareaNoteDto) {
-    return await this.deskareaService.updateEntity(updateDeskareaDto);
+    return await this.service.update({
+      id: create.deskarea_id,
+      deposites: req["deposite"],
+    } as UpdateDeskAreaDto);
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Deskarea,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.deskareaService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

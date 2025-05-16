@@ -1,5 +1,5 @@
 import { Category } from "src/categories/category.entity";
-import { Purchases } from "src/purchases/purchases.entity";
+import { Purchase } from "src/purchase/purchase.entity";
 import { Returns } from "src/returns/returns.entity";
 import { User } from "src/users/user.entity";
 import {
@@ -54,9 +54,9 @@ export class Product {
   @JoinTable()
   categories: Category[];
 
-  @OneToMany(() => Purchases, purchase => purchase.product)
-  purchases: Purchases[];
+  @OneToMany(() => Purchase, purchase => purchase.product)
+  purchases: Purchase[];
 
   @OneToMany(() => Returns, returns => returns.product)
-  returns: Purchases[];
+  returns: Purchase[];
 }

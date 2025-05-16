@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { Deposite } from "src/deposit/deposites.entity";
-import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 
 export class CreateReservationRoomDto {
   @IsString()
@@ -62,12 +62,6 @@ export class CreateReservationRoomDto {
   @IsNumber()
   @Type(() => Number)
   package_id: number;
-
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
 
   @IsNumber()
   @IsOptional()

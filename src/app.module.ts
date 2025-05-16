@@ -31,7 +31,7 @@ import { OfferCoWorkingSpaceModule } from "./offer-co-working-space/offer-co-wor
 import { OfferPackageModule } from "./offer-packages/offerpackages.module";
 import { OrdersModule } from "./orders/orders.module";
 import { ProductsModule } from "./products/products.module";
-import { PurchasesModule } from "./purchases/purchases.module";
+import { PurchaseModule } from "./purchase/purchase.module";
 import { DeskareaModule } from "./reservations/deskarea/deskarea.module";
 import { ReservationRoomModule } from "./reservations/rooms/reservation-room.module";
 import { SharedModule } from "./reservations/shared/shared.module";
@@ -87,7 +87,7 @@ const ENV = process.env.NODE_ENV;
     ExpensesPlaceModule,
     CategoryModule,
     ReturnsModule,
-    PurchasesModule,
+    PurchaseModule,
     ProductsModule,
     OrdersModule,
     StudentActivityModule,

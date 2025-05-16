@@ -8,7 +8,10 @@ import {
   IsString,
   ValidateIf,
 } from "class-validator";
-import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { Deposite } from "src/deposit/deposites.entity";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { User } from "src/users/user.entity";
 
 export class CreateSharedDto {
   @IsString()
@@ -56,12 +59,6 @@ export class CreateSharedDto {
   @Type(() => Number)
   membership_id: number;
 
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
-
   @IsString()
   @IsOptional()
   note: string;
@@ -69,4 +66,10 @@ export class CreateSharedDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  assignGeneralOffer: AssignGeneralOffer;
+
+  createdBy: User;
+
+  deposites?: Deposite;
 }

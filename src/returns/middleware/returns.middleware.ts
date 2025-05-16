@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NestMiddleware, NotFoundException } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
+import { UpdateProductDto } from "src/products/dto/update-product.dto";
 import { ProductService } from "src/products/products.service";
 
 @Injectable()
@@ -26,7 +27,7 @@ export class ReturnsMiddleware implements NestMiddleware {
 
       const newStore = product.store - return_qty;
       product.store = newStore;
-      await this.productService.updateStore({ id: product.id, store: newStore });
+      await this.productService.update({ id: product.id, store: newStore } as UpdateProductDto);
 
       // Calculate price based on type_store
       const price = type_store === "item" ? return_price : total;

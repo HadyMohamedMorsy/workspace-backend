@@ -14,10 +14,10 @@ export class Deskarea {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   selected_day: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: false })
   is_full_day: boolean;
 
   @Column({ nullable: true })

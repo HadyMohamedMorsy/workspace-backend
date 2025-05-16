@@ -1,36 +1,38 @@
-import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
-import { IndividualModule } from "src/individual/individual.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
-import { CompanyModule } from "./../../companies/company.module";
+import { DepositMiddleware } from "./middleware/deposit.middleware";
+import { SharedMiddleware } from "./middleware/shared.middleware";
 import { SharedController } from "./shared.controller";
 import { Shared } from "./shared.entity";
 import { SharedService } from "./shared.service";
 
 @Module({
   imports: [
-    forwardRef(() => AssignesMembershipModule),
-    CompanyModule,
-    IndividualModule,
-    GeneralSettingsModule,
-    StudentActivityModule,
+    TypeOrmModule.forFeature([Shared]),
     AssignGeneralOfferModule,
     GeneralOfferModule,
+    GeneralSettingsModule,
+    AssignesMembershipModule,
+    StudentActivityModule,
     UsersModule,
-    TypeOrmModule.forFeature([Shared]),
   ],
   controllers: [SharedController],
-  providers: [SharedService],
+  providers: [SharedService, SharedMiddleware, DepositMiddleware],
   exports: [SharedService],
 })
-export class SharedModule {
+export class SharedModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CustomerMiddleware).forRoutes("shared/store", "shared/store/reservation");
+    consumer
+      .apply(CustomerMiddleware, SharedMiddleware)
+      .forRoutes("shared/store", "shared/update")
+      .apply(DepositMiddleware)
+      .forRoutes("shared/store-deposit");
   }
 }

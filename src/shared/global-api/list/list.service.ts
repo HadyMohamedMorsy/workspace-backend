@@ -4,6 +4,7 @@ import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
 import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
 import { RoomsService } from "src/rooms/rooms.service";
+import { TypeMember } from "src/shared/enum/global-enum";
 import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
 import { LISTS_EXPENSES_AR, LISTS_EXPENSES_EN } from "./lists/expenses/expenses";
@@ -94,21 +95,29 @@ export class ListService {
   }
 
   async getEntityList(module: string) {
-    if (module === "user") return await this.usersService.getList({ status: "active" });
-    if (module === "room") return await this.roomService.getList();
-    if (module === "categories") return await this.categoryService.getList();
-    if (module === "global-offer-shared") return await this.generalOfferService.findShared();
-    if (module === "global-offer-deskarea") return await this.generalOfferService.findDeskArea();
-    if (module === "global-offer-membership")
-      return await this.generalOfferService.findMembership();
-    if (module === "global-offer-deals") return await this.generalOfferService.findDeals();
-    if (module === "global-offer-packages") return await this.generalOfferService.findPackages();
-    if (module === "global-offer-rooms") return await this.generalOfferService.findRooms();
-    if (module === "membership-offer-shared")
-      return await this.offerCoWorkingSpaceService.findListShared();
-    if (module === "membership-offer-deskarea")
-      return await this.offerCoWorkingSpaceService.findListDeskArea();
-    if (module === "offer-package-offer") return await this.offerPackagesService.findList();
+    const strategyMap = {
+      user: () => this.usersService.getList({ status: "active" }),
+      room: () => this.roomService.getList(),
+      categories: () => this.categoryService.getList(),
+      "global-offer-shared": () => this.generalOfferService.findShared(),
+      "global-offer-deskarea": () => this.generalOfferService.findDeskArea(),
+      "global-offer-membership": () => this.generalOfferService.findMembership(),
+      "global-offer-deals": () => this.generalOfferService.findDeals(),
+      "global-offer-packages": () => this.generalOfferService.findPackages(),
+      "global-offer-rooms": () => this.generalOfferService.findRooms(),
+      "membership-offer-shared": () =>
+        this.offerCoWorkingSpaceService.getList({ type: TypeMember.Shared }),
+      "membership-offer-deskarea": () =>
+        this.offerCoWorkingSpaceService.getList({ type: TypeMember.DeskaArea }),
+      "offer-package-offer": () => this.offerPackagesService.getList(undefined, ["room"]),
+    };
+
+    const strategy = strategyMap[module];
+    if (!strategy) {
+      throw new Error(`No strategy found for module: ${module}`);
+    }
+
+    return await strategy();
   }
 
   async filterRoomsCalender() {

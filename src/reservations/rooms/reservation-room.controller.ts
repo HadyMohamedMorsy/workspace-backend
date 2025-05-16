@@ -1,20 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
@@ -26,14 +13,12 @@ export class ReservationRoomController {
   constructor(private readonly reservationRoomService: ReservationRoomService) {}
 
   @Post("/all-rooms")
-  @UseInterceptors(CachingInterceptor)
   @HttpCode(200)
   async findRoomAll(@Body() filterQueryDto: any) {
     return this.reservationRoomService.findAll(filterQueryDto);
   }
 
   @Post("/index")
-  @UseInterceptors(CachingInterceptor)
   @HttpCode(200)
   async findAll(@Body() filterQueryDto: any) {
     return this.reservationRoomService.getReservationsForThisWeek(filterQueryDto);
@@ -41,7 +26,6 @@ export class ReservationRoomController {
 
   @Post("/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -54,7 +38,6 @@ export class ReservationRoomController {
 
   @Post("/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -67,7 +50,6 @@ export class ReservationRoomController {
 
   @Post("/company")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -80,7 +62,6 @@ export class ReservationRoomController {
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -93,7 +74,6 @@ export class ReservationRoomController {
 
   @Post("/packages/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -106,7 +86,6 @@ export class ReservationRoomController {
 
   @Post("/packages/company")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -119,7 +98,6 @@ export class ReservationRoomController {
 
   @Post("/packages/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -132,7 +110,6 @@ export class ReservationRoomController {
 
   @Post("/deals/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -145,7 +122,6 @@ export class ReservationRoomController {
 
   @Post("/deals/company")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -158,7 +134,6 @@ export class ReservationRoomController {
 
   @Post("/deals/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -170,14 +145,6 @@ export class ReservationRoomController {
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assign-general-offer",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -194,14 +161,6 @@ export class ReservationRoomController {
   }
 
   @Post("/store/package")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-package",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
@@ -220,14 +179,6 @@ export class ReservationRoomController {
     });
   }
   @Post("/store/deal")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/deals",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
@@ -247,15 +198,6 @@ export class ReservationRoomController {
   }
 
   @Post("/update")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-package",
-    "/api/v1/deals",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -267,13 +209,6 @@ export class ReservationRoomController {
   }
 
   @Post("/store-deposite")
-  @ClearCacheAnotherModules([
-    "/api/v1/deposite",
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Deposite,
@@ -286,15 +221,6 @@ export class ReservationRoomController {
   }
 
   @Post("/update-entity")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-package",
-    "/api/v1/deals",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,
@@ -306,7 +232,6 @@ export class ReservationRoomController {
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.ReservationRoom,

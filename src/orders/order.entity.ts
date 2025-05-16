@@ -1,6 +1,6 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { PaymentMethod, TypeOrder, TypeUser } from "src/shared/enum/global-enum";
+import { PaymentMethod, TypeOrder } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
@@ -25,12 +25,6 @@ export class Order {
     enum: TypeOrder,
   })
   type_order: TypeOrder;
-
-  @Column({
-    type: "enum",
-    enum: TypeUser,
-  })
-  type_user: TypeUser;
 
   @ManyToOne(() => Individual, individual => individual.orders, {
     onDelete: "CASCADE",

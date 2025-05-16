@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
+import { UpdateProductDto } from "src/products/dto/update-product.dto";
 import { Product } from "src/products/product.entity";
 import { ProductService } from "src/products/products.service";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -68,7 +69,7 @@ export class OrdersService {
         };
       });
       updateProducts.forEach(async product => {
-        await this.productService.updateStore(product);
+        await this.productService.update(product as UpdateProductDto);
       });
     }
     return orderSaved;

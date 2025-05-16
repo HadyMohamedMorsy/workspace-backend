@@ -8,19 +8,13 @@ import {
   IsString,
   ValidateNested,
 } from "class-validator";
-import { TypeOrder, TypeUser } from "src/shared/enum/global-enum";
+import { TypeOrder } from "src/shared/enum/global-enum";
 
 export class CreateOrderDto {
   @IsEnum(TypeOrder, {
     message: "type order must be one of the following: hold or paid",
   })
   type_order: TypeOrder;
-
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
 
   @IsString()
   @IsNotEmpty()

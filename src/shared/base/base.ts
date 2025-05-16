@@ -69,8 +69,11 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     return { deleted: true, id };
   }
 
-  async getList(filterData: any = {}) {
-    const records = await this.repository.find({ where: filterData });
+  async getList(filterData: any = {}, relations: string[] = []) {
+    const records = await this.repository.find({
+      where: filterData,
+      relations: relations,
+    });
     return {
       data: records,
     };
