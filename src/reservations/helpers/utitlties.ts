@@ -13,13 +13,15 @@ export interface calulateHour {
 
 export function convertTo24HourDate(hour: number, minute: number, period: string): Date {
   const currentDate = new Date();
-  let hour24 = hour;
-
-  if (period === "pm" && hour < 12) hour24 += 12;
-  if (period === "am" && hour === 12) hour24 = 0;
-
+  const hour24 = ato24h(hour, period);
   currentDate.setHours(hour24, minute, 0, 0);
   return currentDate;
+}
+
+export function ato24h(hour: number, period: string): number {
+  if (period?.toLowerCase() === "pm" && hour < 12) return hour + 12;
+  if (period?.toLowerCase() === "am" && hour === 12) return 0;
+  return hour;
 }
 
 export function calculateTimeDifferenceInHours(startDate: Date, endDate: Date) {
@@ -29,6 +31,11 @@ export function calculateTimeDifferenceInHours(startDate: Date, endDate: Date) {
 
 export function formatDate(date: string): string {
   return moment(date).format("DD/MM/YYYY");
+}
+
+export function createCairoTime(dateStr: string, hour: number, minute: number, zone: string) {
+  const [day, month, year] = dateStr.split("/");
+  return moment.tz(`${year}-${month}-${day} ${hour}:${minute}`, "YYYY-MM-DD HH:mm", zone);
 }
 
 export function diffrentHour(rest: Partial<UpdateDeskAreaDto | UpdateSharedDto>) {

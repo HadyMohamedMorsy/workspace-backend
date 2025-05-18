@@ -11,6 +11,10 @@ import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-g
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
+import { BaseService } from "src/shared/base/base";
+import { APIFeaturesService } from "src/shared/filters/filter.service";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { SelectQueryBuilder } from "typeorm";
 
 import { Deals } from "src/deals/deals.entity";
 import { DealsService } from "src/deals/deals.service";
@@ -20,7 +24,6 @@ import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Room } from "src/rooms/room.entity";
 import { RoomsService } from "src/rooms/rooms.service";
 import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
-import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
 import { calculateHours, diffrentHour, formatDate } from "../helpers/utitlties";
@@ -31,7 +34,10 @@ import { ReservationRoom } from "./reservation-room.entity";
 type ReservationType = "offer" | "package" | "deal" | "normal";
 
 @Injectable()
-export class ReservationRoomService {
+export class ReservationRoomService
+  extends BaseService<ReservationRoom, CreateReservationRoomDto, UpdateReservationRoomDto>
+  implements ICrudService<ReservationRoom, CreateReservationRoomDto, UpdateReservationRoomDto>
+{
   constructor(
     @InjectRepository(ReservationRoom)
     private reservationRoomRepository: Repository<ReservationRoom>,
@@ -44,15 +50,12 @@ export class ReservationRoomService {
     private readonly packageRooms: AssignesPackagesService,
     @Inject(forwardRef(() => DealsService))
     private readonly deal: DealsService,
-  ) {}
+  ) {
+    super(reservationRoomRepository, apiFeaturesService);
+  }
 
-  // ==================== PUBLIC METHODS ====================
-
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
       .leftJoin("e.createdBy", "ecr")
       .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"])
@@ -64,41 +67,36 @@ export class ReservationRoomService {
       .addSelect(["es.id", "es.name", "es.unviresty"])
       .leftJoinAndSelect("e.deposites", "esdep");
 
-    if (filterData.search.value) {
+    if (filteredRecord?.search?.value) {
       queryBuilder.andWhere(
         `ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name OR ecr.firstName LIKE :name`,
         {
-          name: `%${filterData.search.value}%`,
+          name: `%${filteredRecord.search.value}%`,
         },
       );
       queryBuilder.andWhere(`ec.whatsApp LIKE :number OR ep.whatsApp LIKE :number`, {
-        number: `%${filterData.search.value}%`,
+        number: `%${filteredRecord.search.value}%`,
       });
     }
 
-    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
+    if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filterData.customFilters.start_date,
-        end_date: filterData.customFilters.end_date,
+        start_date: filteredRecord.customFilters.start_date,
+        end_date: filteredRecord.customFilters.end_date,
       });
     }
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
   }
 
-  async create(createDto: CreateReservationRoomDto, reqBody: any) {
+  // ==================== PUBLIC METHODS ====================
+
+  async create(
+    createDto: CreateReservationRoomDto,
+    selectOptions?: Record<string, boolean>,
+    relations?: Record<string, any>,
+  ) {
     return this.handleReservationCreation(
       createDto,
-      reqBody,
+      { createdBy: relations?.createdBy, customer: relations?.customer },
       createDto.offer_id ? "offer" : "normal",
     );
   }
@@ -262,275 +260,110 @@ export class ReservationRoomService {
   // ==================== finded LOGIC ====================
 
   async findRoomsByIndividualAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .leftJoinAndSelect("e.room", "er")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .leftJoinAndSelect("e.assignGeneralOffer", "es")
-      .leftJoinAndSelect("es.generalOffer", "eg")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .andWhere("e.assignesPackages IS NULL")
-      .andWhere("e.deals IS NULL")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "individual",
+      alias: "individual",
+      selectFields: ["id", "name", "whatsApp"],
+      filterField: "individual_id",
+      additionalConditions: [
+        { field: "assignesPackages", value: null },
+        { field: "deals", value: null },
+      ],
+    });
   }
   async findRoomsByComapnyAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ecc")
-      .leftJoinAndSelect("e.room", "er")
-      .andWhere("ecc.id = :company_id", { company_id: filterData.company_id })
-      .leftJoinAndSelect("e.assignGeneralOffer", "es")
-      .leftJoinAndSelect("es.generalOffer", "eg")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .andWhere("e.assignesPackages IS NULL")
-      .andWhere("e.deals IS NULL")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "company",
+      alias: "company",
+      selectFields: ["id", "name", "phone"],
+      filterField: "company_id",
+      additionalConditions: [
+        { field: "assignesPackages", value: null },
+        { field: "deals", value: null },
+      ],
+    });
   }
   async findRoomsByStudentActivityAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .leftJoinAndSelect("e.room", "er")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
-      .leftJoinAndSelect("ess.generalOffer", "eg")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .andWhere("e.assignesPackages IS NULL")
-      .andWhere("e.deals IS NULL")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "studentActivity",
+      alias: "studentActivity",
+      selectFields: ["id", "name", "unviresty"],
+      filterField: "studentActivity_id",
+      additionalConditions: [
+        { field: "assignesPackages", value: null },
+        { field: "deals", value: null },
+      ],
+    });
   }
   async findRoomsByUserAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.room", "er")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
-      .leftJoinAndSelect("e.assignGeneralOffer", "es")
-      .leftJoinAndSelect("es.generalOffer", "eg")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .andWhere("e.assignesPackages IS NULL")
-      .andWhere("e.deals IS NULL")
-      .andWhere("ec.id = :user_id", {
-        user_id: filterData.user_id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "createdBy",
+      alias: "user",
+      selectFields: ["id", "firstName", "lastName"],
+      filterField: "user_id",
+    });
   }
   async findIndividuaPackageRoomAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .leftJoinAndSelect("e.assignesPackages", "em")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .andWhere("em.id = :package_id", { package_id: filterData.package_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "individual",
+      alias: "individual",
+      selectFields: ["id", "name", "whatsApp"],
+      filterField: "individual_id",
+    });
   }
   async findCompanyPackageRoomAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .leftJoinAndSelect("e.assignesPackages", "em")
-      .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
-      .andWhere("em.id = :package_id", { package_id: filterData.package_id })
-
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "company",
+      alias: "company",
+      selectFields: ["id", "name", "phone"],
+      filterField: "company_id",
+    });
   }
   async findStudentActivityPackageRoomAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .leftJoinAndSelect("e.assignesPackages", "em")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .andWhere("em.id = :package_id", { package_id: filterData.package_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "studentActivity",
+      alias: "studentActivity",
+      selectFields: ["id", "name", "unviresty"],
+      filterField: "studentActivity_id",
+    });
   }
   async findIndividualDealAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .leftJoinAndSelect("e.deals", "em")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .andWhere("em.id = :deal_id", { deal_id: filterData.deal_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "individual",
+      alias: "individual",
+      selectFields: ["id", "name", "whatsApp"],
+      filterField: "individual_id",
+    });
   }
   async findCompanyDealAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .leftJoinAndSelect("e.deals", "em")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .andWhere("ei.id = :company_id", { company_id: filterData.company_id })
-      .andWhere("em.id = :deal_id", { deal_id: filterData.deal_id })
-
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "company",
+      alias: "company",
+      selectFields: ["id", "name", "phone"],
+      filterField: "company_id",
+      additionalRelations: [
+        {
+          relationPath: "deals",
+          alias: "deals",
+          filterField: "deal_id",
+        },
+      ],
+    });
   }
   async findStudentActivityDealAll(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .leftJoinAndSelect("e.deals", "em")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .andWhere("em.id = :deal_id", { deal_id: filterData.deal_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.findRelatedEntities(filterData, {
+      relationPath: "studentActivity",
+      alias: "studentActivity",
+      selectFields: ["id", "name", "unviresty"],
+      filterField: "studentActivity_id",
+      additionalRelations: [
+        {
+          relationPath: "deals",
+          alias: "deals",
+          filterField: "deal_id",
+        },
+      ],
+    });
   }
 
   async findOne(id: number): Promise<ReservationRoom> {
@@ -623,7 +456,7 @@ export class ReservationRoomService {
     dto: CreateReservationRoomDto,
     reqBody: any,
     type: ReservationType,
-  ) {
+  ): Promise<ReservationRoom> {
     const { room_id, selected_day, ...rest } = dto;
     const selectedDay = formatDate(selected_day);
 
@@ -727,7 +560,7 @@ export class ReservationRoomService {
     selectedDay: string,
     additionalData: any,
     reqBody: any,
-  ) {
+  ): ReservationRoom {
     const diffHours = calculateHours({
       start_hour: dto.start_hour,
       start_minute: dto.start_minute,
@@ -762,6 +595,76 @@ export class ReservationRoomService {
   private async executePaginatedQuery(query: any) {
     const [data, total] = await Promise.all([query.getMany(), query.getCount()]);
     return { data, recordsFiltered: data.length, totalRecords: total };
+  }
+
+  private async findRelatedEntities(
+    filterData: any,
+    relationConfig: {
+      relationPath: string;
+      alias: string;
+      selectFields?: string[];
+      filterField: string;
+      additionalRelations?: Array<{
+        relationPath: string;
+        alias: string;
+        filterField: string;
+      }>;
+      additionalConditions?: Array<{
+        field: string;
+        value: any;
+      }>;
+    },
+  ) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(ReservationRoom)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
+        [relationConfig.filterField]: filterData[relationConfig.filterField],
+      });
+
+    // Add additional relations if specified
+    if (relationConfig.additionalRelations) {
+      relationConfig.additionalRelations.forEach(relation => {
+        queryBuilder
+          .leftJoinAndSelect(`e.${relation.relationPath}`, relation.alias)
+          .andWhere(`${relation.alias}.id = :${relation.filterField}`, {
+            [relation.filterField]: filterData[relation.filterField],
+          });
+      });
+    }
+
+    // Add additional conditions if specified
+    if (relationConfig.additionalConditions) {
+      relationConfig.additionalConditions.forEach(condition => {
+        queryBuilder.andWhere(`e.${condition.field} = :${condition.field}`, {
+          [condition.field]: condition.value,
+        });
+      });
+    }
+
+    queryBuilder
+      .leftJoinAndSelect("e.room", "room")
+      .leftJoinAndSelect("e.deposites", "deposites")
+      .leftJoin("e.createdBy", "creator")
+      .addSelect(["creator.id", "creator.firstName", "creator.lastName"]);
+
+    if (relationConfig.selectFields) {
+      queryBuilder.addSelect(
+        relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`),
+      );
+    }
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return {
+      data: filteredRecord,
+      recordsFiltered: filteredRecord.length,
+      totalRecords: +totalRecords,
+    };
   }
 
   // ==================== SPECIFIC LOGIC HANDLERS ====================
@@ -863,42 +766,6 @@ export class ReservationRoomService {
     });
   }
 
-  // ==================== VALIDATION METHODS ====================
-
-  private async validatePackage(id: number) {
-    const pkg = await this.packageRooms.findOne(id);
-    if (!pkg) throw new BadRequestException("Invalid package");
-    return pkg;
-  }
-
-  private async validateDeal(id: number) {
-    const deal = await this.deal.findOne(id);
-    if (!deal) throw new BadRequestException("Invalid deal");
-    return deal;
-  }
-
-  private validatePackageRange(pkg: AssignesPackages, selectedDay: string) {
-    const date = moment(selectedDay, "DD/MM/YYYY");
-    const start = moment(pkg.start_date);
-    const end = moment(pkg.end_date);
-
-    if (!start.isSameOrBefore(date) || !end.isSameOrAfter(date)) {
-      throw new BadRequestException("Package not active for selected date");
-    }
-  }
-
-  private validateDealRange(deal: Deals, selectedDay: string) {
-    const date = moment(selectedDay, "DD/MM/YYYY");
-    const start = moment(deal.start_date);
-    const end = moment(deal.end_date);
-
-    if (!start.isSameOrBefore(date) || !end.isSameOrAfter(date)) {
-      throw new BadRequestException("Deal not active for selected date");
-    }
-  }
-
-  // ==================== UTILITY METHODS ====================
-
   async findActiveOrInactiveReservationsForCustomer(customer_id: number, customer_type: string) {
     const customerRelationMap = {
       individual: "individual",
@@ -926,40 +793,6 @@ export class ReservationRoomService {
     if (existingReservations.length) {
       throw new BadRequestException(`You can't create another reservation for this user.`);
     }
-  }
-
-  private async getActiveReservations(roomId: number, day: string) {
-    return this.reservationRoomRepository
-      .createQueryBuilder("reservation")
-      .innerJoinAndSelect("reservation.room", "room")
-      .where("room.id = :roomId", { roomId })
-      .andWhere("reservation.selected_day = :day", { day })
-      .andWhere("reservation.status IN (:...statuses)", {
-        statuses: [ReservationStatus.ACTIVE, ReservationStatus.COMPLETE],
-      })
-      .getMany();
-  }
-
-  private checkOverlap(
-    reservations: ReservationRoom[],
-    newStart: moment.Moment,
-    newEnd: moment.Moment,
-  ) {
-    return reservations.some(reservation => {
-      const existingStart = this.createMoment(
-        reservation.selected_day,
-        reservation.start_hour,
-        reservation.start_minute,
-        reservation.start_time,
-      );
-      const existingEnd = this.createMoment(
-        reservation.selected_day,
-        reservation.end_hour,
-        reservation.end_minute,
-        reservation.end_time,
-      );
-      return newStart.isSameOrBefore(existingEnd) && newEnd.isSameOrAfter(existingStart);
-    });
   }
 
   private async calculatePrice(offer: any, roomId: number, details: any) {
@@ -1017,16 +850,5 @@ export class ReservationRoomService {
     }
 
     await this.reservationRoomRepository.update(dto.id, rest);
-  }
-
-  private ato24h(hour: number, minute: number, period: string): number {
-    if (period?.toLowerCase() === "pm" && hour < 12) return hour + 12;
-    if (period?.toLowerCase() === "am" && hour === 12) return 0;
-    return hour;
-  }
-
-  private createCairoTime(dateStr: string, hour: number, minute: number, zone: string) {
-    const [day, month, year] = dateStr.split("/");
-    return moment.tz(`${year}-${month}-${day} ${hour}:${minute}`, "YYYY-MM-DD HH:mm", zone);
   }
 }

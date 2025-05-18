@@ -1,4 +1,4 @@
-import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
+import { forwardRef, MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesPackagesModule } from "src/assigness-packages-offers/assignes-packages.module";
@@ -12,6 +12,7 @@ import { RoomsModule } from "src/rooms/rooms.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
+import { ReservationRoomValidationMiddleware } from "./middleware/reservation-room-validation.middleware";
 import { ReservationRoomController } from "./reservation-room.controller";
 import { ReservationRoom } from "./reservation-room.entity";
 import { ReservationRoomService } from "./reservation-room.service";
@@ -32,13 +33,13 @@ import { ReservationRoomService } from "./reservation-room.service";
     TypeOrmModule.forFeature([ReservationRoom]),
   ],
   controllers: [ReservationRoomController],
-  providers: [ReservationRoomService],
+  providers: [ReservationRoomService, ReservationRoomValidationMiddleware],
   exports: [ReservationRoomService],
 })
-export class ReservationRoomModule {
+export class ReservationRoomModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(CustomerMiddleware)
+      .apply(CustomerMiddleware, ReservationRoomValidationMiddleware)
       .forRoutes(
         "reservation-room/store",
         "reservation-room/store/package",
