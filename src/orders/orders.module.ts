@@ -7,6 +7,7 @@ import { FilterDateModule } from "src/shared/filters/filter-date.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
+import { OrderMiddleware } from "./middleware/order.middleware";
 import { OrderController } from "./order.controller";
 import { Order } from "./order.entity";
 import { OrdersService } from "./orders.service";
@@ -27,6 +28,6 @@ import { OrdersService } from "./orders.service";
 })
 export class OrdersModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CustomerMiddleware).forRoutes("order/store");
+    consumer.apply(CustomerMiddleware, OrderMiddleware).forRoutes("order/store");
   }
 }

@@ -1,17 +1,22 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Company } from "src/companies/company.entity";
-import { Individual } from "src/individual/individual.entity";
 import { UpdateProductDto } from "src/products/dto/update-product.dto";
 import { Product } from "src/products/product.entity";
 import { ProductService } from "src/products/products.service";
+import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { StudentActivity } from "src/student-activity/StudentActivity.entity";
-import { User } from "src/users/user.entity";
-import { In, Repository } from "typeorm";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { Order } from "./order.entity";
+
+type RelationConfig = {
+  relationPath: string;
+  alias: string;
+  selectFields: string[];
+  filterField: string;
+};
 
 export class orderItem {
   product: Product;
@@ -19,66 +24,40 @@ export class orderItem {
 }
 
 @Injectable()
-export class OrdersService {
+export class OrdersService
+  extends BaseService<Order, CreateOrderDto, UpdateOrderDto>
+  implements ICrudService<Order, CreateOrderDto, UpdateOrderDto>
+{
   constructor(
     @InjectRepository(Order)
-    private orderRepository: Repository<Order>,
+    repository: Repository<Order>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly productService: ProductService,
-  ) {}
-
-  // Create a new record
-  async create(
-    createOrderDto: CreateOrderDto,
-    reqBody: {
-      customer: Individual | Company | StudentActivity;
-      createdBy: User;
-    },
-  ): Promise<Order> {
-    const totalOrder = createOrderDto.order_items.reduce((total, item) => {
-      return total + this.getOrderItemTotalPrice(item, createOrderDto.type_order);
-    }, 0);
-
-    const orderPrice = createOrderDto.order_items.reduce((total, item) => {
-      return total + this.getOrderItemTotalPrice(item, "PAID");
-    }, 0);
-
-    const payload = {
-      ...createOrderDto,
-      total_order: totalOrder,
-      order_price: orderPrice,
-      createdBy: reqBody.createdBy,
-      [createOrderDto.type_user]: reqBody.customer,
-      order_items:
-        createOrderDto.order_items?.map(item => ({
-          product_id: item.product?.id,
-          quantity: item.quantity,
-        })) || [],
-    };
-
-    const order = this.orderRepository.create(payload);
-    const orderSaved = await this.orderRepository.save(order);
-
-    if (orderSaved) {
-      const updateProducts = createOrderDto.order_items.map(item => {
-        const { quantity, product } = item;
-        const { store, ...otherItem } = product;
-        return {
-          store: store - quantity,
-          ...otherItem,
-        };
-      });
-      updateProducts.forEach(async product => {
-        await this.productService.update(product as UpdateProductDto);
-      });
-    }
-    return orderSaved;
+  ) {
+    super(repository, apiFeaturesService);
   }
 
-  // Get all records
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+  private prepareProductUpdate(product: Product, quantity: number): UpdateProductDto {
+    const { store, type, ...otherItem } = product;
+    return {
+      id: product.id,
+      store: store - quantity,
+      type: type as "item" | "weight",
+      product,
+      ...otherItem,
+    };
+  }
 
+  private async updateProductsInventory(orderItems: orderItem[]): Promise<void> {
+    const updateProducts = orderItems.map(item =>
+      this.prepareProductUpdate(item.product, item.quantity),
+    );
+
+    await Promise.all(updateProducts.map(product => this.productService.update(product)));
+  }
+
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
       .leftJoin("e.individual", "ep")
       .addSelect(["ep.id", "ep.name", "ep.whatsApp"])
@@ -89,94 +68,36 @@ export class OrdersService {
       .leftJoin("e.createdBy", "ecr")
       .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"]);
 
-    if (filterData.search.value) {
+    if (filteredRecord.search?.value) {
       queryBuilder.andWhere(
         `ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name OR ecr.firstName LIKE :name`,
         {
-          name: `%${filterData.search.value}%`,
+          name: `%${filteredRecord.search.value}%`,
         },
       );
       queryBuilder.andWhere(`ec.whatsApp LIKE :number OR ep.whatsApp LIKE :number`, {
-        number: `%${filterData.search.value}%`,
+        number: `%${filteredRecord.search.value}%`,
       });
     }
 
-    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
+    if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filterData.customFilters.start_date,
-        end_date: filterData.customFilters.end_date,
+        start_date: filteredRecord.customFilters.start_date,
+        end_date: filteredRecord.customFilters.end_date,
       });
     }
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
   }
 
-  async findOrderByUserAll(filterData) {
+  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
     const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
+
     queryBuilder
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
-      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
+        [relationConfig.filterField]: filterData[relationConfig.filterField],
+      });
 
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-  async findOrderByIndividualAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-  async findOrderByComapnyAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ecr")
-      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-  async findOrderByStudentActivityAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+    this.queryRelationIndex(queryBuilder);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
@@ -188,60 +109,47 @@ export class OrdersService {
     };
   }
 
-  // Get record by ID
-  async findOne(id: number): Promise<Order> {
-    const order = await this.orderRepository.findOne({ where: { id } });
-    if (!order) {
-      throw new NotFoundException(`order is not found`);
+  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+    const order = await super.create(createOrderDto);
+    if (order && createOrderDto.order_items?.length > 0) {
+      await this.updateProductsInventory(createOrderDto.order_items);
     }
     return order;
   }
 
-  async findMany(ids: number[]): Promise<Order[]> {
-    const orders = await this.orderRepository.find({
-      where: {
-        id: In(ids),
-      },
+  async findOrderByUserAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "createdBy",
+      alias: "user",
+      selectFields: ["id", "firstName", "lastName"],
+      filterField: "user_id",
     });
-    if (!orders) {
-      throw new NotFoundException(`orders is  not found`);
-    }
-    return orders;
   }
 
-  // Update a record
-  async update(updateOrderDto: UpdateOrderDto) {
-    await this.orderRepository.update(updateOrderDto.id, updateOrderDto);
-    return this.orderRepository.findOne({ where: { id: updateOrderDto.id } });
+  async findOrderByIndividualAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "individual",
+      alias: "individual",
+      selectFields: ["id", "name", "whatsApp"],
+      filterField: "individual_id",
+    });
   }
 
-  async remove(orderId: number) {
-    await this.orderRepository.delete(orderId);
+  async findOrderByComapnyAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "company",
+      alias: "company",
+      selectFields: ["id", "name", "phone"],
+      filterField: "company_id",
+    });
   }
 
-  getOrderItemTotalPrice(item: any, key: string): number {
-    let quantity = 0;
-    let accesKey = "";
-
-    switch (key) {
-      case "PAID":
-      case "HOLD":
-        quantity = item.quantity;
-        accesKey = "selling_price";
-        break;
-      case "COST":
-        quantity = item.quantity;
-        accesKey = "purshase_price";
-        break;
-      case "FREE":
-        quantity = 0;
-        accesKey = "selling_price";
-        break;
-      default:
-        quantity = item.quantity;
-        accesKey = "selling_price";
-        break;
-    }
-    return item.product[accesKey] * quantity;
+  async findOrderByStudentActivityAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "studentActivity",
+      alias: "studentActivity",
+      selectFields: ["id", "name", "unviresty"],
+      filterField: "studentActivity_id",
+    });
   }
 }

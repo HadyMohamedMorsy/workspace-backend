@@ -9,6 +9,7 @@ import {
   ValidateNested,
 } from "class-validator";
 import { TypeOrder } from "src/shared/enum/global-enum";
+import { User } from "src/users/user.entity";
 
 export class CreateOrderDto {
   @IsEnum(TypeOrder, {
@@ -30,6 +31,18 @@ export class CreateOrderDto {
   @Type(() => OrderItemDto)
   @IsOptional()
   order_items: OrderItemDto[];
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  total_order: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  orderPrice: number;
+
+  createdBy: User;
 }
 
 export class OrderItemDto {

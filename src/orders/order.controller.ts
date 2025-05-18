@@ -1,14 +1,14 @@
 import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource } from "src/shared/enum/global-enum";
+import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateOrderDto } from "./dto/create-order.dto";
-import { UpdateOrderDto } from "./dto/update-order.dto";
 import { OrdersService } from "./orders.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("order")
-export class OrderController {
+export class OrderController implements SelectOptions, RelationOptions {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post("/index")
@@ -79,23 +79,16 @@ export class OrderController {
     },
   ])
   async create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.ordersService.create(createOrderDto, {
-      customer,
-      createdBy,
-    });
-  }
-
-  @Post("/update")
-  @Permissions([
-    {
-      resource: Resource.Order,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async update(@Body() updateOrderDto: UpdateOrderDto) {
-    return await this.ordersService.update(updateOrderDto);
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.ordersService.create({
+      type_order: createOrderDto.type_order,
+      order_number: createOrderDto.order_number,
+      order_items: req["orderItems"],
+      total_order: req["totalOrder"],
+      orderPrice: req["orderPrice"],
+      createdBy: req["createdBy"],
+      [customerType]: req[customerType],
+    } as CreateOrderDto);
   }
 
   @Delete("/delete")
@@ -105,7 +98,46 @@ export class OrderController {
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.ordersService.remove(bodyDelete.id);
+  async remove(@Body() id: number) {
+    await this.ordersService.delete(id);
+  }
+
+  selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      order_number: true,
+      type_order: true,
+      order_price: true,
+      total_order: true,
+      payment_method: true,
+      order_items: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      individual: {
+        id: true,
+        name: true,
+        whatsApp: true,
+      },
+      company: {
+        id: true,
+        name: true,
+        phone: true,
+      },
+      studentActivity: {
+        id: true,
+        name: true,
+        unviresty: true,
+      },
+    };
   }
 }
