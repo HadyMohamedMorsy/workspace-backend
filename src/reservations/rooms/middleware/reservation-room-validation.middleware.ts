@@ -22,10 +22,8 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const { body } = req;
 
-    // Validate time slot
     await this.validateTimeSlot(body);
 
-    // Validate package or deal if provided
     if (body.package_id) {
       await this.validatePackage(body.package_id, body.selected_day);
     }

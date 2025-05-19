@@ -12,7 +12,11 @@ import { RoomsModule } from "src/rooms/rooms.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
+import { PriceCalculationMiddleware } from "./middleware/price-calculation.middleware";
 import { ReservationRoomValidationMiddleware } from "./middleware/reservation-room-validation.middleware";
+import { ReservationStatusMiddleware } from "./middleware/reservation-status.middleware";
+import { ReservationCalendarService } from "./reservation-calendar.service";
+import { ReservationRoomQueryService } from "./reservation-room-query.service";
 import { ReservationRoomController } from "./reservation-room.controller";
 import { ReservationRoom } from "./reservation-room.entity";
 import { ReservationRoomService } from "./reservation-room.service";
@@ -31,15 +35,21 @@ import { ReservationRoomService } from "./reservation-room.service";
     forwardRef(() => AssignesPackagesModule),
     forwardRef(() => DealsModule),
     TypeOrmModule.forFeature([ReservationRoom]),
+    DepositesModule,
   ],
   controllers: [ReservationRoomController],
-  providers: [ReservationRoomService, ReservationRoomValidationMiddleware],
+  providers: [ReservationRoomService, ReservationRoomQueryService, ReservationCalendarService],
   exports: [ReservationRoomService],
 })
 export class ReservationRoomModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(CustomerMiddleware, ReservationRoomValidationMiddleware)
+      .apply(
+        CustomerMiddleware,
+        ReservationRoomValidationMiddleware,
+        PriceCalculationMiddleware,
+        ReservationStatusMiddleware,
+      )
       .forRoutes(
         "reservation-room/store",
         "reservation-room/store/package",

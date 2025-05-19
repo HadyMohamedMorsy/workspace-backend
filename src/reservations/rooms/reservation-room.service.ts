@@ -1,16 +1,8 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import * as moment from "moment-timezone";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
 import { CreateAssignGeneralOfferDto } from "src/assignes-global-offers/dto/create-assign-general-offer.dto";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
-import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
@@ -20,15 +12,18 @@ import { Deals } from "src/deals/deals.entity";
 import { DealsService } from "src/deals/deals.service";
 import { DepositeService } from "src/deposit/deposites.service";
 import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
-import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { Room } from "src/rooms/room.entity";
 import { RoomsService } from "src/rooms/rooms.service";
-import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import { Repository } from "typeorm";
-import { calculateHours, diffrentHour, formatDate } from "../helpers/utitlties";
+import { calculateHours, formatDate } from "../helpers/utitlties";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
+import { PriceCalculationMiddleware } from "./middleware/price-calculation.middleware";
+import { ReservationStatusMiddleware } from "./middleware/reservation-status.middleware";
+import { ReservationCalendarService } from "./reservation-calendar.service";
+import { ReservationRoomQueryService } from "./reservation-room-query.service";
 import { ReservationRoom } from "./reservation-room.entity";
 
 type ReservationType = "offer" | "package" | "deal" | "normal";
@@ -43,13 +38,14 @@ export class ReservationRoomService
     private reservationRoomRepository: Repository<ReservationRoom>,
     private readonly apiFeaturesService: APIFeaturesService,
     private readonly assignGlobalOffer: AssignGeneralOfferservice,
-    private readonly globalOffer: GeneralOfferService,
     protected readonly depositeService: DepositeService,
     private readonly room: RoomsService,
-    @Inject(forwardRef(() => AssignesPackagesService))
-    private readonly packageRooms: AssignesPackagesService,
-    @Inject(forwardRef(() => DealsService))
+
     private readonly deal: DealsService,
+    private readonly priceCalculationMiddleware: PriceCalculationMiddleware,
+    private readonly reservationStatusMiddleware: ReservationStatusMiddleware,
+    private readonly queryService: ReservationRoomQueryService,
+    private readonly calendarService: ReservationCalendarService,
   ) {
     super(reservationRoomRepository, apiFeaturesService);
   }
@@ -109,269 +105,6 @@ export class ReservationRoomService
     return this.handleReservationCreation(createDto, reqBody, "deal");
   }
 
-  async getReservationsForThisWeek(filterData: any) {
-    const queryBuilder = this.reservationRoomRepository.createQueryBuilder("r");
-    const weekStartDate = moment(filterData.weekStartDate);
-    const startOfWeek = weekStartDate.clone().startOf("week").startOf("day");
-    const endOfWeek = weekStartDate.clone().endOf("week").endOf("day");
-
-    const formattedStartOfWeek = startOfWeek.format("DD/MM/YYYY");
-    const formattedEndOfWeek = endOfWeek.format("DD/MM/YYYY");
-
-    queryBuilder
-      .leftJoinAndSelect("r.room", "rr")
-      .where(
-        `TO_DATE(r.selected_day, 'DD/MM/YYYY') 
-      BETWEEN TO_DATE(:startOfWeek, 'DD/MM/YYYY') 
-      AND TO_DATE(:endOfWeek, 'DD/MM/YYYY')
-      AND r.status != :status`,
-        {
-          startOfWeek: formattedStartOfWeek,
-          endOfWeek: formattedEndOfWeek,
-          status: ReservationStatus.CANCELLED,
-        },
-      )
-      .leftJoinAndSelect("r.individual", "individual")
-      .leftJoinAndSelect("r.company", "company")
-      .leftJoinAndSelect("r.studentActivity", "studentActivity")
-      .addSelect(
-        `
-    COALESCE(individual.name, company.name, studentActivity.name, 'Unknown Client') AS "clientName"
-  `,
-      );
-
-    if (filterData?.roomIds && filterData.roomIds.length > 0) {
-      queryBuilder.andWhere("rr.id IN (:...roomIds)", {
-        roomIds: filterData.roomIds.map(id => String(id)),
-      });
-    }
-
-    const reservations = await queryBuilder.getRawMany();
-
-    if (filterData?.isFree) {
-      const freeSlots = this.getFreeSlots(
-        reservations,
-        filterData.roomIds,
-        startOfWeek,
-        endOfWeek, // Pass the endOfWeek to the free slots calculation
-      );
-      return { data: freeSlots };
-    }
-
-    const formattedReservations = reservations.map(res => this.formatReservation(res));
-    return {
-      data: formattedReservations,
-    };
-  }
-
-  private formatReservation(res) {
-    const timeZone = "Africa/Cairo";
-
-    const startHour = this.ato24h(res.r_start_hour, res.r_start_minute, res.r_start_time);
-    const endHour = this.ato24h(res.r_end_hour, res.r_end_minute, res.r_end_time);
-
-    const start = this.createCairoTime(res.r_selected_day, startHour, res.r_start_minute, timeZone);
-    const end = this.createCairoTime(res.r_selected_day, endHour, res.r_end_minute, timeZone);
-
-    return {
-      id: String(res.r_id),
-      title: res.clientName || "Unknown Client",
-      start: start.format("YYYY-MM-DDTHH:mm:ssZ"),
-      end: end.format("YYYY-MM-DDTHH:mm:ssZ"),
-      extendedProps: {
-        roomName: res.rr_name,
-      },
-    };
-  }
-
-  // Updated free slots calculation
-  private getFreeSlots(
-    reservations: any[],
-    roomIds: string[],
-    startOfWeek: moment.Moment,
-    endOfWeek: moment.Moment,
-  ) {
-    const timeZone = "Africa/Cairo";
-    const freeSlots = [];
-
-    const rooms = roomIds || [...new Set(reservations.map(res => res.rr_id))];
-
-    rooms.forEach(roomId => {
-      const roomReservations = reservations
-        .filter(res => res.rr_id === roomId)
-        .map(res => ({
-          ...res,
-          start: this.createCairoTime(
-            res.r_selected_day,
-            this.ato24h(res.r_start_hour, res.r_start_minute, res.r_start_time),
-            res.r_start_minute,
-            timeZone,
-          ),
-          end: this.createCairoTime(
-            res.r_selected_day,
-            this.ato24h(res.r_end_hour, res.r_end_minute, res.r_end_time),
-            res.r_end_minute,
-            timeZone,
-          ),
-        }));
-
-      // Sort by start time
-      roomReservations.sort((a, b) => a.start.valueOf() - b.start.valueOf());
-
-      let lastEnd = startOfWeek.clone().tz(timeZone);
-      const roomName = roomReservations[0]?.rr_name || "Unknown Room";
-
-      // Check gaps between reservations
-      for (const res of roomReservations) {
-        if (res.start.isAfter(lastEnd)) {
-          freeSlots.push({
-            roomId,
-            roomName,
-            start: lastEnd.format("YYYY-MM-DDTHH:mm:ssZ"),
-            end: res.start.format("YYYY-MM-DDTHH:mm:ssZ"),
-          });
-        }
-
-        if (res.end.isAfter(lastEnd)) {
-          lastEnd = res.end.clone();
-        }
-      }
-
-      if (lastEnd.isBefore(endOfWeek)) {
-        freeSlots.push({
-          roomId,
-          roomName,
-          start: lastEnd.format("YYYY-MM-DDTHH:mm:ssZ"),
-          end: endOfWeek.format("YYYY-MM-DDTHH:mm:ssZ"),
-        });
-      }
-    });
-
-    return freeSlots;
-  }
-
-  async findRoomsByUserType(filterData: any, userType: string) {
-    const query = this.buildBaseQuery(filterData)
-      .leftJoinAndSelect(`e.${userType}`, "user")
-      .andWhere(`user.id = :id`, { id: filterData[`${userType}_id`] });
-    return this.executePaginatedQuery(query);
-  }
-
-  // ==================== finded LOGIC ====================
-
-  async findRoomsByIndividualAll(filterData) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "individual",
-      alias: "individual",
-      selectFields: ["id", "name", "whatsApp"],
-      filterField: "individual_id",
-      additionalConditions: [
-        { field: "assignesPackages", value: null },
-        { field: "deals", value: null },
-      ],
-    });
-  }
-  async findRoomsByComapnyAll(filterData) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "company",
-      alias: "company",
-      selectFields: ["id", "name", "phone"],
-      filterField: "company_id",
-      additionalConditions: [
-        { field: "assignesPackages", value: null },
-        { field: "deals", value: null },
-      ],
-    });
-  }
-  async findRoomsByStudentActivityAll(filterData) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "studentActivity",
-      alias: "studentActivity",
-      selectFields: ["id", "name", "unviresty"],
-      filterField: "studentActivity_id",
-      additionalConditions: [
-        { field: "assignesPackages", value: null },
-        { field: "deals", value: null },
-      ],
-    });
-  }
-  async findRoomsByUserAll(filterData) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "createdBy",
-      alias: "user",
-      selectFields: ["id", "firstName", "lastName"],
-      filterField: "user_id",
-    });
-  }
-  async findIndividuaPackageRoomAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "individual",
-      alias: "individual",
-      selectFields: ["id", "name", "whatsApp"],
-      filterField: "individual_id",
-    });
-  }
-  async findCompanyPackageRoomAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "company",
-      alias: "company",
-      selectFields: ["id", "name", "phone"],
-      filterField: "company_id",
-    });
-  }
-  async findStudentActivityPackageRoomAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "studentActivity",
-      alias: "studentActivity",
-      selectFields: ["id", "name", "unviresty"],
-      filterField: "studentActivity_id",
-    });
-  }
-  async findIndividualDealAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "individual",
-      alias: "individual",
-      selectFields: ["id", "name", "whatsApp"],
-      filterField: "individual_id",
-    });
-  }
-  async findCompanyDealAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "company",
-      alias: "company",
-      selectFields: ["id", "name", "phone"],
-      filterField: "company_id",
-      additionalRelations: [
-        {
-          relationPath: "deals",
-          alias: "deals",
-          filterField: "deal_id",
-        },
-      ],
-    });
-  }
-  async findStudentActivityDealAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "studentActivity",
-      alias: "studentActivity",
-      selectFields: ["id", "name", "unviresty"],
-      filterField: "studentActivity_id",
-      additionalRelations: [
-        {
-          relationPath: "deals",
-          alias: "deals",
-          filterField: "deal_id",
-        },
-      ],
-    });
-  }
-
-  async findOne(id: number): Promise<ReservationRoom> {
-    const reservation = await this.reservationRoomRepository.findOne({ where: { id } });
-    if (!reservation) throw new NotFoundException(`Reservation ${id} not found`);
-    return reservation;
-  }
-
   async update(updateDto: UpdateReservationRoomDto) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {
@@ -393,14 +126,11 @@ export class ReservationRoomService
       ...rest
     } = updateDto;
 
-    if (status === ReservationStatus.CANCELLED) {
-      await this.handleCancellation(updateDto);
-    } else {
-      await this.reservationRoomRepository.update(updateDto.id, {
-        ...rest,
-        status: ReservationStatus.COMPLETE,
-      });
-    }
+    await this.reservationRoomRepository.update(updateDto.id, {
+      ...rest,
+      status: ReservationStatus.COMPLETE,
+    });
+
     return this.findOne(updateDto.id);
   }
 
@@ -457,6 +187,8 @@ export class ReservationRoomService
     reqBody: any,
     type: ReservationType,
   ): Promise<ReservationRoom> {
+    await this.reservationStatusMiddleware.checkActiveReservations(reqBody);
+
     const { room_id, selected_day, ...rest } = dto;
     const selectedDay = formatDate(selected_day);
 
@@ -493,42 +225,6 @@ export class ReservationRoomService
         details.end_time,
       ),
     };
-  }
-
-  private createMoment(day: string, hour: number, minute: number, period: TimeOfDay) {
-    const [d, m, y] = day.split("/");
-    const adjustedHour = this.adjustHour(hour, period);
-    return moment(`${y}-${m}-${d} ${adjustedHour}:${minute}`, "YYYY-MM-DD HH:mm");
-  }
-
-  private adjustHour(hour: number, period: TimeOfDay): number {
-    if (period === TimeOfDay.PM && hour !== 12) return hour + 12;
-    if (period === TimeOfDay.AM && hour === 12) return 0;
-    return hour;
-  }
-
-  private async validateTimeSlot(
-    roomId: number,
-    day: string,
-    start: moment.Moment,
-    end: moment.Moment,
-  ) {
-    if (end.isBefore(start)) {
-      throw new BadRequestException("End time must be after start time.");
-    }
-
-    const parsedDay = moment(day, "DD/MM/YYYY");
-    const startOfDay = parsedDay.clone().startOf("day");
-    const endOfDay = parsedDay.clone().endOf("day");
-
-    if (end.isBefore(startOfDay) || end.isAfter(endOfDay)) {
-      throw new BadRequestException("End time must be within the same day.");
-    }
-
-    const existing = await this.getActiveReservations(roomId, day);
-    if (this.checkOverlap(existing, start, end)) {
-      throw new BadRequestException("Time slot overlaps with existing reservation");
-    }
   }
 
   private async getValidRoom(roomId: number) {
@@ -581,92 +277,6 @@ export class ReservationRoomService
     });
   }
 
-  // ==================== QUERY BUILDERS ====================
-
-  private buildBaseQuery(filterData: any) {
-    return this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData)
-      .leftJoinAndSelect("e.room", "room")
-      .leftJoin("e.createdBy", "creator")
-      .addSelect(["creator.id", "creator.firstName", "creator.lastName"]);
-  }
-
-  private async executePaginatedQuery(query: any) {
-    const [data, total] = await Promise.all([query.getMany(), query.getCount()]);
-    return { data, recordsFiltered: data.length, totalRecords: total };
-  }
-
-  private async findRelatedEntities(
-    filterData: any,
-    relationConfig: {
-      relationPath: string;
-      alias: string;
-      selectFields?: string[];
-      filterField: string;
-      additionalRelations?: Array<{
-        relationPath: string;
-        alias: string;
-        filterField: string;
-      }>;
-      additionalConditions?: Array<{
-        field: string;
-        value: any;
-      }>;
-    },
-  ) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ReservationRoom)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
-
-    // Add additional relations if specified
-    if (relationConfig.additionalRelations) {
-      relationConfig.additionalRelations.forEach(relation => {
-        queryBuilder
-          .leftJoinAndSelect(`e.${relation.relationPath}`, relation.alias)
-          .andWhere(`${relation.alias}.id = :${relation.filterField}`, {
-            [relation.filterField]: filterData[relation.filterField],
-          });
-      });
-    }
-
-    // Add additional conditions if specified
-    if (relationConfig.additionalConditions) {
-      relationConfig.additionalConditions.forEach(condition => {
-        queryBuilder.andWhere(`e.${condition.field} = :${condition.field}`, {
-          [condition.field]: condition.value,
-        });
-      });
-    }
-
-    queryBuilder
-      .leftJoinAndSelect("e.room", "room")
-      .leftJoinAndSelect("e.deposites", "deposites")
-      .leftJoin("e.createdBy", "creator")
-      .addSelect(["creator.id", "creator.firstName", "creator.lastName"]);
-
-    if (relationConfig.selectFields) {
-      queryBuilder.addSelect(
-        relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`),
-      );
-    }
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
   // ==================== SPECIFIC LOGIC HANDLERS ====================
 
   private async processOffer(dto: CreateReservationRoomDto, reqBody: any) {
@@ -679,17 +289,41 @@ export class ReservationRoomService
     };
 
     const assignOffer = await this.assignGlobalOffer.create(payload, reqBody);
-    const offer = await this.globalOffer.findOne(dto.offer_id);
+    const priceCalculation = await this.priceCalculationMiddleware.calculatePrice({
+      roomId: dto.room_id,
+      details: {
+        start_hour: dto.start_hour,
+        start_minute: dto.start_minute,
+        start_time: dto.start_time,
+        end_hour: dto.end_hour,
+        end_minute: dto.end_minute,
+        end_time: dto.end_time,
+      },
+      offerId: dto.offer_id,
+    });
+
     return {
       assignGeneralOffer: assignOffer,
-      total_price: await this.calculatePrice(offer, dto.room_id, dto),
+      total_price: priceCalculation.totalPrice,
     };
   }
 
   private async processCalcNormal(dto: CreateReservationRoomDto) {
+    const priceCalculation = await this.priceCalculationMiddleware.calculatePrice({
+      roomId: dto.room_id,
+      details: {
+        start_hour: dto.start_hour,
+        start_minute: dto.start_minute,
+        start_time: dto.start_time,
+        end_hour: dto.end_hour,
+        end_minute: dto.end_minute,
+        end_time: dto.end_time,
+      },
+    });
+
     return {
       assignGeneralOffer: null,
-      total_price: await this.calculatePrice(null, dto.room_id, dto),
+      total_price: priceCalculation.totalPrice,
     };
   }
 
@@ -764,91 +398,5 @@ export class ReservationRoomService
       used: newUsed,
       remaining: newRemaining,
     });
-  }
-
-  async findActiveOrInactiveReservationsForCustomer(customer_id: number, customer_type: string) {
-    const customerRelationMap = {
-      individual: "individual",
-      company: "company",
-      studentActivity: "studentActivity",
-    };
-
-    const customerRelationField = customerRelationMap[customer_type];
-    const customerCondition = { [customerRelationField]: { id: customer_id } };
-
-    const existingReservations = await this.reservationRoomRepository.find({
-      relations: [customerRelationField],
-      where: [
-        {
-          status: ReservationStatus.ACTIVE,
-          ...customerCondition,
-        },
-        {
-          status: ReservationStatus.PENDING,
-          ...customerCondition,
-        },
-      ],
-    });
-
-    if (existingReservations.length) {
-      throw new BadRequestException(`You can't create another reservation for this user.`);
-    }
-  }
-
-  private async calculatePrice(offer: any, roomId: number, details: any) {
-    const priceRoom = await this.room.findOne(roomId);
-    const diffHours = diffrentHour(details);
-    let discount = 0;
-    const totalPrice = diffHours ? +priceRoom.price * diffHours : +priceRoom.price;
-    if (offer) {
-      const typeDiscount = offer.type_discount;
-      const discountAmount = offer.discount;
-      discount = typeDiscount === "amount" ? discountAmount : totalPrice * (discountAmount / 100);
-    }
-
-    return totalPrice - discount;
-  }
-
-  private async handleCancellation(dto: UpdateReservationRoomDto) {
-    const {
-      start_hour,
-      start_minute,
-      start_time,
-      end_hour,
-      end_minute,
-      end_time,
-      package_id,
-      deal_id,
-      ...rest
-    } = dto;
-
-    const diffHours = calculateHours({
-      start_hour,
-      start_minute,
-      start_time,
-      end_hour,
-      end_minute,
-      end_time,
-    });
-
-    if (package_id) {
-      const pkg = await this.validatePackage(package_id);
-      await this.packageRooms.update({
-        id: pkg.id,
-        used: pkg.used - diffHours,
-        remaining: pkg.remaining + diffHours,
-      });
-    }
-
-    if (deal_id) {
-      const deal = await this.validateDeal(deal_id);
-      await this.deal.update({
-        id: deal.id,
-        used: deal.used - diffHours,
-        remaining: deal.remaining + diffHours,
-      });
-    }
-
-    await this.reservationRoomRepository.update(dto.id, rest);
   }
 }

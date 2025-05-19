@@ -1,5 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { Deals } from "src/deals/deals.entity";
 import { Deposite } from "src/deposit/deposites.entity";
 import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 
@@ -78,4 +80,10 @@ export class CreateReservationRoomDto {
 
   @IsOptional()
   deposites?: Deposite;
+
+  @IsOptional()
+  package?: AssignesPackages;
+
+  @IsOptional()
+  deal?: Deals;
 }
