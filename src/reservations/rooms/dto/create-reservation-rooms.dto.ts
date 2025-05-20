@@ -1,9 +1,11 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Deposite } from "src/deposit/deposites.entity";
-import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { User } from "src/users/user.entity";
 
 export class CreateReservationRoomDto {
   @IsString()
@@ -78,12 +80,25 @@ export class CreateReservationRoomDto {
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
 
-  @IsOptional()
   deposites?: Deposite;
 
-  @IsOptional()
   package?: AssignesPackages;
 
-  @IsOptional()
   deal?: Deals;
+
+  payment_method?: PaymentMethod;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  total_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  total_time?: number;
+
+  createdBy: User;
+
+  assignGeneralOffer?: AssignGeneralOffer;
 }

@@ -1,0 +1,54 @@
+import { BadRequestException, Injectable, NestMiddleware } from "@nestjs/common";
+import { NextFunction, Request, Response } from "express";
+import { DepositeService } from "src/deposit/deposites.service";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
+
+interface DepositEntity extends CreateDepositeDto {
+  assignMembership?: any;
+  assignPackage?: any;
+}
+
+@Injectable()
+export class DepositMiddleware implements NestMiddleware {
+  constructor(private readonly depositeService: DepositeService) {}
+
+  async use(req: Request, res: Response, next: NextFunction) {
+    const entities = {
+      memberShip: { type: "membership", field: "assignMembership" },
+      pkg: { type: "package", field: "assignPackage" },
+      shared: { type: "shared", field: "assignPackage" },
+      deskarea: { type: "deskarea", field: "assignPackage" },
+    };
+
+    for (const [key, config] of Object.entries(entities)) {
+      const entity = req[key];
+      if (entity) {
+        const deposite = await this.createDeposit(req, entity, config.field);
+        this.validateDepositAmount(deposite, entity, config.type);
+        req["deposite"] = deposite;
+        break;
+      }
+    }
+
+    next();
+  }
+
+  private async createDeposit(req: Request, entity: any, assignField: string): Promise<any> {
+    const depositData: DepositEntity = {
+      total_price: req.body.total_price,
+      status: req.body.status,
+      [assignField]: entity,
+      createdBy: req["createdBy"],
+    };
+
+    return this.depositeService.create(depositData);
+  }
+
+  private validateDepositAmount(deposite: any, entity: any, type: string): void {
+    if (deposite.total_price >= entity.total_price) {
+      throw new BadRequestException(
+        `Deposit amount (${deposite.total_price}) must be less than ${type} total price (${entity.total_price})`,
+      );
+    }
+  }
+}

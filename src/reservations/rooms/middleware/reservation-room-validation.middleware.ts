@@ -6,7 +6,9 @@ import { AssignesPackages } from "src/assigness-packages-offers/assignes-package
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
 import { Deals } from "src/deals/deals.entity";
 import { DealsService } from "src/deals/deals.service";
-import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
+import { createMoment } from "src/reservations/helpers/utitlties";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { Repository } from "typeorm";
 import { ReservationRoom } from "../reservation-room.entity";
 
@@ -17,6 +19,7 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
     private readonly reservationRoomRepository: Repository<ReservationRoom>,
     private readonly packageRooms: AssignesPackagesService,
     private readonly deal: DealsService,
+    private readonly offer: GeneralOfferService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -25,28 +28,25 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
     await this.validateTimeSlot(body);
 
     if (body.package_id) {
-      await this.validatePackage(body.package_id, body.selected_day);
+      const pkg = await this.validatePackage(body.package_id, body.selected_day);
+      req["pkg"] = pkg;
     }
     if (body.deal_id) {
-      await this.validateDeal(body.deal_id, body.selected_day);
+      const deal = await this.validateDeal(body.deal_id, body.selected_day);
+      req["deal"] = deal;
     }
 
     next();
   }
 
   private async validateTimeSlot(body: any) {
-    const startTime = this.createMoment(
+    const startTime = createMoment(
       body.selected_day,
       body.start_hour,
       body.start_minute,
       body.start_time,
     );
-    const endTime = this.createMoment(
-      body.selected_day,
-      body.end_hour,
-      body.end_minute,
-      body.end_time,
-    );
+    const endTime = createMoment(body.selected_day, body.end_hour, body.end_minute, body.end_time);
 
     if (endTime.isBefore(startTime)) {
       throw new BadRequestException("End time must be after start time.");
@@ -104,6 +104,21 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
     }
   }
 
+  private async validateOffer(id: number, selectedDay: string) {
+    const offer = await this.offer.findOne(id);
+    if (!offer) {
+      throw new BadRequestException("Invalid offer");
+    }
+
+    const date = moment(selectedDay, "DD/MM/YYYY");
+    const start = moment(offer.start_date);
+    const end = moment(offer.end_date);
+
+    if (!start.isSameOrBefore(date) || !end.isSameOrAfter(date)) {
+      throw new BadRequestException("Offer not active for selected date");
+    }
+  }
+
   private async getActiveReservations(roomId: number, day: string) {
     return this.reservationRoomRepository
       .createQueryBuilder("reservation")
@@ -122,13 +137,13 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
     newEnd: moment.Moment,
   ) {
     return reservations.some(reservation => {
-      const existingStart = this.createMoment(
+      const existingStart = createMoment(
         reservation.selected_day,
         reservation.start_hour,
         reservation.start_minute,
         reservation.start_time,
       );
-      const existingEnd = this.createMoment(
+      const existingEnd = createMoment(
         reservation.selected_day,
         reservation.end_hour,
         reservation.end_minute,
@@ -136,17 +151,5 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
       );
       return newStart.isSameOrBefore(existingEnd) && newEnd.isSameOrAfter(existingStart);
     });
-  }
-
-  private createMoment(day: string, hour: number, minute: number, period: TimeOfDay) {
-    const [d, m, y] = day.split("/");
-    const adjustedHour = this.adjustHour(hour, period);
-    return moment(`${y}-${m}-${d} ${adjustedHour}:${minute}`, "YYYY-MM-DD HH:mm");
-  }
-
-  private adjustHour(hour: number, period: TimeOfDay): number {
-    if (period === TimeOfDay.PM && hour !== 12) return hour + 12;
-    if (period === TimeOfDay.AM && hour === 12) return 0;
-    return hour;
   }
 }

@@ -15,6 +15,7 @@ import { UsersModule } from "src/users/users.module";
 import { PriceCalculationMiddleware } from "./middleware/price-calculation.middleware";
 import { ReservationRoomValidationMiddleware } from "./middleware/reservation-room-validation.middleware";
 import { ReservationStatusMiddleware } from "./middleware/reservation-status.middleware";
+import { UpdateUsageMiddleware } from "./middleware/update-usage.middleware";
 import { ReservationCalendarService } from "./reservation-calendar.service";
 import { ReservationRoomQueryService } from "./reservation-room-query.service";
 import { ReservationRoomController } from "./reservation-room.controller";
@@ -49,6 +50,7 @@ export class ReservationRoomModule implements NestModule {
         ReservationRoomValidationMiddleware,
         PriceCalculationMiddleware,
         ReservationStatusMiddleware,
+        UpdateUsageMiddleware,
       )
       .forRoutes(
         "reservation-room/store",

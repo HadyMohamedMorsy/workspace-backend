@@ -1,4 +1,5 @@
 import * as moment from "moment";
+import { TimeOfDay } from "src/shared/enum/global-enum";
 import { UpdateDeskAreaDto } from "../deskarea/dto/update-deskarea.dto";
 import { UpdateSharedDto } from "../shared/dto/update-shared.dto";
 
@@ -16,6 +17,12 @@ export function convertTo24HourDate(hour: number, minute: number, period: string
   const hour24 = ato24h(hour, period);
   currentDate.setHours(hour24, minute, 0, 0);
   return currentDate;
+}
+
+export function createMoment(day: string, hour: number, minute: number, period: TimeOfDay) {
+  const [d, m, y] = day.split("/");
+  const adjustedHour = ato24h(hour, period);
+  return moment(`${y}-${m}-${d} ${adjustedHour}:${minute}`, "YYYY-MM-DD HH:mm");
 }
 
 export function ato24h(hour: number, period: string): number {
@@ -52,11 +59,16 @@ export function diffrentHour(rest: Partial<UpdateDeskAreaDto | UpdateSharedDto>)
 export function calculateHours(details: calulateHour) {
   const start = convertTo24HourDate(details.start_hour, details.start_minute, details.start_time);
   const end = convertTo24HourDate(details.end_hour, details.end_minute, details.end_time);
-
   const diffMs = Math.abs(end.getTime() - start.getTime());
   const totalMinutes = Math.floor(diffMs / (1000 * 60));
-
   const hours = Math.floor(totalMinutes / 60);
   const remainingMinutes = totalMinutes % 60;
   return remainingMinutes > 10 ? hours + 1 : hours;
+}
+
+export function calculateOfferDiscount(basePrice: number, offer: any): number {
+  if (!offer) return 0;
+  const typeDiscount = offer.type_discount;
+  const discountAmount = offer.discount;
+  return typeDiscount === "amount" ? discountAmount : basePrice * (discountAmount / 100);
 }

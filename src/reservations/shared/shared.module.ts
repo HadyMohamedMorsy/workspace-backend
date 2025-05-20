@@ -8,10 +8,10 @@ import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
 import { DepositMiddleware } from "./middleware/deposit.middleware";
-import { SharedMiddleware } from "./middleware/shared.middleware";
 import { SharedController } from "./shared.controller";
 import { Shared } from "./shared.entity";
 import { SharedService } from "./shared.service";
+import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
 
 @Module({
   imports: [
@@ -24,13 +24,13 @@ import { SharedService } from "./shared.service";
     UsersModule,
   ],
   controllers: [SharedController],
-  providers: [SharedService, SharedMiddleware, DepositMiddleware],
+  providers: [SharedService],
   exports: [SharedService],
 })
 export class SharedModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(CustomerMiddleware, SharedMiddleware)
+      .apply(CustomerMiddleware, AssignGeneralOfferMiddleware)
       .forRoutes("shared/store", "shared/update")
       .apply(DepositMiddleware)
       .forRoutes("shared/store-deposit");

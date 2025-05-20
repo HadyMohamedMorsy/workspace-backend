@@ -1,19 +1,14 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
-import { GeneralOfferService } from "src/general-offer/generalOffer.service";
-import { TypeUser } from "src/shared/enum/global-enum";
+import { TypeUser } from "../enum/global-enum";
 
 @Injectable()
-export class SharedMiddleware implements NestMiddleware {
-  constructor(
-    private readonly generalOffer: GeneralOfferService,
-    private readonly assignOfferservice: AssignGeneralOfferservice,
-  ) {}
+export class AssignGeneralOfferMiddleware implements NestMiddleware {
+  constructor(private readonly assignOfferservice: AssignGeneralOfferservice) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { offer_id } = req.body;
-    const [offer] = await Promise.all([offer_id ? this.generalOffer.findOne(offer_id) : null]);
+    const offer = req["offer"];
 
     const customerType = Object.keys(TypeUser).find(type => req[type]);
     const customer = req[customerType];
@@ -27,6 +22,7 @@ export class SharedMiddleware implements NestMiddleware {
       : null;
 
     req["assignGeneralOffer"] = assignOffer;
+
     next();
   }
 }

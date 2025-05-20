@@ -1,5 +1,5 @@
 import { CacheModule } from "@nestjs/cache-manager";
-import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
@@ -49,6 +49,7 @@ import { UploadsModule } from "./shared/global-api/uploads/uploads.module";
 import { TransformInterceptor } from "./shared/interceptor/transform-response.interceptor";
 import { LanMiddleware } from "./shared/middleware/lang.middleware";
 import { UserMiddleware } from "./shared/middleware/user.middleware";
+import { ValidateOfferRangeMiddleware } from "./shared/middleware/validate-offer-range.middleware";
 import enviromentValidation from "./shared/validations/env.validation";
 import { StudentActivityModule } from "./student-activity/studentActivity.module";
 import { TaskModule } from "./tasks/tasks.module";
@@ -146,9 +147,10 @@ const ENV = process.env.NODE_ENV;
     },
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
     consumer.apply(UserMiddleware).exclude("auth/login", "user/store-tech").forRoutes("*");
+    consumer.apply(ValidateOfferRangeMiddleware).forRoutes("*");
   }
 }

@@ -111,13 +111,11 @@ export class ReservationCalendarService {
           ),
         }));
 
-      // Sort by start time
       roomReservations.sort((a, b) => a.start.valueOf() - b.start.valueOf());
 
       let lastEnd = startOfWeek.clone().tz(timeZone);
       const roomName = roomReservations[0]?.rr_name || "Unknown Room";
 
-      // Check gaps between reservations
       for (const res of roomReservations) {
         if (res.start.isAfter(lastEnd)) {
           freeSlots.push({

@@ -6,6 +6,7 @@ import {
   HttpCode,
   Inject,
   Post,
+  Put,
   Req,
   UseGuards,
 } from "@nestjs/common";
@@ -13,7 +14,8 @@ import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DealsService } from "src/deals/deals.service";
 import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
-import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
+import { Permission, ReservationStatus, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
@@ -23,27 +25,101 @@ import { ReservationRoomService } from "./reservation-room.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("reservation-room")
-export class ReservationRoomController {
+export class ReservationRoomController implements SelectOptions, RelationOptions {
   constructor(
-    private readonly reservationRoomService: ReservationRoomService,
+    private readonly service: ReservationRoomService,
     @Inject(forwardRef(() => DealsService))
     private readonly deal: DealsService,
     @Inject(forwardRef(() => AssignesPackagesService))
     private readonly packageRooms: AssignesPackagesService,
-    private readonly reservationRoomQueryService: ReservationRoomQueryService,
-    private readonly reservationCalendarService: ReservationCalendarService,
+    private readonly queryService: ReservationRoomQueryService,
+    private readonly calendarService: ReservationCalendarService,
   ) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      selected_day: true,
+      status: true,
+      start_hour: true,
+      start_minute: true,
+      start_time: true,
+      end_hour: true,
+      end_minute: true,
+      end_time: true,
+      total_price: true,
+      total_time: true,
+      note: true,
+      payment_method: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      room: {
+        id: true,
+        name: true,
+        featured_image: true,
+        capacity: true,
+        price: true,
+      },
+      individual: {
+        id: true,
+        name: true,
+        whatsApp: true,
+      },
+      company: {
+        id: true,
+        name: true,
+        phone: true,
+      },
+      studentActivity: {
+        id: true,
+        name: true,
+        unviresty: true,
+      },
+      assignesPackages: {
+        id: true,
+        name: true,
+      },
+      deals: {
+        id: true,
+        name: true,
+      },
+      assignGeneralOffer: {
+        id: true,
+        name: true,
+      },
+      deposites: {
+        id: true,
+        total_price: true,
+      },
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/all-rooms")
   @HttpCode(200)
   async findRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/index")
   @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.reservationCalendarService.getReservationsForThisWeek(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/individual")
@@ -55,7 +131,7 @@ export class ReservationRoomController {
     },
   ])
   async findIndividuaRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findRoomsByIndividualAll(filterQueryDto);
+    return this.queryService.findRoomsByIndividualAll(filterQueryDto);
   }
 
   @Post("/studentActivity")
@@ -67,7 +143,7 @@ export class ReservationRoomController {
     },
   ])
   async findStudentRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findRoomsByStudentActivityAll(filterQueryDto);
+    return this.queryService.findRoomsByStudentActivityAll(filterQueryDto);
   }
 
   @Post("/company")
@@ -79,7 +155,7 @@ export class ReservationRoomController {
     },
   ])
   async findCompanyRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findRoomsByCompanyAll(filterQueryDto);
+    return this.queryService.findRoomsByCompanyAll(filterQueryDto);
   }
 
   @Post("/user")
@@ -91,7 +167,7 @@ export class ReservationRoomController {
     },
   ])
   async findUserRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findRoomsByUserAll(filterQueryDto);
+    return this.queryService.findRoomsByUserAll(filterQueryDto);
   }
 
   @Post("/packages/individual")
@@ -103,7 +179,7 @@ export class ReservationRoomController {
     },
   ])
   async findIndividuaPackageRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findIndividualPackageRoomAll(filterQueryDto);
+    return this.queryService.findIndividualPackageRoomAll(filterQueryDto);
   }
 
   @Post("/packages/company")
@@ -115,7 +191,7 @@ export class ReservationRoomController {
     },
   ])
   async findCompanyPackageRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findCompanyPackageRoomAll(filterQueryDto);
+    return this.queryService.findCompanyPackageRoomAll(filterQueryDto);
   }
 
   @Post("/packages/studentActivity")
@@ -127,7 +203,7 @@ export class ReservationRoomController {
     },
   ])
   async findStudentActivityPackageRoomAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findStudentActivityPackageRoomAll(filterQueryDto);
+    return this.queryService.findStudentActivityPackageRoomAll(filterQueryDto);
   }
 
   @Post("/deals/individual")
@@ -139,7 +215,7 @@ export class ReservationRoomController {
     },
   ])
   async findIndividualDealAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findIndividualDealAll(filterQueryDto);
+    return this.queryService.findIndividualDealAll(filterQueryDto);
   }
 
   @Post("/deals/company")
@@ -151,7 +227,7 @@ export class ReservationRoomController {
     },
   ])
   async findCompanyDealAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findCompanyDealAll(filterQueryDto);
+    return this.queryService.findCompanyDealAll(filterQueryDto);
   }
 
   @Post("/deals/studentActivity")
@@ -163,7 +239,7 @@ export class ReservationRoomController {
     },
   ])
   async findStudentActivityDealAll(@Body() filterQueryDto: any) {
-    return this.reservationRoomQueryService.findStudentActivityDealAll(filterQueryDto);
+    return this.queryService.findStudentActivityDealAll(filterQueryDto);
   }
 
   @Post("/store")
@@ -173,61 +249,104 @@ export class ReservationRoomController {
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createReservationRoomDto: CreateReservationRoomDto, @Req() req: Request) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.reservationRoomService.create(createReservationRoomDto, {
-      customer,
-      createdBy,
-    });
+  async create(@Body() createDto: CreateReservationRoomDto, @Req() req: Request) {
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.create(
+      {
+        status: ReservationStatus.ACTIVE,
+        package: req["pkg"],
+        [customerType]: req[customerType],
+        deal: req["deal"],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        selected_day: createDto.selected_day,
+        start_hour: createDto.start_hour,
+        start_minute: createDto.start_minute,
+        start_time: createDto.start_time,
+        createdBy: req["createdBy"],
+      } as CreateReservationRoomDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Post("/store/package")
   @Permissions([
     {
-      resource: Resource.Shared,
+      resource: Resource.ReservationRoom,
       actions: [Permission.CREATE],
     },
   ])
   async createReservationByPackage(
-    @Body() createReservationRoomDto: CreateReservationRoomDto,
+    @Body() createDto: CreateReservationRoomDto,
     @Req() req: Request,
   ) {
     const customer = req["customer"];
     const createdBy = req["createdBy"];
-    return await this.reservationRoomService.createReservationByPackage(createReservationRoomDto, {
-      customer,
-      createdBy,
-    });
+    return await this.service.createReservationByPackage(
+      createDto,
+      {
+        customer,
+        createdBy,
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
+
   @Post("/store/deal")
   @Permissions([
     {
-      resource: Resource.Shared,
+      resource: Resource.ReservationRoom,
       actions: [Permission.CREATE],
     },
   ])
-  async createReservationByDeal(
-    @Body() createReservationRoomDto: CreateReservationRoomDto,
-    @Req() req: Request,
-  ) {
+  async createReservationByDeal(@Body() createDto: CreateReservationRoomDto, @Req() req: Request) {
     const customer = req["customer"];
     const createdBy = req["createdBy"];
-    return await this.reservationRoomService.createReservationByDeal(createReservationRoomDto, {
-      customer,
-      createdBy,
-    });
+    return await this.service.createReservationByDeal(
+      createDto,
+      {
+        customer,
+        createdBy,
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.ReservationRoom,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateReservationRoomDto: UpdateReservationRoomDto) {
-    return await this.reservationRoomService.update(updateReservationRoomDto);
+  async update(@Body() updateDto: UpdateReservationRoomDto, @Req() req: Request) {
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.update(
+      {
+        id: updateDto.id,
+        status: updateDto.status,
+        package: req["pkg"],
+        deal: req["deal"],
+        total_price: req["total_price"],
+        total_time: req["total_time"],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        [customerType]: req[customerType],
+        note: updateDto.note,
+        payment_method: updateDto.payment_method,
+        selected_day: updateDto.selected_day,
+        start_hour: updateDto.start_hour,
+        start_minute: updateDto.start_minute,
+        end_hour: updateDto.end_hour,
+        end_minute: updateDto.end_minute,
+        start_time: updateDto.start_time,
+        end_time: updateDto.end_time,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Post("/store-deposite")
@@ -239,7 +358,7 @@ export class ReservationRoomController {
   ])
   async createDeposite(@Body() createReservationRoomDto: CreateDepositeDto, @Req() req: Request) {
     const createdBy = req["createdBy"];
-    return await this.reservationRoomService.createDeposite(createReservationRoomDto, createdBy);
+    return await this.service.createDeposite(createReservationRoomDto, createdBy);
   }
 
   @Delete("/delete")
@@ -249,8 +368,8 @@ export class ReservationRoomController {
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.reservationRoomService.remove(bodyDelete.id);
+  public delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 
   @Post("cancel")
@@ -263,25 +382,8 @@ export class ReservationRoomController {
   async cancelReservation(@Body() updateDto: UpdateReservationRoomDto, @Req() req: Request) {
     const pkg = req["pkg"];
     const deal = req["deal"];
-    const diffHours = req["diffHours"];
 
-    if (pkg) {
-      await this.packageRooms.update({
-        id: pkg.id,
-        used: pkg.used - diffHours,
-        remaining: pkg.remaining + diffHours,
-      });
-    }
-
-    if (deal) {
-      await this.deal.update({
-        id: deal.id,
-        used: deal.used - diffHours,
-        remaining: deal.remaining + diffHours,
-      });
-    }
-
-    return this.reservationRoomService.update({
+    return this.service.update({
       id: updateDto.id,
       status: ReservationStatus.CANCELLED,
       package: pkg,

@@ -14,7 +14,7 @@ import { UsersModule } from "src/users/users.module";
 import { AssignesMembershipController } from "./assignes-membership.controller";
 import { AssignesMembership } from "./assignes-membership.entity";
 import { AssignesMembershipService } from "./assignes-membership.service";
-import { AssignesMembershipMiddleware } from "./middleware/assigness-membership.middleware copy";
+import { AssignesMembershipMiddleware } from "./middleware/calculate-total-price-membership.middleware";
 import { checkAssignMemebershipMiddleware } from "./middleware/check-active-assigness-membership.middleware";
 import { DepositMiddleware } from "./middleware/deposit.middleware";
 
