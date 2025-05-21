@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { UserService } from "src/users/user.service";
 
 @Injectable()
-export class VacationMiddleware implements NestMiddleware {
+export class AssignUserMiddleware implements NestMiddleware {
   constructor(private readonly usersService: UserService) {}
   async use(req: Request, res: Response, next: NextFunction) {
     const { user_id } = req.body;

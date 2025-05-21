@@ -2,10 +2,16 @@ import { BadRequestException, Injectable, NestMiddleware } from "@nestjs/common"
 import { NextFunction, Request, Response } from "express";
 import { DepositeService } from "src/deposit/deposites.service";
 import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
+import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
+import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
+import { Shared } from "src/reservations/shared/shared.entity";
 
 interface DepositEntity extends CreateDepositeDto {
-  assignMembership?: any;
-  assignPackage?: any;
+  assignMembership?: AssignMembership;
+  assignPackage?: AssignPackage;
+  reservationRoom?: ReservationRoom;
+  shared?: Shared;
+  deskarea?: Deskarea;
 }
 
 @Injectable()
@@ -16,8 +22,9 @@ export class DepositMiddleware implements NestMiddleware {
     const entities = {
       memberShip: { type: "membership", field: "assignMembership" },
       pkg: { type: "package", field: "assignPackage" },
-      shared: { type: "shared", field: "assignPackage" },
-      deskarea: { type: "deskarea", field: "assignPackage" },
+      shared: { type: "shared", field: "shared" },
+      deskarea: { type: "deskarea", field: "deskarea" },
+      reservationRoom: { type: "reservationRoom", field: "reservationRoom" },
     };
 
     for (const [key, config] of Object.entries(entities)) {

@@ -13,7 +13,6 @@ import {
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DealsService } from "src/deals/deals.service";
-import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { Permission, ReservationStatus, Resource, TypeUser } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
@@ -254,9 +253,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     return await this.service.create(
       {
         status: ReservationStatus.ACTIVE,
-        package: req["pkg"],
         [customerType]: req[customerType],
-        deal: req["deal"],
         assignGeneralOffer: req["assignGeneralOffer"],
         selected_day: createDto.selected_day,
         start_hour: createDto.start_hour,
@@ -280,14 +277,19 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     @Body() createDto: CreateReservationRoomDto,
     @Req() req: Request,
   ) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.service.createReservationByPackage(
-      createDto,
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.create(
       {
-        customer,
-        createdBy,
-      },
+        status: ReservationStatus.ACTIVE,
+        package: req["pkg"],
+        [customerType]: req[customerType],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        selected_day: createDto.selected_day,
+        start_hour: createDto.start_hour,
+        start_minute: createDto.start_minute,
+        start_time: createDto.start_time,
+        createdBy: req["createdBy"],
+      } as CreateReservationRoomDto,
       this.selectOptions(),
       this.getRelationOptions(),
     );
@@ -301,14 +303,19 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     },
   ])
   async createReservationByDeal(@Body() createDto: CreateReservationRoomDto, @Req() req: Request) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.service.createReservationByDeal(
-      createDto,
+    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    return await this.service.create(
       {
-        customer,
-        createdBy,
-      },
+        status: ReservationStatus.ACTIVE,
+        deal: req["deal"],
+        [customerType]: req[customerType],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        selected_day: createDto.selected_day,
+        start_hour: createDto.start_hour,
+        start_minute: createDto.start_minute,
+        start_time: createDto.start_time,
+        createdBy: req["createdBy"],
+      } as CreateReservationRoomDto,
       this.selectOptions(),
       this.getRelationOptions(),
     );
@@ -356,9 +363,11 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       actions: [Permission.CREATE],
     },
   ])
-  async createDeposite(@Body() createReservationRoomDto: CreateDepositeDto, @Req() req: Request) {
-    const createdBy = req["createdBy"];
-    return await this.service.createDeposite(createReservationRoomDto, createdBy);
+  async createDeposite(@Body() create: { reservation_room_id: number }, @Req() req: Request) {
+    return await this.service.update({
+      id: create.reservation_room_id,
+      deposites: req["deposite"],
+    });
   }
 
   @Delete("/delete")

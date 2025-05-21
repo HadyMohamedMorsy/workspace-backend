@@ -31,6 +31,7 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
       const pkg = await this.validatePackage(body.package_id, body.selected_day);
       req["pkg"] = pkg;
     }
+
     if (body.deal_id) {
       const deal = await this.validateDeal(body.deal_id, body.selected_day);
       req["deal"] = deal;
@@ -101,21 +102,6 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
 
     if (!start.isSameOrBefore(date) || !end.isSameOrAfter(date)) {
       throw new BadRequestException("Deal not active for selected date");
-    }
-  }
-
-  private async validateOffer(id: number, selectedDay: string) {
-    const offer = await this.offer.findOne(id);
-    if (!offer) {
-      throw new BadRequestException("Invalid offer");
-    }
-
-    const date = moment(selectedDay, "DD/MM/YYYY");
-    const start = moment(offer.start_date);
-    const end = moment(offer.end_date);
-
-    if (!start.isSameOrBefore(date) || !end.isSameOrAfter(date)) {
-      throw new BadRequestException("Offer not active for selected date");
     }
   }
 
