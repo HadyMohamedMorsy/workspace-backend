@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, NestMiddleware } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { DepositeService } from "src/deposit/deposites.service";
 import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
@@ -7,8 +9,8 @@ import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity"
 import { Shared } from "src/reservations/shared/shared.entity";
 
 interface DepositEntity extends CreateDepositeDto {
-  assignMembership?: AssignMembership;
-  assignPackage?: AssignPackage;
+  assignMembership?: AssignesMembership;
+  assignPackage?: AssignesPackages;
   reservationRoom?: ReservationRoom;
   shared?: Shared;
   deskarea?: Deskarea;
