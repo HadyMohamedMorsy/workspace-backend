@@ -8,7 +8,7 @@ import { UpdateProductDto } from "./dto/update-product.dto";
 import { ProductService } from "./products.service";
 
 @UseGuards(AuthorizationGuard)
-@Controller("products")
+@Controller("product")
 export class ProductController implements SelectOptions, RelationOptions {
   constructor(private readonly service: ProductService) {}
 

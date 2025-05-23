@@ -96,7 +96,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
       actions: [Permission.DELETE],
     },
   ])
-  async delete(@Body() id: number) {
+  async delete(@Body() { id }: { id: number }) {
     return this.service.delete(id);
   }
 }

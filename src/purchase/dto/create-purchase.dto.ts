@@ -1,44 +1,42 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { User } from "src/users/user.entity";
 
 export class CreatePurchaseDto {
-  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   type_store: string;
 
-  @ApiProperty()
-  @IsOptional()
+  @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
-  purchase_price?: number;
+  purshase_price?: number;
 
-  @ApiProperty()
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   weight_kg?: number;
 
-  @ApiProperty()
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   weight_g?: number;
 
-  @ApiProperty()
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   weight_product?: number;
 
-  @ApiProperty()
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
-  purchase_qty: number;
+  purshase_qty: number;
 
-  @ApiProperty()
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   total: number;
 
-  @ApiProperty()
   @IsOptional()
   @IsString()
   note?: string;

@@ -23,6 +23,7 @@ export class ExpensesSalariesService
 
   async findLatestByUser(userId: number): Promise<ExpenseSalaries | null> {
     return this.expensesSalariesRepository.findOne({
+      relations: ["user"],
       where: { user: { id: userId } },
       order: { created_at: "DESC" },
     });

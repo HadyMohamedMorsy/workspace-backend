@@ -43,6 +43,8 @@ export class ProductService
 
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
-    queryBuilder.leftJoinAndSelect("e.categories", "categories");
+    queryBuilder
+      .leftJoin("e.categories", "categories")
+      .addSelect(["categories.id", "categories.name"]);
   }
 }

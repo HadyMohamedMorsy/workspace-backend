@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -26,6 +38,7 @@ export class UserController implements SelectOptions, RelationOptions {
       status: true,
       annual_start: true,
       annual_increase: true,
+      permission: true,
     };
   }
 
@@ -49,6 +62,11 @@ export class UserController implements SelectOptions, RelationOptions {
   ])
   public index(@Body() filterQueryDto: any) {
     return this.service.findAll(filterQueryDto);
+  }
+
+  @Get("/permission")
+  public permission(@Query("id") id: number) {
+    return this.service.permission(id);
   }
 
   @Post("/store")
@@ -115,5 +133,19 @@ export class UserController implements SelectOptions, RelationOptions {
   ])
   public delete(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.User,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
   }
 }

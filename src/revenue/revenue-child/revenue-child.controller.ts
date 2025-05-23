@@ -85,7 +85,7 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
       actions: [Permission.DELETE],
     },
   ])
-  public delete(@Body() id: number) {
+  public delete(@Body() { id }: { id: number }) {
     return this.service.delete(id);
   }
 }

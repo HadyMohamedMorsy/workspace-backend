@@ -14,6 +14,8 @@ import { ReturnsService } from "./returns.service";
 })
 export class ReturnsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ReturnsMiddleware).forRoutes("returns/store", "returns/update");
+    consumer
+      .apply(ReturnsMiddleware)
+      .forRoutes("returns/store", "returns/update", "returns/delete");
   }
 }

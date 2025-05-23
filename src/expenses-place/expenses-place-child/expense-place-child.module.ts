@@ -16,6 +16,10 @@ export class ExpensesPlaceChildModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(ExpensePlaceChildMiddleware)
-      .forRoutes("expenses-child-place/store", "expenses-child-place/update");
+      .forRoutes(
+        "expenses-child-place/store",
+        "expenses-child-place/update",
+        "expenses-child-place/delete",
+      );
   }
 }

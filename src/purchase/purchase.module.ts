@@ -14,6 +14,8 @@ import { PurchaseService } from "./purchase.service";
 })
 export class PurchaseModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PurchaseMiddleware).forRoutes("purchase/store", "purchase/update");
+    consumer
+      .apply(PurchaseMiddleware)
+      .forRoutes("purchases/store", "purchases/update", "purchases/delete");
   }
 }

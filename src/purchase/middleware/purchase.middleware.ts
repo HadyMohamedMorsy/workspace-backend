@@ -8,7 +8,7 @@ export class PurchaseMiddleware implements NestMiddleware {
   constructor(private readonly productService: ProductService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { product_id, purchase_qty, type_store, purchase_price, total } = req.body;
+    const { product_id, purshase_qty, type_store, purshase_price, total } = req.body;
 
     if (product_id) {
       const product = await this.productService.findOne(product_id);
@@ -17,17 +17,33 @@ export class PurchaseMiddleware implements NestMiddleware {
         throw new NotFoundException("Product not found");
       }
 
-      if (purchase_qty <= 0) {
+      if (purshase_qty <= 0) {
         throw new BadRequestException("Purchase quantity must be greater than 0");
       }
 
-      const newStore = product.store + purchase_qty;
-      product.store = newStore;
-      await this.productService.update({ id: product.id, store: newStore } as UpdateProductDto);
+      const purshaseQty = Number(purshase_qty);
 
-      // Calculate price based on type_store
-      const price = type_store === "item" ? purchase_price : total;
-      req["purchase_price"] = +price;
+      if (isNaN(purshaseQty)) {
+        throw new BadRequestException("Invalid return quantity");
+      }
+      const newStore =
+        req.method === "DELETE" ? +product.store - purshaseQty : +product.store + purshaseQty;
+
+      if (isNaN(newStore)) {
+        throw new BadRequestException("Invalid calculation result");
+      }
+
+      product.store = newStore;
+      product.purshase_price = +purshase_price;
+
+      await this.productService.update({
+        id: product.id,
+        store: +newStore,
+        purshase_price: +purshase_price,
+      } as UpdateProductDto);
+
+      const price = type_store === "item" ? +purshase_price : +total;
+      req["purshase_price"] = +price;
       req["product"] = product;
     }
 

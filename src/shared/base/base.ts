@@ -41,7 +41,6 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     this.getRelationQuery(queryBuilder, relations);
     const record = await queryBuilder.getOne();
     if (!record) throw new NotFoundException(`not found`);
-
     return record;
   }
 
@@ -79,9 +78,14 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     };
   }
 
-  public async changeStatus(id: number, status: string | boolean) {
-    await this.repository.update(id, { status } as any);
-    return this.findOne(id);
+  public async changeStatus(
+    id: number,
+    status: string | boolean,
+    key: string,
+    selectOptions?: Record<string, boolean>,
+  ) {
+    await this.repository.update(id, { [key]: status } as any);
+    return this.findOne(id, selectOptions);
   }
 
   async findByIds(ids: number[]): Promise<T[]> {

@@ -34,6 +34,19 @@ export class RevenueChildService
 
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
-    queryBuilder.leftJoin("e.revenue", "er").addSelect(["er.id", "er.name", "ec.lastName"]);
+    if (filteredRecord.revenueChild_id) {
+      queryBuilder
+        .leftJoin("e.revenue", "er")
+        .andWhere("er.id = :revenueChild_id", {
+          revenueChild_id: filteredRecord.revenueChild_id,
+        })
+        .addSelect(["er.id", "er.name"]);
+    }
+    if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filteredRecord.customFilters.start_date,
+        end_date: filteredRecord.customFilters.end_date,
+      });
+    }
   }
 }

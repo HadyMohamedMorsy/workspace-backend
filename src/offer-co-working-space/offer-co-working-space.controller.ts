@@ -62,7 +62,7 @@ export class OfferCoWorkingSpaceController implements SelectOptions, RelationOpt
       price: createDto.price,
       days: createDto.days,
       type: createDto.type,
-      createdBy: req["user"],
+      createdBy: req["createdBy"],
     });
   }
 
@@ -80,7 +80,7 @@ export class OfferCoWorkingSpaceController implements SelectOptions, RelationOpt
       price: updateDto.price,
       days: updateDto.days,
       type: updateDto.type,
-      createdBy: req["user"],
+      createdBy: req["createdBy"],
     });
   }
 

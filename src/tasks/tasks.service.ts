@@ -39,8 +39,6 @@ export class TaskService
 
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
-    queryBuilder
-      .leftJoinAndSelect("e.user", "eu")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+    queryBuilder.leftJoin("e.user", "eu").addSelect(["eu.id", "eu.firstName", "eu.lastName"]);
   }
 }

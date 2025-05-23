@@ -33,6 +33,16 @@ export class UserService
     return user;
   }
 
+  public permission(id: number) {
+    return this.repository.find({
+      where: {
+        id,
+        status: UserStatus.ACTIVE,
+      },
+      select: ["id", "permission"],
+    });
+  }
+
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder.leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {

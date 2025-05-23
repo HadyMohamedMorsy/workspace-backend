@@ -23,6 +23,8 @@ export class GeneralSettingsService
 
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
-    queryBuilder.leftJoinAndSelect("e.createdBy", "createdBy");
+    queryBuilder
+      .leftJoin("e.createdBy", "createdBy")
+      .addSelect(["createdBy.id", "createdBy.firstName", "createdBy.lastName"]);
   }
 }

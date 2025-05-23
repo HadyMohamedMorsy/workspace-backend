@@ -7,6 +7,10 @@ export class CreateRevenueDto {
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  @IsNotEmpty()
+  type: string;
+
   @IsNumber()
   @IsOptional()
   @Type(() => Number)

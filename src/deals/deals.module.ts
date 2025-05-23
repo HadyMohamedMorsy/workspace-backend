@@ -8,13 +8,13 @@ import { IndividualModule } from "src/individual/individual.module";
 import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
 import { RoomsModule } from "src/rooms/rooms.module";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
+import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
 import { DealsController } from "./deals.controller";
 import { Deals } from "./deals.entity";
 import { DealsService } from "./deals.service";
 import { DealsMiddleware } from "./middleware/deals.middleware";
-import { DepositMiddleware } from "./middleware/deposit.middleware";
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { DepositMiddleware } from "./middleware/deposit.middleware";
     TypeOrmModule.forFeature([Deals]),
   ],
   controllers: [DealsController],
-  providers: [DealsService, DealsMiddleware, DepositMiddleware],
+  providers: [DealsService],
   exports: [DealsService],
 })
 export class DealsModule {

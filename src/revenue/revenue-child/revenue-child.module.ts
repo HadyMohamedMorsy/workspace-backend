@@ -13,6 +13,8 @@ import { RevenueChildService } from "./revenue-child.service";
 })
 export class RevenueChildModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RevenueChildMiddleware).forRoutes("revenue-child");
+    consumer
+      .apply(RevenueChildMiddleware)
+      .forRoutes("revenue-child/store", "revenue-child/update", "revenue-child/delete");
   }
 }

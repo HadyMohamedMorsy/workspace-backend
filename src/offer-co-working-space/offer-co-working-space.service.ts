@@ -8,12 +8,6 @@ import { CreateCoWorkingSpaceDto } from "./dto/create-offer-co-working-space.dto
 import { UpdateCoWorkingSpaceDto } from "./dto/update-offer-co-working-space.dto";
 import { CoWorkingSpace } from "./offer-co-working-space.entity";
 
-type RelationConfig = {
-  relationPath: string;
-  alias: string;
-  selectFields: string[];
-};
-
 @Injectable()
 export class OfferCoWorkingSpaceService
   extends BaseService<CoWorkingSpace, CreateCoWorkingSpaceDto, UpdateCoWorkingSpaceDto>
@@ -25,47 +19,6 @@ export class OfferCoWorkingSpaceService
     apiFeaturesService: APIFeaturesService,
   ) {
     super(repository, apiFeaturesService);
-  }
-
-  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
-    const queryBuilder = this.repository.createQueryBuilder("coWorkingSpace");
-
-    queryBuilder
-      .leftJoin(`coWorkingSpace.assignessMemebership`, "assignedMembership")
-      .leftJoin(`assignedMembership.${relationConfig.relationPath}`, relationConfig.alias)
-      .where("coWorkingSpace.id = :id", { id: filterData.id })
-      .select([
-        "coWorkingSpace",
-        "assignedMembership",
-        ...relationConfig.selectFields.map(f => `${relationConfig.alias}.${f}`),
-      ]);
-
-    const [data, totalRecords] = await queryBuilder.getManyAndCount();
-    return this.response(data, totalRecords);
-  }
-
-  async findRelatedIndividual(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "individual",
-      alias: "individual",
-      selectFields: ["id", "name"],
-    });
-  }
-
-  async findRelatedCompany(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "company",
-      alias: "company",
-      selectFields: ["id", "name"],
-    });
-  }
-
-  async findRelatedStudentActivity(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "studentActivity",
-      alias: "activity",
-      selectFields: ["id", "name"],
-    });
   }
 
   override queryRelationIndex(

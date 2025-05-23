@@ -16,15 +16,16 @@ export class ExpenseSalariesMiddleware implements NestMiddleware {
     // Calculate net salary
     if (req.body) {
       const netSallary = this.calculateNetSalary(req.body);
-      req["net_sallary"] = netSallary;
+      req["net_sallary"] = +netSallary;
 
       // Calculate annual if internal salary
       if (req.body.type_sallary === TypeSallary.Internal && req.body.user_id) {
         const user = await this.usersService.findOne(req.body.user_id);
         if (user) {
           const annual = await this.calculateAnnual(+req.body.sallary, user);
-          req["annual"] = annual;
-          req["net_sallary"] += annual;
+          req["annual"] = +annual;
+          req["net_sallary"] += +annual;
+          req["target_user"] = user;
         }
       }
     }
@@ -33,7 +34,7 @@ export class ExpenseSalariesMiddleware implements NestMiddleware {
   }
 
   private calculateNetSalary(body: any): number {
-    return +body.sallary + (body.incentives ?? 0) + (body.rewards ?? 0) - (body.discounts ?? 0);
+    return +body.sallary + (+body.incentives || 0) + (+body.rewards || 0) - (+body.discounts || 0);
   }
 
   private async calculateAnnual(salary: number, user: User): Promise<number> {
@@ -41,9 +42,9 @@ export class ExpenseSalariesMiddleware implements NestMiddleware {
     const userRelated = await this.expensesSalariesService.findLatestByUser(user.id);
 
     if (currentDate.getMonth() === user.annual_start) {
-      return salary * (user.annual_increase / 100) + (userRelated?.annual || 0);
+      return +salary * (+user.annual_increase / 100) + (+userRelated?.annual || 0);
     }
 
-    return userRelated?.annual || 0;
+    return +userRelated?.annual || 0;
   }
 }

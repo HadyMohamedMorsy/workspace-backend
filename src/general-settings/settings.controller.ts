@@ -15,8 +15,10 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
   public selectOptions(): Record<string, boolean> {
     return {
       id: true,
-      key: true,
-      value: true,
+      price_shared: true,
+      price_deskarea: true,
+      full_day_price_deskarea: true,
+      full_day_price_shared: true,
       created_at: true,
       updated_at: true,
     };

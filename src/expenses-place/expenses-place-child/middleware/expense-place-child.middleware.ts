@@ -4,30 +4,21 @@ import { ExpensesPlaceService } from "src/expenses-place/expense-place.service";
 
 @Injectable()
 export class ExpensePlaceChildMiddleware implements NestMiddleware {
-  constructor(private readonly expensePlaceService: ExpensesPlaceService) {}
+  constructor(private readonly service: ExpensesPlaceService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { method, body } = req;
+    const { body, method } = req;
 
-    if (method === "POST" || method === "PUT") {
-      if (body.expensePlace_id) {
-        const expensePlace = await this.expensePlaceService.findOne(body.expensePlace_id);
-        if (!expensePlace) {
-          return res.status(404).json({
-            statusCode: 404,
-            message: "Expense place not found",
-          });
-        }
+    if (body.expensePlace_id) {
+      const place = await this.service.findOne(body.expensePlace_id);
+      const operator = method === "DELETE" ? -1 : 1;
 
-        const totalExpense = (expensePlace.total || 0) + (body.cost || 0);
+      await this.service.update({
+        id: place.id,
+        total: place.total + (operator === 1 ? +parseFloat(body.cost) : -parseFloat(body.cost)),
+      });
 
-        await this.expensePlaceService.update({
-          id: expensePlace.id,
-          total: totalExpense,
-        });
-
-        req["expensePlace"] = expensePlace;
-      }
+      if (method !== "DELETE") req["expensePlace"] = place;
     }
 
     next();

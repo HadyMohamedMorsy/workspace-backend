@@ -14,6 +14,6 @@ import { ProductService } from "./products.service";
 })
 export class ProductsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(ProductMiddleware).forRoutes("products/store", "products/update");
+    consumer.apply(ProductMiddleware).forRoutes("product/store", "product/update");
   }
 }

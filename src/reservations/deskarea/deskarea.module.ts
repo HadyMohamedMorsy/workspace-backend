@@ -1,23 +1,24 @@
-import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
 import { CompanyModule } from "src/companies/company.module";
+import { DepositesModule } from "src/deposit/deposites.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
+import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
 import { DeskareaController } from "./deskarea.controller";
 import { Deskarea } from "./deskarea.entity";
 import { DeskareaService } from "./deskarea.service";
-import { DepositMiddleware } from "./middleware/deposit.middleware";
 
 @Module({
   imports: [
-    forwardRef(() => AssignesMembershipModule),
+    AssignesMembershipModule,
     CompanyModule,
     IndividualModule,
     GeneralSettingsModule,
@@ -25,6 +26,7 @@ import { DepositMiddleware } from "./middleware/deposit.middleware";
     AssignGeneralOfferModule,
     GeneralOfferModule,
     UsersModule,
+    DepositesModule,
     TypeOrmModule.forFeature([Deskarea]),
   ],
   controllers: [DeskareaController],

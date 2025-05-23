@@ -25,13 +25,23 @@ export class ReturnsMiddleware implements NestMiddleware {
         throw new BadRequestException("Return quantity exceeds available stock.");
       }
 
-      const newStore = product.store - return_qty;
+      const returnQty = Number(return_qty);
+      if (isNaN(returnQty)) {
+        throw new BadRequestException("Invalid return quantity");
+      }
+
+      const newStore =
+        req.method === "DELETE" ? +product.store + returnQty : +product.store - returnQty;
+
       product.store = newStore;
       await this.productService.update({ id: product.id, store: newStore } as UpdateProductDto);
 
       // Calculate price based on type_store
-      const price = type_store === "item" ? return_price : total;
-      req["return_price"] = +price;
+      const price = type_store === "item" ? Number(return_price) : Number(total);
+      if (isNaN(price)) {
+        throw new BadRequestException("Invalid price value");
+      }
+      req["return_price"] = price;
       req["product"] = product;
     }
 

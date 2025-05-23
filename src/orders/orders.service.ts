@@ -61,12 +61,10 @@ export class OrdersService
     queryBuilder
       .leftJoin("e.individual", "ep")
       .addSelect(["ep.id", "ep.name", "ep.whatsApp"])
-      .leftJoin("e.company", "ec")
-      .addSelect(["ec.id", "ec.phone", "ec.name"])
-      .leftJoin("e.studentActivity", "es")
-      .addSelect(["es.id", "es.name", "es.unviresty"])
-      .leftJoin("e.createdBy", "ecr")
-      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"]);
+      .leftJoin("e.company", "eco")
+      .addSelect(["eco.id", "eco.phone", "eco.name"])
+      .leftJoin("e.studentActivity", "esa")
+      .addSelect(["esa.id", "esa.name", "esa.unviresty"]);
 
     if (filteredRecord.search?.value) {
       queryBuilder.andWhere(

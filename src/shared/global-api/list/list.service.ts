@@ -17,7 +17,6 @@ import { LIST_TYPE_DISCOUNT_AR, LIST_TYPE_DISCOUNT_EN } from "./lists/type-disco
 import { LIST_TYPE_ORDER_AR, LIST_TYPE_ORDER_EN } from "./lists/type-order/type-order";
 import { LIST_TYPE_PRODUCT_AR, LIST_TYPE_PRODUCT_EN } from "./lists/type-product/type-product";
 import { LIST_TYPE_SALLARY_AR, LIST_TYPE_SALLARY_EN } from "./lists/type-sallary/type-sallary";
-import { LIST_TYPE_USER_AR, LIST_TYPE_USER_EN } from "./lists/type-user/type-user";
 import { LIST_TYOE_WORK_AR, LIST_TYOE_WORK_EN } from "./lists/type-work/type-work";
 
 @Injectable()
@@ -50,10 +49,6 @@ export class ListService {
     type_order: {
       en: LIST_TYPE_ORDER_EN,
       ar: LIST_TYPE_ORDER_AR,
-    },
-    type_order_user: {
-      en: LIST_TYPE_USER_EN,
-      ar: LIST_TYPE_USER_AR,
     },
     type_sallary: {
       en: LIST_TYPE_SALLARY_EN,

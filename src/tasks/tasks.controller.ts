@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -112,5 +122,19 @@ export class TaskController implements SelectOptions, RelationOptions {
   ])
   public delete(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.Task,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
   }
 }

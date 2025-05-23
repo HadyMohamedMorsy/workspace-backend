@@ -55,7 +55,7 @@ export class ReturnsController implements SelectOptions, RelationOptions {
     },
   ])
   async create(@Body() createReturnsDto: CreateReturnsDto, @Req() req: Request) {
-    return await this.service.create({
+    await this.service.create({
       type_store: createReturnsDto.type_store,
       weight_kg: createReturnsDto.weight_kg,
       weight_g: createReturnsDto.weight_g,
@@ -67,6 +67,8 @@ export class ReturnsController implements SelectOptions, RelationOptions {
       return_price: req["return_price"],
       createdBy: req["createdBy"],
     } as CreateReturnsDto);
+
+    return req["product"];
   }
 
   @Put("/update")
@@ -99,7 +101,7 @@ export class ReturnsController implements SelectOptions, RelationOptions {
       actions: [Permission.DELETE],
     },
   ])
-  public delete(@Body() id: number) {
+  public delete(@Body() { id }: { id: number }) {
     return this.service.delete(id);
   }
 }

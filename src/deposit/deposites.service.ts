@@ -24,35 +24,44 @@ export class DepositeService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      .leftJoinAndSelect("e.assignesPackages", "ea")
-      .leftJoinAndSelect("ea.individual", "ea_individual")
-      .leftJoinAndSelect("ea.company", "ea_company")
-      .leftJoinAndSelect("ea.studentActivity", "ea_student")
-      .leftJoinAndSelect("e.assignessMemebership", "eas")
-      .leftJoinAndSelect("eas.individual", "eas_individual")
-      .leftJoinAndSelect("eas.company", "eas_company")
-      .leftJoinAndSelect("eas.studentActivity", "eas_student")
-      .leftJoinAndSelect("e.reservationRooms", "er")
-      .leftJoinAndSelect("er.individual", "er_individual")
-      .leftJoinAndSelect("er.company", "er_company")
-      .leftJoinAndSelect("er.studentActivity", "er_student")
-      .leftJoinAndSelect("e.createdBy", "ec");
+      .leftJoin("e.assignesPackages", "ea_assignespackages")
+      .addSelect(["ea_assignespackages.id", "ea_assignespackages.total_price"])
+      .leftJoin("ea_assignespackages.individual", "ea_pkg_individual")
+      .addSelect(["ea_pkg_individual.id", "ea_pkg_individual.name"])
+      .leftJoin("ea_assignespackages.company", "ea_pkg_company")
+      .addSelect(["ea_pkg_company.id", "ea_pkg_company.name"])
+      .leftJoin("ea_assignespackages.studentActivity", "ea_pkg_student")
+      .addSelect(["ea_pkg_student.id", "ea_pkg_student.name"])
+      .leftJoin("e.assignessMemebership", "ea_assignessmemebership")
+      .leftJoin("ea_assignessmemebership.individual", "ea_mem_individual")
+      .addSelect(["ea_mem_individual.id", "ea_mem_individual.name"])
+      .leftJoin("ea_assignessmemebership.company", "ea_mem_company")
+      .addSelect(["ea_mem_company.id", "ea_mem_company.name"])
+      .leftJoin("ea_assignessmemebership.studentActivity", "ea_mem_student")
+      .addSelect(["ea_mem_student.id", "ea_mem_student.name"])
+      .addSelect(["ea_assignessmemebership.id", "ea_assignessmemebership.total_price"]);
 
     queryBuilder.addSelect(
       `CASE
-        WHEN ea_individual.id IS NOT NULL THEN ea_individual.name
-        WHEN ea_company.id IS NOT NULL THEN ea_company.name
-        WHEN ea_student.id IS NOT NULL THEN ea_student.name
-        WHEN eas_individual.id IS NOT NULL THEN eas_individual.name
-        WHEN eas_company.id IS NOT NULL THEN eas_company.name
-        WHEN eas_student.id IS NOT NULL THEN eas_student.name
-        WHEN er_individual.id IS NOT NULL THEN er_individual.name
-        WHEN er_company.id IS NOT NULL THEN er_company.name
-        WHEN er_student.id IS NOT NULL THEN er_student.name
-        ELSE CONCAT(ec.firstName, ' ', ec.lastName)
+        WHEN ea_assignespackages.id IS NOT NULL THEN ea_assignespackages.total_price
+        WHEN ea_assignessmemebership.id IS NOT NULL THEN ea_assignessmemebership.total_price
+        ELSE 0
       END`,
-      "customer",
+      "total_price",
     );
+
+    // queryBuilder.addSelect(
+    //   `CASE
+    //     WHEN ea_pkg_individual.id IS NOT NULL THEN ea_pkg_individual.name
+    //     WHEN ea_pkg_company.id IS NOT NULL THEN ea_pkg_company.name
+    //     WHEN ea_pkg_student.id IS NOT NULL THEN ea_pkg_student.name
+    //     WHEN ea_mem_individual.id IS NOT NULL THEN ea_mem_individual.name
+    //     WHEN ea_mem_company.id IS NOT NULL THEN ea_mem_company.name
+    //     WHEN ea_mem_student.id IS NOT NULL THEN ea_mem_student.name
+    //     ELSE NULL
+    //   END`,
+    //   "customer",
+    // );
 
     // Date filtering
     if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
@@ -67,9 +76,12 @@ export class DepositeService
       const searchTerm = `%${filteredRecord.search?.value}%`;
       queryBuilder.andWhere(
         new Brackets(qb => {
-          qb.where("ea_individual.name LIKE :search", { search: searchTerm })
-            .orWhere("ea_company.name LIKE :search", { search: searchTerm })
-            .orWhere("ea_student.name LIKE :search", { search: searchTerm })
+          qb.where("ea_pkg_individual.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_pkg_company.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_pkg_student.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_mem_individual.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_mem_company.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_mem_student.name LIKE :search", { search: searchTerm })
             .orWhere("eas_individual.name LIKE :search", { search: searchTerm })
             .orWhere("eas_company.name LIKE :search", { search: searchTerm })
             .orWhere("eas_student.name LIKE :search", { search: searchTerm })
