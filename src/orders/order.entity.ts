@@ -23,6 +23,7 @@ export class Order {
   @Column({
     type: "enum",
     enum: TypeOrder,
+    nullable: true,
   })
   type_order: TypeOrder;
 
@@ -83,6 +84,6 @@ export class Order {
 }
 
 export class OrderItemDto {
-  product: number;
+  product_id: number;
   quantity: number;
 }

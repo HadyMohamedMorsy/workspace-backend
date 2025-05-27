@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateOrderDto } from "./dto/create-order.dto";
@@ -9,7 +9,7 @@ import { OrdersService } from "./orders.service";
 @UseGuards(AuthorizationGuard)
 @Controller("order")
 export class OrderController implements SelectOptions, RelationOptions {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly service: OrdersService) {}
 
   @Post("/index")
   @HttpCode(200)
@@ -20,7 +20,7 @@ export class OrderController implements SelectOptions, RelationOptions {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.ordersService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/individual")
@@ -32,7 +32,7 @@ export class OrderController implements SelectOptions, RelationOptions {
     },
   ])
   async findIndividuaOrderlAll(@Body() filterQueryDto: any) {
-    return this.ordersService.findOrderByIndividualAll(filterQueryDto);
+    return this.service.findOrderByIndividualAll(filterQueryDto);
   }
 
   @Post("/company")
@@ -44,7 +44,7 @@ export class OrderController implements SelectOptions, RelationOptions {
     },
   ])
   async findCompanyOrderlAll(@Body() filterQueryDto: any) {
-    return this.ordersService.findOrderByComapnyAll(filterQueryDto);
+    return this.service.findOrderByComapnyAll(filterQueryDto);
   }
 
   @Post("/studentActivity")
@@ -56,7 +56,7 @@ export class OrderController implements SelectOptions, RelationOptions {
     },
   ])
   async findStudentOrderlAll(@Body() filterQueryDto: any) {
-    return this.ordersService.findOrderByStudentActivityAll(filterQueryDto);
+    return this.service.findOrderByStudentActivityAll(filterQueryDto);
   }
 
   @Post("/user")
@@ -68,7 +68,7 @@ export class OrderController implements SelectOptions, RelationOptions {
     },
   ])
   async findUserOrderlAll(@Body() filterQueryDto: any) {
-    return this.ordersService.findOrderByUserAll(filterQueryDto);
+    return this.service.findOrderByUserAll(filterQueryDto);
   }
 
   @Post("/store")
@@ -79,15 +79,17 @@ export class OrderController implements SelectOptions, RelationOptions {
     },
   ])
   async create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
-    return await this.ordersService.create({
-      type_order: createOrderDto.type_order,
+    return await this.service.create({
       order_number: createOrderDto.order_number,
       order_items: req["orderItems"],
+      type_order: createOrderDto.type_order,
       total_order: req["totalOrder"],
-      orderPrice: req["orderPrice"],
+      order_price: req["orderPrice"],
       createdBy: req["createdBy"],
-      [customerType]: req[customerType],
+      individual: req["individual"],
+      company: req["company"],
+      studentActivity: req["studentActivity"],
+      user: req["user"],
     } as CreateOrderDto);
   }
 
@@ -99,7 +101,44 @@ export class OrderController implements SelectOptions, RelationOptions {
     },
   ])
   async remove(@Body() id: number) {
-    await this.ordersService.delete(id);
+    await this.service.delete(id);
+  }
+
+  @Patch("/change-type-order-status")
+  @Permissions([
+    {
+      resource: Resource.Order,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; type_order: string }, @Req() req: Request) {
+    return this.service.changeStatus(
+      update.id,
+      update.type_order,
+      "type_order",
+      {
+        id: true,
+        type_order: true,
+        order_price: true,
+      },
+      {
+        order_price: req["orderPrice"],
+      },
+    );
+  }
+
+  @Patch("/change-payment-method")
+  @Permissions([
+    {
+      resource: Resource.Order,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
   }
 
   selectOptions(): Record<string, boolean> {

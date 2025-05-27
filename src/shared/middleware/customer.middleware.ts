@@ -15,22 +15,26 @@ export class CustomerMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { customer_id } = req.body;
-
+    const { customer_id, customer_type } = req.body;
     try {
-      // Fetch all customer types
-      const [individual, company, studentActivity, user] = await Promise.all([
-        this.individualService.findOne(customer_id),
-        this.companyService.findOne(customer_id),
-        this.studentActivityService.findOne(customer_id),
-        this.userService.findOne(customer_id),
-      ]);
+      let customer = null;
 
-      // Set all customer types in request
-      req["individual"] = individual;
-      req["company"] = company;
-      req["studentActivity"] = studentActivity;
-      req["user"] = user;
+      switch (customer_type) {
+        case "individual":
+          customer = await this.individualService.findOne(+customer_id);
+          break;
+        case "company":
+          customer = await this.companyService.findOne(+customer_id);
+          break;
+        case "studentActivity":
+          customer = await this.studentActivityService.findOne(+customer_id);
+          break;
+        case "user":
+          customer = await this.userService.findOne(+customer_id);
+          break;
+      }
+      req[customer_type] = customer;
+      req["customer_type"] = customer_type;
 
       next();
     } catch (error) {

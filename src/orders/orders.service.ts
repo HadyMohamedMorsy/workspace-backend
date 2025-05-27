@@ -1,7 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { UpdateProductDto } from "src/products/dto/update-product.dto";
-import { Product } from "src/products/product.entity";
 import { ProductService } from "src/products/products.service";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -19,7 +17,7 @@ type RelationConfig = {
 };
 
 export class orderItem {
-  product: Product;
+  product_id: number;
   quantity: number;
 }
 
@@ -37,20 +35,18 @@ export class OrdersService
     super(repository, apiFeaturesService);
   }
 
-  private prepareProductUpdate(product: Product, quantity: number): UpdateProductDto {
-    const { store, type, ...otherItem } = product;
-    return {
-      id: product.id,
-      store: store - quantity,
-      type: type as "item" | "weight",
-      product,
-      ...otherItem,
-    };
-  }
-
-  private async updateProductsInventory(orderItems: orderItem[]): Promise<void> {
-    const updateProducts = orderItems.map(item =>
-      this.prepareProductUpdate(item.product, item.quantity),
+  private async updateProductsInventory(orderItems: orderItem[]) {
+    const updateProducts = await Promise.all(
+      orderItems.map(async item => {
+        const product = await this.productService.findOne(item.product_id, {
+          id: true,
+          store: true,
+        });
+        return {
+          id: product.id,
+          store: product.store - item.quantity,
+        };
+      }),
     );
 
     await Promise.all(updateProducts.map(product => this.productService.update(product)));
@@ -66,22 +62,22 @@ export class OrdersService
       .leftJoin("e.studentActivity", "esa")
       .addSelect(["esa.id", "esa.name", "esa.unviresty"]);
 
-    if (filteredRecord.search?.value) {
+    if (filteredRecord?.search?.value) {
       queryBuilder.andWhere(
-        `ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name OR ecr.firstName LIKE :name`,
+        `ep.name LIKE :name OR ec.firstName LIKE :name OR ec.lastName LIKE :name OR eco.name LIKE :name OR esa.name LIKE :name`,
         {
-          name: `%${filteredRecord.search.value}%`,
+          name: `%${filteredRecord?.search.value}%`,
         },
       );
-      queryBuilder.andWhere(`ec.whatsApp LIKE :number OR ep.whatsApp LIKE :number`, {
-        number: `%${filteredRecord.search.value}%`,
+      queryBuilder.andWhere(`eco.phone LIKE :number OR ep.whatsApp LIKE :number`, {
+        number: `%${filteredRecord?.search.value}%`,
       });
     }
 
     if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filteredRecord.customFilters.start_date,
-        end_date: filteredRecord.customFilters.end_date,
+        start_date: filteredRecord?.customFilters?.start_date,
+        end_date: filteredRecord?.customFilters?.end_date,
       });
     }
   }
@@ -90,7 +86,8 @@ export class OrdersService
     const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
 
     queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
       .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
       });
@@ -100,11 +97,7 @@ export class OrdersService
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
+    return this.response(filteredRecord, totalRecords);
   }
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {

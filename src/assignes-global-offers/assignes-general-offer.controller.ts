@@ -92,19 +92,19 @@ export class AssignGeneralOfferController implements SelectOptions, RelationOpti
     return this.service.findAssignesByUser(filterQueryDto);
   }
 
-  @Post("/by-individual")
+  @Post("/individual")
   @HttpCode(200)
   async findByIndividual(@Body() filterQueryDto: any) {
     return this.service.findAssignesByIndividual(filterQueryDto);
   }
 
-  @Post("/by-company")
+  @Post("/company")
   @HttpCode(200)
   async findByCompany(@Body() filterQueryDto: any) {
     return this.service.findAssignesByCompany(filterQueryDto);
   }
 
-  @Post("/by-student-activity")
+  @Post("/studentActivity")
   @HttpCode(200)
   async findByStudentActivity(@Body() filterQueryDto: any) {
     return this.service.findAssignesByStudentActivity(filterQueryDto);

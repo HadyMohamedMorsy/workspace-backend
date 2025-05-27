@@ -45,13 +45,7 @@ export class CategoryController implements SelectOptions, RelationOptions {
 
   @Get("/list-categories")
   async findList() {
-    return this.service.getList();
-  }
-
-  @Post("/show")
-  @HttpCode(200)
-  async findRelList(@Body() filterQueryDto: any) {
-    return this.service.findOne(filterQueryDto);
+    return this.service.getList({}, [], { name: true, id: true });
   }
 
   @Post("/store")

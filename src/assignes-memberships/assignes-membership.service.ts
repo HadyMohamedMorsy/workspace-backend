@@ -32,23 +32,27 @@ export class AssignesMembershipService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      .leftJoinAndSelect("e.memeberShip", "em")
-      .leftJoinAndSelect("e.shared", "es")
-      .leftJoinAndSelect("e.deskarea", "ed")
-      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
-      .leftJoinAndSelect("ess.generalOffer", "eg")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.memeberShip", "em")
+      .addSelect(["em.id", "em.name", "em.price", "em.days", "em.type"])
+      .leftJoin("e.shared", "es")
+      .addSelect(["es.id"])
+      .leftJoin("e.deskarea", "ed")
+      .addSelect(["ed.id"])
+      .leftJoin("e.assignGeneralOffer", "ess")
+      .addSelect(["ess.id"])
+      .leftJoin("ess.generalOffer", "eg")
+      .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
+      .leftJoin("e.deposites", "esdep")
+      .addSelect(["esdep.id"]);
   }
 
   private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
     const queryBuilder = this.apiFeaturesService
       .setRepository(AssignesMembership)
       .buildQuery(filterData);
-
     queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
       .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
       });
@@ -78,7 +82,7 @@ export class AssignesMembershipService
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
-      selectFields: ["id", "firstName", "lastName"],
+      selectFields: ["id", "name"],
       filterField: "individual_id",
     });
   }

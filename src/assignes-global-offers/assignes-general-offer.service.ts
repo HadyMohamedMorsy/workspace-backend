@@ -34,12 +34,21 @@ export class AssignGeneralOfferservice
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      .leftJoinAndSelect("e.generalOffer", "eg")
-      .leftJoinAndSelect("e.shared", "es")
-      .leftJoinAndSelect("e.deskarea", "ed")
-      .leftJoinAndSelect("e.reservationRooms", "er")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.generalOffer", "eg")
+      .addSelect([
+        "eg.id",
+        "eg.name",
+        "eg.discount",
+        "eg.type_discount",
+        "eg.start_date",
+        "eg.end_date",
+      ])
+      .leftJoin("e.shared", "es")
+      .addSelect(["es.id"])
+      .leftJoin("e.deskarea", "ed")
+      .addSelect(["ed.id"])
+      .leftJoin("e.reservationRooms", "er")
+      .addSelect(["er.id"]);
   }
 
   private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
@@ -48,7 +57,8 @@ export class AssignGeneralOfferservice
       .buildQuery(filterData);
 
     queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
       .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
       });
@@ -58,11 +68,7 @@ export class AssignGeneralOfferservice
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
+    return this.response(filteredRecord, totalRecords);
   }
 
   async findAssignesByUser(filterData: any) {
@@ -78,7 +84,7 @@ export class AssignGeneralOfferservice
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
-      selectFields: ["id", "firstName", "lastName"],
+      selectFields: ["id", "name"],
       filterField: "individual_id",
     });
   }

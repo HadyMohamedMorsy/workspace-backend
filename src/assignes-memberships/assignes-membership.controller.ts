@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -6,7 +6,6 @@ import { Permissions } from "../shared/decorators/permissions.decorator";
 import { AssignesMembershipService } from "./assignes-membership.service";
 import { CreateAssignesMembershipDto } from "./dto/create-assignes-membership.dto";
 import { UpdateAssignesMembershipDto } from "./dto/update-assignes-membership.dto";
-
 @UseGuards(AuthorizationGuard)
 @Controller("assignes-membership")
 export class AssignesMembershipController implements SelectOptions, RelationOptions {
@@ -185,5 +184,33 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
   ])
   async delete(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
+  }
+
+  @Patch("/change-payment-method")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
   }
 }

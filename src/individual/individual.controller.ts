@@ -15,11 +15,16 @@ export class IndividualController implements SelectOptions, RelationOptions {
   public selectOptions(): Record<string, boolean> {
     return {
       id: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      phone: true,
-      address: true,
+      name: true,
+      number: true,
+      whatsApp: true,
+      individual_type: true,
+      employed_job: true,
+      freelancer_job: true,
+      unviresty: true,
+      college: true,
+      nationality: true,
+      note: true,
       created_at: true,
       updated_at: true,
     };

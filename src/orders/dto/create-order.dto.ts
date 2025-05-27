@@ -8,7 +8,10 @@ import {
   IsString,
   ValidateNested,
 } from "class-validator";
+import { Company } from "src/companies/company.entity";
+import { Individual } from "src/individual/individual.entity";
 import { TypeOrder } from "src/shared/enum/global-enum";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 
 export class CreateOrderDto {
@@ -23,6 +26,17 @@ export class CreateOrderDto {
 
   @IsNumber()
   @Type(() => Number)
+  @IsOptional()
+  total_order: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  order_price: number;
+
+  @IsNumber()
+  @IsNumber()
+  @Type(() => Number)
   @IsNotEmpty()
   customer_id: number;
 
@@ -32,22 +46,16 @@ export class CreateOrderDto {
   @IsOptional()
   order_items: OrderItemDto[];
 
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  total_order: number;
-
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  orderPrice: number;
-
   createdBy: User;
+
+  individual: Individual;
+  company: Company;
+  studentActivity: StudentActivity;
+  user: User;
 }
 
 export class OrderItemDto {
-  product: any;
-
+  product_id: number;
   @IsNumber()
   @Type(() => Number)
   quantity: number;

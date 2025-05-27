@@ -31,13 +31,16 @@ export class AssignesPackagesService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      .leftJoinAndSelect("e.packages", "ep")
-      .leftJoinAndSelect("ep.room", "epr")
-      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
-      .leftJoinAndSelect("ess.generalOffer", "eg")
-      .leftJoinAndSelect("e.deposites", "esdep")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+      .leftJoin("e.packages", "ep")
+      .addSelect(["ep.id", "ep.name", "ep.hours", "ep.price", "ep.room"])
+      .leftJoin("ep.room", "epr")
+      .addSelect(["epr.id", "epr.name"])
+      .leftJoin("e.assignGeneralOffer", "ess")
+      .addSelect(["ess.id"])
+      .leftJoin("ess.generalOffer", "eg")
+      .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
+      .leftJoin("e.deposites", "esdep")
+      .addSelect(["esdep.id"]);
   }
 
   private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
@@ -46,7 +49,8 @@ export class AssignesPackagesService
       .buildQuery(filterData);
 
     queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
       .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
       });
@@ -56,11 +60,7 @@ export class AssignesPackagesService
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
+    return this.response(filteredRecord, totalRecords);
   }
 
   async findAssignesByUser(filterData: any) {
@@ -76,7 +76,7 @@ export class AssignesPackagesService
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
-      selectFields: ["id", "firstName", "lastName"],
+      selectFields: ["id", "name"],
       filterField: "individual_id",
     });
   }

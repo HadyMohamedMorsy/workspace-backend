@@ -12,6 +12,33 @@ export interface calulateHour {
   end_time: string;
 }
 
+import { TypeOrder } from "src/shared/enum/global-enum";
+
+export const getOrderItemTotalPrice = (item: any, key: string): number => {
+  let quantity = 0;
+  let accessKey = "";
+  switch (key) {
+    case TypeOrder.PAID:
+    case TypeOrder.HOLD:
+      quantity = item.quantity;
+      accessKey = "selling_price";
+      break;
+    case TypeOrder.COST:
+      quantity = item.quantity;
+      accessKey = "purshase_price";
+      break;
+    case TypeOrder.FREE:
+      quantity = 0;
+      accessKey = "selling_price";
+      break;
+    default:
+      quantity = item.quantity;
+      accessKey = "selling_price";
+      break;
+  }
+  return item.product[accessKey] * quantity;
+};
+
 export function convertTo24HourDate(hour: number, minute: number, period: string): Date {
   const currentDate = new Date();
   const hour24 = ato24h(hour, period);

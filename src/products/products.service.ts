@@ -22,7 +22,7 @@ export class ProductService
   }
 
   async updateProduct(
-    updateProductDto: UpdateProductDto & { id: number },
+    updateProductDto: UpdateProductDto & { product: Product },
     selectOptions?: Record<string, boolean>,
     relations?: Record<string, any>,
   ): Promise<Product> {
@@ -46,5 +46,36 @@ export class ProductService
     queryBuilder
       .leftJoin("e.categories", "categories")
       .addSelect(["categories.id", "categories.name"]);
+  }
+
+  async getProductsByCategory(
+    category_id: number,
+    search?: string,
+    start: number = 0,
+    length: number = 10,
+  ) {
+    const queryBuilder = this.repository
+      .createQueryBuilder("product")
+      .select([
+        "product.id",
+        "product.name",
+        "product.store",
+        "product.selling_price",
+        "product.purshase_price",
+        "product.featured_image",
+      ]);
+
+    if (search) {
+      queryBuilder.where("product.name ILIKE :search", { search: `%${search}%` });
+    } else {
+      queryBuilder
+        .leftJoin("product.categories", "categories")
+        .where("categories.id = :categoryId", { categoryId: category_id });
+    }
+
+    const filteredRecord = await queryBuilder.skip(start).take(length).getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return this.response(filteredRecord, totalRecords);
   }
 }

@@ -1,6 +1,6 @@
 // src/shared/base-crud.service.ts
 import { NotFoundException } from "@nestjs/common";
-import { In, Repository } from "typeorm";
+import { FindOptionsSelect, In, Repository } from "typeorm";
 import { APIFeaturesService } from "../filters/filter.service";
 import { ICrudService } from "../interface/crud-service.interface";
 import { BaseQueryUtils } from "./base-query.utils";
@@ -40,7 +40,7 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     this.getSelectQuery(queryBuilder, selectOptions);
     this.getRelationQuery(queryBuilder, relations);
     const record = await queryBuilder.getOne();
-    if (!record) throw new NotFoundException(`not found`);
+    if (!record) throw new NotFoundException(`this user is not found`);
     return record;
   }
 
@@ -68,9 +68,14 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     return { deleted: true, id };
   }
 
-  async getList(filterData: any = {}, relations: string[] = []) {
+  async getList(
+    filterData: any = {},
+    relations: string[] = [],
+    selectOptions?: FindOptionsSelect<T>,
+  ) {
     const records = await this.repository.find({
       where: filterData,
+      select: selectOptions,
       relations: relations,
     });
     return {
@@ -83,8 +88,9 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     status: string | boolean,
     key: string,
     selectOptions?: Record<string, boolean>,
+    updateDto?: any,
   ) {
-    await this.repository.update(id, { [key]: status } as any);
+    await this.repository.update(id, { [key]: status, ...updateDto } as any);
     return this.findOne(id, selectOptions);
   }
 

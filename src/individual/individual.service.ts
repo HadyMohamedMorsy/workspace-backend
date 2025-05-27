@@ -26,18 +26,16 @@ export class IndividualService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      .leftJoinAndSelect("e.assign_memberships", "ep", "ep.status = :status_memeber", {
+      .leftJoin("e.assign_memberships", "ep", "ep.status = :status_memeber", {
         status_memeber: ReservationStatus.ACTIVE,
       })
-      .leftJoinAndSelect("ep.memeberShip", "ms")
-      .leftJoinAndSelect("e.assignesPackages", "es", "es.status = :status_package", {
+      .leftJoin("ep.memeberShip", "ms")
+      .leftJoin("e.assignesPackages", "es", "es.status = :status_package", {
         status_package: ReservationStatus.ACTIVE,
       })
-      .leftJoinAndSelect("es.packages", "pa")
-      .leftJoinAndSelect("pa.room", "pr")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
-      .leftJoinAndSelect("e.orders", "eo", "eo.type_order = :typeOrder", {
+      .leftJoin("es.packages", "pa")
+      .leftJoin("pa.room", "pr")
+      .leftJoin("e.orders", "eo", "eo.type_order = :typeOrder", {
         typeOrder: "HOLD",
       });
   }

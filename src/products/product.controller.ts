@@ -5,6 +5,7 @@ import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.inte
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
+import { Product } from "./product.entity";
 import { ProductService } from "./products.service";
 
 @UseGuards(AuthorizationGuard)
@@ -85,7 +86,7 @@ export class ProductController implements SelectOptions, RelationOptions {
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() update: UpdateProductDto, @Req() req: Request) {
+  async update(@Body() update: UpdateProductDto & { product: Product }, @Req() req: Request) {
     return await this.service.updateProduct(
       {
         id: update.id,
@@ -99,7 +100,7 @@ export class ProductController implements SelectOptions, RelationOptions {
         product: req["product"],
         categories: req["categories"],
         createdBy: req["createdBy"],
-      } as UpdateProductDto,
+      },
       this.selectOptions(),
       this.getRelationOptions(),
     );
@@ -114,5 +115,14 @@ export class ProductController implements SelectOptions, RelationOptions {
   ])
   async delete(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Post("/products-by-category")
+  async getProductsByCategory(@Body() filterQueryDto: any) {
+    const category_id = filterQueryDto.category_id;
+    const search = filterQueryDto.search;
+    const start = filterQueryDto.start;
+    const length = filterQueryDto.length;
+    return this.service.getProductsByCategory(category_id, search, start, length);
   }
 }
