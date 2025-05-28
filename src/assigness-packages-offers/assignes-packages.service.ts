@@ -8,13 +8,6 @@ import { AssignesPackages } from "./assignes-packages.entity";
 import { CreateAssignesPackageDto } from "./dto/create-assignes-packages.dto";
 import { UpdateAssignesPackageDto } from "./dto/update-assignes-packages.dto";
 
-type RelationConfig = {
-  relationPath: string;
-  alias: string;
-  selectFields: string[];
-  filterField: string;
-};
-
 @Injectable()
 export class AssignesPackagesService
   extends BaseService<AssignesPackages, CreateAssignesPackageDto, UpdateAssignesPackageDto>
@@ -41,26 +34,6 @@ export class AssignesPackagesService
       .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
       .leftJoin("e.deposites", "esdep")
       .addSelect(["esdep.id"]);
-  }
-
-  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignesPackages)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
-
-    this.queryRelationIndex(queryBuilder);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return this.response(filteredRecord, totalRecords);
   }
 
   async findAssignesByUser(filterData: any) {

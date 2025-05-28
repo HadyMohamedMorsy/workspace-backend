@@ -4,17 +4,9 @@ import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
 import { Repository, SelectQueryBuilder } from "typeorm";
-import { Deskarea } from "../deskarea/deskarea.entity";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { Shared } from "./shared.entity";
-
-type RelationConfig = {
-  relationPath: string;
-  alias: string;
-  selectFields: string[];
-  filterField: string;
-};
 
 @Injectable()
 export class SharedService
@@ -29,43 +21,24 @@ export class SharedService
     super(repository, apiFeaturesService);
   }
 
-  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deskarea).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
-
-    this.queryRelationIndex(queryBuilder);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-    return this.response(filteredRecord, totalRecords);
-  }
-
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
 
     queryBuilder
-      .leftJoin("e.individual", "ep")
-      .addSelect(["ep.id", "ep.name", "ep.whatsApp"])
-      .leftJoin("e.company", "ec")
-      .addSelect(["ec.id", "ec.phone", "ec.name"])
-      .leftJoin("e.studentActivity", "es")
-      .addSelect(["es.id", "es.name", "es.unviresty"]);
+      .leftJoin("e.individual", "ei")
+      .addSelect(["ei.id", "ei.name", "ei.whatsApp"])
+      .leftJoin("e.company", "eco")
+      .addSelect(["eco.id", "eco.phone", "eco.name"])
+      .leftJoin("e.studentActivity", "esa")
+      .addSelect(["esa.id", "esa.name", "esa.unviresty"]);
 
-    if (filteredRecord.search.value) {
+    if (filteredRecord?.search?.value) {
       queryBuilder.andWhere(
-        `ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name OR ecr.firstName LIKE :name`,
+        `ei.name LIKE :name OR ei.whatsApp LIKE :name OR eco.name LIKE :name OR esa.name LIKE :name`,
         {
-          name: `%${filteredRecord.search.value}%`,
+          name: `%${filteredRecord?.search?.value}%`,
         },
       );
-      queryBuilder.andWhere(`ec.whatsApp LIKE :number OR ep.whatsApp LIKE :number`, {
-        number: `%${filteredRecord.search.value}%`,
-      });
     }
 
     if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
@@ -80,7 +53,7 @@ export class SharedService
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
-      selectFields: ["id", "firstName", "lastName"],
+      selectFields: ["id", "name"],
       filterField: "individual_id",
     });
   }

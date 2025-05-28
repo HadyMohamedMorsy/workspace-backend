@@ -5,6 +5,13 @@ import { APIFeaturesService } from "../filters/filter.service";
 import { ICrudService } from "../interface/crud-service.interface";
 import { BaseQueryUtils } from "./base-query.utils";
 
+export type RelationConfig = {
+  relationPath: string;
+  alias: string;
+  selectFields: string[];
+  filterField: string;
+};
+
 export abstract class BaseService<T, CreateDto, UpdateDto>
   extends BaseQueryUtils<T>
   implements ICrudService<T, CreateDto, UpdateDto>
@@ -96,5 +103,25 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
 
   async findByIds(ids: number[]): Promise<T[]> {
     return this.repository.findBy({ id: In(ids) } as any);
+  }
+
+  public async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
+    const queryBuilder = this.apiService
+      .setRepository(this.repository.target)
+      .buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
+      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
+        [relationConfig.filterField]: filterData[relationConfig.filterField],
+      });
+
+    this.queryRelationIndex(queryBuilder);
+
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+
+    return this.response(filteredRecord, totalRecords);
   }
 }

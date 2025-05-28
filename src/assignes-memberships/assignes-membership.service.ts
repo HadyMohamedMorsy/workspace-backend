@@ -8,13 +8,6 @@ import { AssignesMembership } from "./assignes-membership.entity";
 import { CreateAssignesMembershipDto } from "./dto/create-assignes-membership.dto";
 import { UpdateAssignesMembershipDto } from "./dto/update-assignes-membership.dto";
 
-type RelationConfig = {
-  relationPath: string;
-  alias: string;
-  selectFields: string[];
-  filterField: string;
-};
-
 @Injectable()
 export class AssignesMembershipService
   extends BaseService<AssignesMembership, CreateAssignesMembershipDto, UpdateAssignesMembershipDto>
@@ -44,29 +37,6 @@ export class AssignesMembershipService
       .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
       .leftJoin("e.deposites", "esdep")
       .addSelect(["esdep.id"]);
-  }
-
-  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignesMembership)
-      .buildQuery(filterData);
-    queryBuilder
-      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
-
-    this.queryRelationIndex(queryBuilder);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
   }
 
   async findAssignesByUser(filterData: any) {

@@ -5,7 +5,6 @@ import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
 import { SelectQueryBuilder } from "typeorm";
 
-import { DepositeService } from "src/deposit/deposites.service";
 import { Repository } from "typeorm";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
 import { UpdateReservationRoomDto } from "./dto/update-reservation-rooms.dto";
@@ -20,7 +19,6 @@ export class ReservationRoomService
     @InjectRepository(ReservationRoom)
     private reservationRoomRepository: Repository<ReservationRoom>,
     private readonly apiFeaturesService: APIFeaturesService,
-    protected readonly depositeService: DepositeService,
   ) {
     super(reservationRoomRepository, apiFeaturesService);
   }
@@ -28,25 +26,18 @@ export class ReservationRoomService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      .leftJoin("e.createdBy", "ecr")
-      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"])
       .leftJoin("e.individual", "ep")
       .addSelect(["ep.id", "ep.name", "ep.whatsApp"])
-      .leftJoin("e.company", "ec")
-      .addSelect(["ec.id", "ec.phone", "ec.name"])
+      .leftJoin("e.company", "eco")
+      .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "es")
       .addSelect(["es.id", "es.name", "es.unviresty"])
-      .leftJoinAndSelect("e.deposites", "esdep");
+      .leftJoin("e.deposites", "esdep")
+      .addSelect(["esdep.id"]);
 
     if (filteredRecord?.search?.value) {
-      queryBuilder.andWhere(
-        `ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name OR ecr.firstName LIKE :name`,
-        {
-          name: `%${filteredRecord.search.value}%`,
-        },
-      );
-      queryBuilder.andWhere(`ec.whatsApp LIKE :number OR ep.whatsApp LIKE :number`, {
-        number: `%${filteredRecord.search.value}%`,
+      queryBuilder.andWhere(`ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name`, {
+        name: `%${filteredRecord.search.value}%`,
       });
     }
 

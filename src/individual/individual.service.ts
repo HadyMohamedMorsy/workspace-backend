@@ -37,7 +37,34 @@ export class IndividualService
       .leftJoin("pa.room", "pr")
       .leftJoin("e.orders", "eo", "eo.type_order = :typeOrder", {
         typeOrder: "HOLD",
-      });
+      })
+      .addSelect([
+        "ep.id",
+        "ep.start_date",
+        "ep.end_date",
+        "ep.used",
+        "ep.remaining",
+        "ep.status",
+        "ms.id",
+        "ms.name",
+        "ms.days",
+        "ms.price",
+        "ms.type",
+        "es.id",
+        "es.start_date",
+        "es.end_date",
+        "es.used",
+        "es.remaining",
+        "pa.id",
+        "pa.name",
+        "pa.price",
+        "pa.hours",
+        "pr.id",
+        "pr.name",
+        "pr.price",
+        "eo.id",
+        "eo.type_order",
+      ]);
   }
 
   override findAll(filterData) {
@@ -61,10 +88,7 @@ export class IndividualService
   async findByUserAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Individual).buildQuery(filterData);
 
-    queryBuilder
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
-      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+    queryBuilder.andWhere("ec.id = :user_id", { user_id: filterData.user_id });
 
     this.queryRelationIndex(queryBuilder);
 

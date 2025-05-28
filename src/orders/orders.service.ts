@@ -9,13 +9,6 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { Order } from "./order.entity";
 
-type RelationConfig = {
-  relationPath: string;
-  alias: string;
-  selectFields: string[];
-  filterField: string;
-};
-
 export class orderItem {
   product_id: number;
   quantity: number;
@@ -80,24 +73,6 @@ export class OrdersService
         end_date: filteredRecord?.customFilters?.end_date,
       });
     }
-  }
-
-  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
-    const queryBuilder = this.apiFeaturesService.setRepository(Order).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
-
-    this.queryRelationIndex(queryBuilder);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return this.response(filteredRecord, totalRecords);
   }
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {

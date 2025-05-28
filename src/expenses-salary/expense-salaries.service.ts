@@ -29,6 +29,18 @@ export class ExpensesSalariesService
     });
   }
 
+  async findByUserAll(filterData) {
+    const queryBuilder = this.apiFeaturesService
+      .setRepository(ExpenseSalaries)
+      .buildQuery(filterData);
+
+    queryBuilder.andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+    this.queryRelationIndex(queryBuilder);
+    const filteredRecord = await queryBuilder.getMany();
+    const totalRecords = await queryBuilder.getCount();
+    return this.response(filteredRecord, totalRecords);
+  }
+
   override queryRelationIndex(
     queryBuilder?: SelectQueryBuilder<ExpenseSalaries>,
     filteredRecord?: any,

@@ -8,13 +8,6 @@ import { Deals } from "./deals.entity";
 import { CreateDealsDto } from "./dto/create-deals.dto";
 import { UpdateDealsDto } from "./dto/update-deals.dto";
 
-type RelationConfig = {
-  relationPath: string;
-  alias: string;
-  selectFields: string[];
-  filterField: string;
-};
-
 @Injectable()
 export class DealsService
   extends BaseService<Deals, CreateDealsDto, UpdateDealsDto>
@@ -31,33 +24,21 @@ export class DealsService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      .leftJoinAndSelect("e.room", "er")
-      .leftJoinAndSelect("e.assignGeneralOffer", "ess")
-      .leftJoinAndSelect("ess.generalOffer", "eg")
-      .leftJoinAndSelect("e.deposites", "esdep");
-  }
-
-  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
-    const queryBuilder = this.apiFeaturesService.setRepository(Deals).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
-
-    this.queryRelationIndex(queryBuilder);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-    return this.response(filteredRecord, totalRecords);
+      .leftJoin("e.room", "er")
+      .addSelect(["er.id", "er.name"])
+      .leftJoin("e.assignGeneralOffer", "ess")
+      .addSelect(["ess.id"])
+      .leftJoin("ess.generalOffer", "eg")
+      .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
+      .leftJoin("e.deposites", "esdep")
+      .addSelect(["esdep.id"]);
   }
 
   async findDealsByIndividualAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
-      selectFields: ["id", "firstName", "lastName"],
+      selectFields: ["id", "name"],
       filterField: "individual_id",
     });
   }

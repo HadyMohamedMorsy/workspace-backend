@@ -49,13 +49,15 @@ export class ReservationRoomQueryService {
     queryBuilder: SelectQueryBuilder<ReservationRoom>,
     relationConfig: {
       relationPath: string;
+      selectFields?: string[];
       alias: string;
       filterField: string;
     },
     filterData: any,
   ) {
     queryBuilder
-      .leftJoinAndSelect(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
+      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
       .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
       });

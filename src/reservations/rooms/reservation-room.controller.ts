@@ -118,7 +118,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.service.findAll(filterQueryDto);
+    return this.calendarService.getReservationsForThisWeek(filterQueryDto);
   }
 
   @Post("/individual")

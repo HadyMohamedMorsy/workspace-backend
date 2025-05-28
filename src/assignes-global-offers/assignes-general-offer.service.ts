@@ -9,13 +9,6 @@ import { AssignGeneralOffer } from "./assignes-general-offer.entity";
 import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.dto";
 import { UpdateAssignGeneralOfferDto } from "./dto/update-assign-general-offer.dto";
 
-type RelationConfig = {
-  relationPath: string;
-  alias: string;
-  selectFields: string[];
-  filterField: string;
-};
-
 @Injectable()
 export class AssignGeneralOfferservice
   extends BaseService<AssignGeneralOffer, CreateAssignGeneralOfferDto, UpdateAssignGeneralOfferDto>
@@ -49,26 +42,6 @@ export class AssignGeneralOfferservice
       .addSelect(["ed.id"])
       .leftJoin("e.reservationRooms", "er")
       .addSelect(["er.id"]);
-  }
-
-  private async findRelatedEntities(filterData: any, relationConfig: RelationConfig): Promise<any> {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
-
-    this.queryRelationIndex(queryBuilder);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return this.response(filteredRecord, totalRecords);
   }
 
   async findAssignesByUser(filterData: any) {
