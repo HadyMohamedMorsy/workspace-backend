@@ -5,6 +5,7 @@ import {
   forwardRef,
   HttpCode,
   Inject,
+  Patch,
   Post,
   Put,
   Req,
@@ -323,6 +324,20 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
   ])
   public delete(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Patch("/change-payment-method")
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
   }
 
   @Post("cancel")
