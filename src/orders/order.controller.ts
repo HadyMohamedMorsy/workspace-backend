@@ -1,5 +1,17 @@
-import { Body, Controller, Delete, HttpCode, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { ProductService } from "src/products/products.service";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
@@ -9,7 +21,10 @@ import { OrdersService } from "./orders.service";
 @UseGuards(AuthorizationGuard)
 @Controller("order")
 export class OrderController implements SelectOptions, RelationOptions {
-  constructor(private readonly service: OrdersService) {}
+  constructor(
+    private readonly service: OrdersService,
+    private readonly productService: ProductService,
+  ) {}
 
   @Post("/index")
   @HttpCode(200)
@@ -69,6 +84,48 @@ export class OrderController implements SelectOptions, RelationOptions {
   ])
   async findUserOrderlAll(@Body() filterQueryDto: any) {
     return this.service.findOrderByUserAll(filterQueryDto);
+  }
+
+  @Get("/show/:id")
+  async getOrderById(@Param("id") id: number) {
+    const order = await this.service.findOne(id, {
+      id: true,
+      order_number: true,
+      type_order: true,
+      order_price: true,
+      total_order: true,
+      payment_method: true,
+      order_items: true,
+      created_at: true,
+      updated_at: true,
+    });
+
+    if (!order) {
+      return null;
+    }
+
+    // Get product details for each order item
+    const orderItemsWithProducts = await Promise.all(
+      order.order_items.map(async item => {
+        const product = await this.productService.findOne(item.product_id, {
+          id: true,
+          name: true,
+          code: true,
+          selling_price: true,
+          store: true,
+          featured_image: true,
+        });
+        return {
+          product,
+          quantity: item.quantity,
+        };
+      }),
+    );
+
+    return {
+      ...order,
+      order_items: orderItemsWithProducts,
+    };
   }
 
   @Post("/store")
