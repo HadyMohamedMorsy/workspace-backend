@@ -7,14 +7,19 @@ import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
 import { RoomsModule } from "src/rooms/rooms.module";
+import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
+import { ValidateDateRangeMiddleware } from "src/shared/middleware/validate-date-range.middleware";
+import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
+import { ValidateOfferMiddleware } from "src/shared/middleware/validate-offer.middleware";
+import { ValidateRoomMiddleware } from "src/shared/middleware/validate-room.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
 import { DealsController } from "./deals.controller";
 import { Deals } from "./deals.entity";
 import { DealsService } from "./deals.service";
-import { DealsMiddleware } from "./middleware/deals.middleware";
+import { CalculateDealPriceMiddleware } from "./middleware/calculate-deal-price.middleware";
 
 @Module({
   imports: [
@@ -36,9 +41,15 @@ import { DealsMiddleware } from "./middleware/deals.middleware";
 export class DealsModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(CustomerMiddleware)
-      .forRoutes("deals/store")
-      .apply(DealsMiddleware)
+      .apply(
+        ValidateDateRangeMiddleware,
+        CustomerMiddleware,
+        ValidateRoomMiddleware,
+        ValidateOfferMiddleware,
+        ValidateOfferRangeMiddleware,
+        AssignGeneralOfferMiddleware,
+        CalculateDealPriceMiddleware,
+      )
       .forRoutes("deals/store", "deals/update")
       .apply(DepositMiddleware)
       .forRoutes("deals/store-deposite");

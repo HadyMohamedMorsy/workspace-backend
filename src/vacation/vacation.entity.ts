@@ -1,43 +1,23 @@
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Vacation {
+export class Vacation extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, user => user.task, {
+  @ManyToOne(() => User, user => user.vacation, {
     onDelete: "CASCADE",
   })
   user: User;
 
-  @ManyToOne(() => User, user => user.createdByTasks, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({ name: "createdById" })
-  createdBy: User;
-
   @Column()
   selected_day: string;
 
-  @Column()
+  @Column({ nullable: true })
   note: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

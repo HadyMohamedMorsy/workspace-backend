@@ -6,7 +6,6 @@ import { AssignesPackages } from "src/assigness-packages-offers/assignes-package
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
 import { Deals } from "src/deals/deals.entity";
 import { DealsService } from "src/deals/deals.service";
-import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { createMoment } from "src/reservations/helpers/utitlties";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { Repository } from "typeorm";
@@ -19,41 +18,40 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
     private readonly reservationRoomRepository: Repository<ReservationRoom>,
     private readonly packageRooms: AssignesPackagesService,
     private readonly deal: DealsService,
-    private readonly offer: GeneralOfferService,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     const { body } = req;
 
-    await this.validateTimeSlot(body);
+    await this.validateTimeSlot(body, req["selected_day"]);
 
     if (body.package_id) {
-      const pkg = await this.validatePackage(body.package_id, body.selected_day);
+      const pkg = await this.validatePackage(body.package_id, req["selected_day"]);
       req["pkg"] = pkg;
     }
 
     if (body.deal_id) {
-      const deal = await this.validateDeal(body.deal_id, body.selected_day);
+      const deal = await this.validateDeal(body.deal_id, req["selected_day"]);
       req["deal"] = deal;
     }
 
     next();
   }
 
-  private async validateTimeSlot(body: any) {
+  private async validateTimeSlot(body: any, selectedDay: string) {
     const startTime = createMoment(
-      body.selected_day,
+      selectedDay,
       body.start_hour,
       body.start_minute,
       body.start_time,
     );
-    const endTime = createMoment(body.selected_day, body.end_hour, body.end_minute, body.end_time);
+    const endTime = createMoment(selectedDay, body.end_hour, body.end_minute, body.end_time);
 
     if (endTime.isBefore(startTime)) {
       throw new BadRequestException("End time must be after start time.");
     }
 
-    const parsedDay = moment(body.selected_day, "DD/MM/YYYY");
+    const parsedDay = moment(selectedDay, "DD/MM/YYYY");
     const startOfDay = parsedDay.clone().startOf("day");
     const endOfDay = parsedDay.clone().endOf("day");
 
@@ -61,7 +59,7 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
       throw new BadRequestException("End time must be within the same day.");
     }
 
-    const existing = await this.getActiveReservations(body.room_id, body.selected_day);
+    const existing = await this.getActiveReservations(body.room_id, selectedDay);
     if (this.checkOverlap(existing, startTime, endTime)) {
       throw new BadRequestException("Time slot overlaps with existing reservation");
     }

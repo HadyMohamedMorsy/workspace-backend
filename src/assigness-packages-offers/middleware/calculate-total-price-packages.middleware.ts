@@ -12,8 +12,8 @@ export class CalculatePackagesPriceMiddleware implements NestMiddleware {
     const offer = req["offer"];
 
     if (pkg && offer) {
-      const hours = pkg.hours;
-      const price = pkg.price * hours;
+      const hours = +pkg.hours;
+      const price = +pkg.price * hours;
       const discount = calculateOfferDiscount(price, offer);
       req["totalPrice"] = price - discount;
     }

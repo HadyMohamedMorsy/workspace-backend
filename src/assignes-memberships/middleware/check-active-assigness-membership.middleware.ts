@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NestMiddleware } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { NextFunction, Request, Response } from "express";
-import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { Repository } from "typeorm";
 import { AssignesMembership } from "../assignes-membership.entity";
 
@@ -13,22 +13,50 @@ export class checkAssignMemebershipMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
-    const customer = req[customerType];
+    if (req["individual"]) {
+      const existingActiveMembership = await this.assignesMembershipRepository.findOne({
+        relations: ["individual", "memeberShip"],
+        where: {
+          individual: { id: req["individual"].id },
+          status: ReservationStatus.ACTIVE,
+        },
+      });
 
-    const existingActiveMembership = await this.assignesMembershipRepository.findOne({
-      where: {
-        [customerType]: customer,
-        memeberShip: { id: req.body.membership_id },
-        status: ReservationStatus.ACTIVE,
-      },
-    });
-
-    if (existingActiveMembership) {
-      throw new ConflictException(
-        "An active membership already exists for this customer and membership.",
-      );
+      if (existingActiveMembership) {
+        throw new ConflictException("An active membership already exists for this individual.");
+      }
     }
+
+    if (req["company"]) {
+      const existingActiveMembership = await this.assignesMembershipRepository.findOne({
+        relations: ["company", "memeberShip"],
+        where: {
+          company: { id: req["company"].id },
+          status: ReservationStatus.ACTIVE,
+        },
+      });
+
+      if (existingActiveMembership) {
+        throw new ConflictException("An active membership already exists for this company.");
+      }
+    }
+
+    if (req["studentActivity"]) {
+      const existingActiveMembership = await this.assignesMembershipRepository.findOne({
+        relations: ["studentActivity", "memeberShip"],
+        where: {
+          studentActivity: { id: req["studentActivity"].id },
+          status: ReservationStatus.ACTIVE,
+        },
+      });
+
+      if (existingActiveMembership) {
+        throw new ConflictException(
+          "An active membership already exists for this student activity.",
+        );
+      }
+    }
+
     next();
   }
 }

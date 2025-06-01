@@ -90,7 +90,7 @@ export function calculateHours(details: calulateHour) {
   const totalMinutes = Math.floor(diffMs / (1000 * 60));
   const hours = Math.floor(totalMinutes / 60);
   const remainingMinutes = totalMinutes % 60;
-  return remainingMinutes > 10 ? hours + 1 : hours;
+  return remainingMinutes >= 10 ? hours + 1 : hours;
 }
 
 export function calculateOfferDiscount(basePrice: number, offer: any): number {
@@ -98,4 +98,13 @@ export function calculateOfferDiscount(basePrice: number, offer: any): number {
   const typeDiscount = offer.type_discount;
   const discountAmount = offer.discount;
   return typeDiscount === "amount" ? discountAmount : basePrice * (discountAmount / 100);
+}
+
+export function getCurrentTime() {
+  const now = new Date();
+  return {
+    hours: now.getHours() % 12 || 12,
+    minutes: now.getMinutes(),
+    timeOfDay: now.getHours() >= 12 ? TimeOfDay.PM : TimeOfDay.AM,
+  };
 }

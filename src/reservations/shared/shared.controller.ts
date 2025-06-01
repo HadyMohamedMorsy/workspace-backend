@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { UpdateDepositeDto } from "src/deposit/dto/update-deposites.dto";
-import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
+import { formatDate, getCurrentTime } from "../helpers/utitlties";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { SharedService } from "./shared.service";
@@ -20,15 +21,11 @@ export class SharedController implements SelectOptions, RelationOptions {
       start_hour: true,
       start_minute: true,
       start_time: true,
-      end_hour: true,
-      end_minute: true,
-      end_time: true,
-      total_price: true,
       status: true,
+      note: true,
+      is_full_day: true,
       created_at: true,
-      updated_at: true,
       createdBy: true,
-      updatedBy: true,
     };
   }
 
@@ -37,27 +34,19 @@ export class SharedController implements SelectOptions, RelationOptions {
       individual: {
         id: true,
         name: true,
-        whatsApp: true,
       },
       company: {
         id: true,
-        phone: true,
         name: true,
       },
       studentActivity: {
         id: true,
         name: true,
-        whatsApp: true,
-      },
-      user: {
-        id: true,
-        name: true,
-        whatsApp: true,
       },
       createdBy: {
         id: true,
-        name: true,
-        whatsApp: true,
+        firstName: true,
+        lastName: true,
       },
     };
   }
@@ -130,15 +119,20 @@ export class SharedController implements SelectOptions, RelationOptions {
     },
   ])
   async create(@Body() createSharedDto: CreateSharedDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    const createTime = getCurrentTime();
+
     return await this.service.create(
       {
-        selected_day: createSharedDto.selected_day,
-        start_hour: createSharedDto.start_hour,
-        start_minute: createSharedDto.start_minute,
-        start_time: createSharedDto.start_time,
+        selected_day: formatDate(createSharedDto.selected_day),
+        start_hour: createTime.hours,
+        start_minute: createTime.minutes,
+        start_time: createTime.timeOfDay,
+        note: createSharedDto.note,
+        is_full_day: createSharedDto.is_full_day,
         assignGeneralOffer: req["assignGeneralOffer"],
-        [customerType]: req[customerType],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
         createdBy: req["createdBy"],
       } as CreateSharedDto,
       this.selectOptions(),
@@ -154,16 +148,19 @@ export class SharedController implements SelectOptions, RelationOptions {
     },
   ])
   async update(@Body() update: UpdateSharedDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.update(
       {
         id: update.id,
-        selected_day: update.selected_day,
+        selected_day: formatDate(update.selected_day),
+        is_full_day: update.is_full_day,
+        note: update.note,
         end_hour: update.end_hour,
         end_minute: update.end_minute,
         end_time: update.end_time,
         assignGeneralOffer: req["assignGeneralOffer"],
-        [customerType]: req[customerType],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
         createdBy: req["createdBy"],
       },
       this.selectOptions(),

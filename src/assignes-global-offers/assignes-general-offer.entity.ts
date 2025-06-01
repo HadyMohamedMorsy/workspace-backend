@@ -7,19 +7,13 @@ import { Individual } from "src/individual/individual.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import {
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class AssignGeneralOffer {
+export class AssignGeneralOffer extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -43,11 +37,6 @@ export class AssignGeneralOffer {
   })
   generalOffer: GeneralOffer;
 
-  @ManyToOne(() => User, user => user.createdByGeneralOffer, {
-    onDelete: "CASCADE",
-  })
-  createdBy: User;
-
   @OneToMany(() => Shared, shared => shared.assignGeneralOffer)
   shared: Shared;
 
@@ -66,13 +55,6 @@ export class AssignGeneralOffer {
   @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.assignGeneralOffer)
   assignessMemebership: AssignesMembership;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

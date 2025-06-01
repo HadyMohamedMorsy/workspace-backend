@@ -1,7 +1,6 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
 import { NextFunction, Request, Response } from "express";
-import * as moment from "moment-timezone";
-
+import { formatDate } from "src/reservations/helpers/utitlties";
 @Injectable()
 export class DateFormatMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
@@ -12,6 +11,6 @@ export class DateFormatMiddleware implements NestMiddleware {
   }
 
   private formatDate(date: string): string {
-    return moment(date).format("YYYY-MM-DD");
+    return formatDate(date);
   }
 }

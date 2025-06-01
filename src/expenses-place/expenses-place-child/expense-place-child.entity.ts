@@ -1,4 +1,5 @@
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ExpensePlace } from "../expense-place.entity";
 
@@ -17,4 +18,7 @@ export class ExpensePlaceChild extends BaseMemberEntity {
     onDelete: "CASCADE",
   })
   expensePlace: ExpensePlace;
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

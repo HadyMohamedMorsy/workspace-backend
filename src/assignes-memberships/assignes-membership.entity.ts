@@ -5,23 +5,22 @@ import { Individual } from "src/individual/individual.entity";
 import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from "typeorm";
 
 @Entity()
-export class AssignesMembership {
+export class AssignesMembership extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -93,18 +92,6 @@ export class AssignesMembership {
   })
   payment_method: PaymentMethod;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @ManyToOne(() => User, user => user.createdByMemebership, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
 }

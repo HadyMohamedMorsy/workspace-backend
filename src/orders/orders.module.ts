@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CompanyModule } from "src/companies/company.module";
 import { IndividualModule } from "src/individual/individual.module";
@@ -15,9 +15,9 @@ import { OrdersService } from "./orders.service";
 
 @Module({
   imports: [
-    CompanyModule,
-    IndividualModule,
-    StudentActivityModule,
+    forwardRef(() => CompanyModule),
+    forwardRef(() => IndividualModule),
+    forwardRef(() => StudentActivityModule),
     UsersModule,
     ProductsModule,
     FilterDateModule,

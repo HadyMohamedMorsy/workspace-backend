@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { AssignesPackagesService } from "./assignes-packages.service";
@@ -15,10 +15,13 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
   public selectOptions(): Record<string, boolean> {
     return {
       id: true,
-      name: true,
       start_date: true,
       end_date: true,
       total_price: true,
+      payment_method: true,
+      remaining: true,
+      status: true,
+      total_used: true,
       used: true,
     };
   }
@@ -32,8 +35,6 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
       },
       assignGeneralOffer: {
         id: true,
-        name: true,
-        price: true,
       },
       packages: {
         id: true,
@@ -44,13 +45,9 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
       deposites: {
         id: true,
         total_price: true,
-        status: true,
-        payment_method: true,
       },
-      room: {
+      reservationRooms: {
         id: true,
-        name: true,
-        price: true,
       },
     };
   }
@@ -111,17 +108,18 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
     },
   ])
   async create(@Body() create: CreateAssignesPackageDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.create(
       {
         createdBy: req["createdBy"],
         assignGeneralOffer: req["assignGeneralOffer"],
-        packages: req["packages"],
+        packages: req["package"],
         total_price: req["totalPrice"],
         used: 0,
-        [customerType]: req[customerType],
-        remaining: +req["packages"].hours,
-        total_used: +req["packages"].hours,
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
+        remaining: +req["package"].hours,
+        total_used: +req["package"].hours,
         start_date: create.start_date,
         end_date: create.end_date,
       } as CreateAssignesPackageDto,
@@ -152,7 +150,6 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
     },
   ])
   async update(@Body() update: UpdateAssignesPackageDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.update(
       {
         id: update.id,
@@ -160,12 +157,11 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
         end_date: update.end_date,
         createdBy: req["createdBy"],
         assignGeneralOffer: req["assignGeneralOffer"],
-        packages: req["packages"],
+        packages: req["package"],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
         total_price: req["totalPrice"],
-        [customerType]: req[customerType],
-        remaining: +req["packages"].hours,
-        total_used: +req["packages"].hours,
-        used: update.used,
       },
       this.selectOptions(),
       this.getRelationOptions(),

@@ -1,7 +1,8 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PRODUCT_TYPE } from "src/shared/enum/global-enum";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { DiscountType } from "./dto/create-general-offer.dto";
 
 @Entity()
@@ -33,4 +34,7 @@ export class GeneralOffer extends BaseMemberEntity {
 
   @Column({ type: "enum", enum: PRODUCT_TYPE, default: PRODUCT_TYPE.Room })
   product: PRODUCT_TYPE;
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

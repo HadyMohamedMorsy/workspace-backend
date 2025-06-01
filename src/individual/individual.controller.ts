@@ -1,6 +1,17 @@
-import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource } from "src/shared/enum/global-enum";
+import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateIndividualDto } from "./dto/create-individual.dto";
@@ -24,7 +35,6 @@ export class IndividualController implements SelectOptions, RelationOptions {
       unviresty: true,
       college: true,
       nationality: true,
-      note: true,
       created_at: true,
       updated_at: true,
     };
@@ -80,6 +90,97 @@ export class IndividualController implements SelectOptions, RelationOptions {
   @HttpCode(200)
   async findByUserAll(@Body() filterQueryDto: any) {
     return this.service.findByUserAll(filterQueryDto);
+  }
+
+  @Get("/assignes-membership/:id")
+  async assignesMembershipById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        assign_memberships: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          payment_method: true,
+          memeberShip: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
+  }
+
+  @Get("/assignes-package/:id")
+  async assignesPackageById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        assignesPackages: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          payment_method: true,
+          packages: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
+  }
+  @Get("/assignes-deal/:id")
+  async assignesDealById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        deals: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          price_hour: true,
+          hours: true,
+          payment_method: true,
+          room: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
   }
 
   @Post("/store")
@@ -146,5 +247,11 @@ export class IndividualController implements SelectOptions, RelationOptions {
   ])
   async remove(@Body() bodyDelete: { id: number }) {
     return this.service.delete(bodyDelete.id);
+  }
+
+  @Get("/check-invoice/:id")
+  @HttpCode(200)
+  async checkInvoice(@Param("id") id: string) {
+    return this.service.checkInvoice(id);
   }
 }

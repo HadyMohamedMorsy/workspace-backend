@@ -9,12 +9,16 @@ import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { RoomsModule } from "src/rooms/rooms.module";
+import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
+import { DateFormatMiddleware } from "src/shared/middleware/date-format.middleware";
+import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
+import { ValidateOfferMiddleware } from "src/shared/middleware/validate-offer.middleware";
+import { ValidateRoomMiddleware } from "src/shared/middleware/validate-room.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
 import { PriceCalculationMiddleware } from "./middleware/price-calculation.middleware";
 import { ReservationRoomValidationMiddleware } from "./middleware/reservation-room-validation.middleware";
-import { ReservationStatusMiddleware } from "./middleware/reservation-status.middleware";
 import { UpdateUsageMiddleware } from "./middleware/update-usage.middleware";
 import { ReservationCalendarService } from "./reservation-calendar.service";
 import { ReservationRoomQueryService } from "./reservation-room-query.service";
@@ -25,9 +29,9 @@ import { ReservationRoomService } from "./reservation-room.service";
 @Module({
   imports: [
     GeneralOffer,
-    CompanyModule,
-    IndividualModule,
-    StudentActivityModule,
+    forwardRef(() => CompanyModule),
+    forwardRef(() => IndividualModule),
+    forwardRef(() => StudentActivityModule),
     RoomsModule,
     DepositesModule,
     AssignGeneralOfferModule,
@@ -47,15 +51,15 @@ export class ReservationRoomModule implements NestModule {
     consumer
       .apply(
         CustomerMiddleware,
+        DateFormatMiddleware,
+        ValidateRoomMiddleware,
         ReservationRoomValidationMiddleware,
+        ValidateOfferMiddleware,
+        ValidateOfferRangeMiddleware,
+        AssignGeneralOfferMiddleware,
         PriceCalculationMiddleware,
-        ReservationStatusMiddleware,
         UpdateUsageMiddleware,
       )
-      .forRoutes(
-        "reservation-room/store",
-        "reservation-room/store/package",
-        "reservation-room/store/deal",
-      );
+      .forRoutes("reservation-room/store");
   }
 }

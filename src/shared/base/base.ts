@@ -40,12 +40,18 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     id: number,
     selectOptions?: Record<string, boolean>,
     relations?: Record<string, any>,
+    where?: Record<string, any>,
+    whereDeep?: Record<string, any>,
   ): Promise<T> {
     const queryBuilder = this.repository.createQueryBuilder("e");
     queryBuilder.where("e.id = :id", { id });
 
+    if (where) {
+      queryBuilder.andWhere(where);
+    }
+
     this.getSelectQuery(queryBuilder, selectOptions);
-    this.getRelationQuery(queryBuilder, relations);
+    this.getRelationQuery(queryBuilder, relations, whereDeep);
     const record = await queryBuilder.getOne();
     if (!record) throw new NotFoundException(`this user is not found`);
     return record;
@@ -66,7 +72,10 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     selectOptions?: Record<string, boolean>,
     relations?: Record<string, any>,
   ): Promise<T> {
-    await this.repository.update(updateDto.id, updateDto as any);
+    const filteredUpdateDto = Object.fromEntries(
+      Object.entries(updateDto).filter(([, value]) => value !== null),
+    );
+    await this.repository.update(updateDto.id, filteredUpdateDto as any);
     return this.findOne(updateDto.id, selectOptions, relations);
   }
 

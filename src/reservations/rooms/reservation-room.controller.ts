@@ -13,7 +13,8 @@ import {
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DealsService } from "src/deals/deals.service";
-import { Permission, ReservationStatus, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { formatDate } from "src/reservations/helpers/utitlties";
+import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateReservationRoomDto } from "./dto/create-reservation-rooms.dto";
@@ -67,29 +68,23 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       individual: {
         id: true,
         name: true,
-        whatsApp: true,
       },
       company: {
         id: true,
         name: true,
-        phone: true,
       },
       studentActivity: {
         id: true,
         name: true,
-        unviresty: true,
       },
       assignesPackages: {
         id: true,
-        name: true,
       },
       deals: {
         id: true,
-        name: true,
       },
       assignGeneralOffer: {
         id: true,
-        name: true,
       },
       deposites: {
         id: true,
@@ -249,71 +244,21 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     },
   ])
   async create(@Body() createDto: CreateReservationRoomDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.create(
       {
         status: ReservationStatus.ACTIVE,
-        [customerType]: req[customerType],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
         assignGeneralOffer: req["assignGeneralOffer"],
-        selected_day: createDto.selected_day,
+        room: req["room"],
+        selected_day: formatDate(createDto.selected_day),
         start_hour: createDto.start_hour,
         start_minute: createDto.start_minute,
         start_time: createDto.start_time,
-        createdBy: req["createdBy"],
-      } as CreateReservationRoomDto,
-      this.selectOptions(),
-      this.getRelationOptions(),
-    );
-  }
-
-  @Post("/store/package")
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.CREATE],
-    },
-  ])
-  async createReservationByPackage(
-    @Body() createDto: CreateReservationRoomDto,
-    @Req() req: Request,
-  ) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
-    return await this.service.create(
-      {
-        status: ReservationStatus.ACTIVE,
-        package: req["pkg"],
-        [customerType]: req[customerType],
-        assignGeneralOffer: req["assignGeneralOffer"],
-        selected_day: createDto.selected_day,
-        start_hour: createDto.start_hour,
-        start_minute: createDto.start_minute,
-        start_time: createDto.start_time,
-        createdBy: req["createdBy"],
-      } as CreateReservationRoomDto,
-      this.selectOptions(),
-      this.getRelationOptions(),
-    );
-  }
-
-  @Post("/store/deal")
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.CREATE],
-    },
-  ])
-  async createReservationByDeal(@Body() createDto: CreateReservationRoomDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
-    return await this.service.create(
-      {
-        status: ReservationStatus.ACTIVE,
-        deal: req["deal"],
-        [customerType]: req[customerType],
-        assignGeneralOffer: req["assignGeneralOffer"],
-        selected_day: createDto.selected_day,
-        start_hour: createDto.start_hour,
-        start_minute: createDto.start_minute,
-        start_time: createDto.start_time,
+        end_hour: createDto.end_hour,
+        end_minute: createDto.end_minute,
+        end_time: createDto.end_time,
         createdBy: req["createdBy"],
       } as CreateReservationRoomDto,
       this.selectOptions(),
@@ -329,7 +274,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     },
   ])
   async update(@Body() updateDto: UpdateReservationRoomDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.update(
       {
         id: updateDto.id,
@@ -339,10 +283,10 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
         total_price: req["total_price"],
         total_time: req["total_time"],
         assignGeneralOffer: req["assignGeneralOffer"],
-        [customerType]: req[customerType],
+        room: req["room"],
         note: updateDto.note,
         payment_method: updateDto.payment_method,
-        selected_day: updateDto.selected_day,
+        selected_day: formatDate(updateDto.selected_day),
         start_hour: updateDto.start_hour,
         start_minute: updateDto.start_minute,
         end_hour: updateDto.end_hour,

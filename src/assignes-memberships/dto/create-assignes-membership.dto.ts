@@ -1,10 +1,13 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { Company } from "src/companies/company.entity";
 import { Deposite } from "src/deposit/deposites.entity";
+import { Individual } from "src/individual/individual.entity";
 import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 
 export class CreateAssignesMembershipDto {
@@ -58,12 +61,11 @@ export class CreateAssignesMembershipDto {
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
 
-  @IsOptional()
   deposites?: Deposite;
-
   createdBy: User;
-
   assignGeneralOffer: AssignGeneralOffer;
-
   memeberShip: CoWorkingSpace;
+  individual: Individual;
+  company: Company;
+  studentActivity: StudentActivity;
 }

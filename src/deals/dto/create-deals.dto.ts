@@ -47,8 +47,8 @@ export class CreateDealsDto {
 
   @IsNumber()
   @Type(() => Number)
-  @IsNotEmpty()
-  total: number;
+  @IsOptional()
+  total_price: number;
 
   @IsNumber()
   @Type(() => Number)
@@ -88,4 +88,10 @@ export class CreateDealsDto {
   createdBy: User;
 
   assignGeneralOffer: AssignGeneralOffer;
+
+  individual?: Individual;
+
+  company?: Company;
+
+  studentActivity?: StudentActivity;
 }

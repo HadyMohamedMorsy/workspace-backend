@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { DealsService } from "./deals.service";
 import { CreateDealsDto } from "./dto/create-deals.dto";
@@ -79,21 +79,22 @@ export class DealsController {
     },
   ])
   async create(@Body() createDealsDto: CreateDealsDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.create({
       hours: +createDealsDto.hours,
       start_date: createDealsDto.start_date,
       end_date: createDealsDto.end_date,
-      total: +createDealsDto.total,
+      total_price: +req["total_price"],
       used: 0,
-      total_used: +createDealsDto.total_used,
-      remaining: +createDealsDto.remaining,
+      total_used: +createDealsDto.hours,
+      remaining: +createDealsDto.hours,
       status: createDealsDto.status,
       price_hour: +createDealsDto.price_hour,
       payment_method: createDealsDto.payment_method,
       room: req["room"],
       assignGeneralOffer: req["assignGeneralOffer"],
-      [customerType]: req[customerType],
+      individual: req["individual"],
+      company: req["company"],
+      studentActivity: req["studentActivity"],
       createdBy: req["createdBy"],
     } as CreateDealsDto);
   }
@@ -106,25 +107,22 @@ export class DealsController {
     },
   ])
   async update(@Body() update: UpdateDealsDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.update({
       id: update.id,
       deposites: update.deposites,
-      [customerType]: req[customerType],
-      createdBy: req["createdBy"],
       hours: +update.hours,
       start_date: update.start_date,
       end_date: update.end_date,
-      total: +update.total,
-      used: update.used,
-      total_used: +update.total_used,
-      remaining: +update.remaining,
+      total_price: +req["total_price"],
       status: update.status,
       price_hour: +update.price_hour,
       payment_method: update.payment_method,
       room: req["room"],
       assignGeneralOffer: req["assignGeneralOffer"],
-      [customerType]: req[customerType],
+      individual: req["individual"],
+      company: req["company"],
+      studentActivity: req["studentActivity"],
+      createdBy: req["createdBy"],
     });
   }
 

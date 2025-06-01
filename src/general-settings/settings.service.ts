@@ -27,4 +27,8 @@ export class GeneralSettingsService
       .leftJoin("e.createdBy", "createdBy")
       .addSelect(["createdBy.id", "createdBy.firstName", "createdBy.lastName"]);
   }
+
+  protected override response(data: GeneralSettings[]) {
+    return data[0];
+  }
 }

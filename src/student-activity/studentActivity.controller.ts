@@ -1,6 +1,17 @@
-import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource } from "src/shared/enum/global-enum";
+import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CreateStudentActivityDto } from "./dto/create-StudentActivity.dto";
@@ -62,6 +73,97 @@ export class StudentActivityController implements SelectOptions, RelationOptions
   @HttpCode(200)
   async findOne(@Body() filterQueryDto: any) {
     return this.service.findOne(filterQueryDto);
+  }
+
+  @Get("/assignes-membership/:id")
+  async assignesMembershipById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        assign_memberships: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          payment_method: true,
+          memeberShip: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
+  }
+
+  @Get("/assignes-package/:id")
+  async assignesPackageById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        assignesPackages: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          payment_method: true,
+          packages: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
+  }
+  @Get("/assignes-deal/:id")
+  async assignesDealById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        deals: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          price_hour: true,
+          hours: true,
+          payment_method: true,
+          room: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
   }
 
   @Post("/user")

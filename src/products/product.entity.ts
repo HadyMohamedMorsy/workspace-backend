@@ -2,7 +2,16 @@ import { Category } from "src/categories/category.entity";
 import { Purchase } from "src/purchase/purchase.entity";
 import { Returns } from "src/returns/returns.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 @Entity()
 export class Product extends BaseMemberEntity {
@@ -41,4 +50,7 @@ export class Product extends BaseMemberEntity {
 
   @OneToMany(() => Returns, returns => returns.product)
   returns: Purchase[];
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

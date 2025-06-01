@@ -39,4 +39,7 @@ export class ExpenseSalaries extends BaseMemberEntity {
     onDelete: "CASCADE",
   })
   user: User;
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

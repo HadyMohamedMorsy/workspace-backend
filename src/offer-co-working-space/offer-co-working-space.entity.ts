@@ -1,7 +1,8 @@
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { TypeMember } from "src/shared/enum/global-enum";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class CoWorkingSpace extends BaseMemberEntity {
@@ -22,4 +23,7 @@ export class CoWorkingSpace extends BaseMemberEntity {
 
   @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.memeberShip)
   assignessMemebership: AssignesMembership[];
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

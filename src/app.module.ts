@@ -27,6 +27,7 @@ import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.modul
 import { GeneralOfferModule } from "./general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "./general-settings/settings.module";
 import { IndividualModule } from "./individual/individual.module";
+import { InvoiceModule } from "./invoice/invoice.module";
 import { OfferCoWorkingSpaceModule } from "./offer-co-working-space/offer-co-working-space.module";
 import { OfferPackageModule } from "./offer-packages/offerpackages.module";
 import { OrdersModule } from "./orders/orders.module";
@@ -58,28 +59,22 @@ import { VacationModule } from "./vacation/vacation.module";
 const ENV = process.env.NODE_ENV;
 @Module({
   imports: [
+    AssignesPackagesModule,
+    AssignGeneralOfferModule,
+    AssignesMembershipModule,
+    DealsModule,
     UploadsModule,
+    GeneralSettingsModule,
     CompanyModule,
     DashboredModule,
+    InvoiceModule,
     OfferPackageModule,
     RoomsModule,
     listModule,
     SearchModule,
     GeneralOfferModule,
-    GeneralSettingsModule,
     DepositesModule,
     TaskModule,
-    RevenueModule,
-    RevenueChildModule,
-    AssignesPackagesModule,
-    DeskareaModule,
-    ReservationRoomModule,
-    VacationModule,
-    SharedModule,
-    AssignGeneralOfferModule,
-    AssignesMembershipModule,
-    OfferCoWorkingSpaceModule,
-    DealsModule,
     IndividualModule,
     AttendModule,
     ExpensesSalariesModule,
@@ -94,6 +89,14 @@ const ENV = process.env.NODE_ENV;
     FilterDateModule,
     UsersModule,
     AuthModule,
+    RevenueModule,
+    RevenueChildModule,
+    ReservationRoomModule,
+    VacationModule,
+    SharedModule,
+    DeskareaModule,
+    OfferCoWorkingSpaceModule,
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "uploads"),
       serveRoot: "/uploads",

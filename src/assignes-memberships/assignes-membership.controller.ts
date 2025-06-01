@@ -1,6 +1,16 @@
-import { Body, Controller, Delete, HttpCode, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { AssignesMembershipService } from "./assignes-membership.service";
@@ -14,11 +24,14 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
   public selectOptions(): Record<string, boolean> {
     return {
       id: true,
-      name: true,
       start_date: true,
       end_date: true,
       total_price: true,
       used: true,
+      remaining: true,
+      total_used: true,
+      payment_method: true,
+      status: true,
     };
   }
 
@@ -31,29 +44,19 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
       },
       assignGeneralOffer: {
         id: true,
-        name: true,
-        price: true,
       },
       memeberShip: {
         id: true,
-        name: true,
-        price: true,
       },
       deposites: {
         id: true,
         total_price: true,
-        status: true,
-        payment_method: true,
       },
       shared: {
         id: true,
-        name: true,
-        price: true,
       },
       deskarea: {
         id: true,
-        name: true,
-        price: true,
       },
     };
   }
@@ -114,19 +117,20 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
     },
   ])
   async create(@Body() create: CreateAssignesMembershipDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.create(
       {
         start_date: create.start_date,
         end_date: create.end_date,
         createdBy: req["createdBy"],
         assignGeneralOffer: req["assignGeneralOffer"],
-        memeberShip: req["memeberShip"],
+        memeberShip: req["memberShip"],
         total_price: req["totalPrice"],
         used: 0,
-        [customerType]: req[customerType],
-        remaining: +req["memeberShip"].days,
-        total_used: +req["memeberShip"].days,
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
+        remaining: +req["memberShip"].days,
+        total_used: +req["memberShip"].days,
       } as CreateAssignesMembershipDto,
       this.selectOptions(),
       this.getRelationOptions(),
@@ -147,7 +151,7 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
     });
   }
 
-  @Post("/update")
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -155,7 +159,6 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
     },
   ])
   async update(@Body() update: UpdateAssignesMembershipDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
     return await this.service.update(
       {
         id: update.id,
@@ -163,12 +166,11 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
         end_date: update.end_date,
         createdBy: req["createdBy"],
         assignGeneralOffer: req["assignGeneralOffer"],
-        memeberShip: req["memeberShip"],
+        memeberShip: req["memberShip"],
         total_price: req["totalPrice"],
-        [customerType]: req[customerType],
-        remaining: +req["memeberShip"].days,
-        total_used: +req["memeberShip"].days,
-        used: update.used,
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
       },
       this.selectOptions(),
       this.getRelationOptions(),

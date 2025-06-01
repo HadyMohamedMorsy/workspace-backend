@@ -6,28 +6,21 @@ import { Deals } from "src/deals/deals.entity";
 import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class ReservationRoom {
+export class ReservationRoom extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   selected_day: string;
 
-  @Column({ type: "enum", enum: ReservationStatus })
+  @Column({ type: "enum", enum: ReservationStatus, default: ReservationStatus.ACTIVE })
   status: ReservationStatus;
 
   @Column()
@@ -80,9 +73,7 @@ export class ReservationRoom {
   })
   assignGeneralOffer: AssignGeneralOffer[];
 
-  @ManyToOne(() => Room, room => room.reservationRoom, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => Room, room => room.reservationRoom)
   room: Room;
 
   @Column({ nullable: true })
@@ -106,14 +97,6 @@ export class ReservationRoom {
   @JoinColumn()
   deposites: Deposite;
 
-  @ManyToOne(() => User, user => user.createdByReservationRoom, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
-
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 }

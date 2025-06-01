@@ -1,6 +1,7 @@
 import { Product } from "src/products/product.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Category extends BaseMemberEntity {
@@ -14,4 +15,7 @@ export class Category extends BaseMemberEntity {
     onDelete: "CASCADE",
   })
   products: Product[];
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

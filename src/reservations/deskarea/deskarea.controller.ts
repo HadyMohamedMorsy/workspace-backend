@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource, TypeUser } from "src/shared/enum/global-enum";
+import { UpdateDepositeDto } from "src/deposit/dto/update-deposites.dto";
+import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
+import { formatDate, getCurrentTime } from "../helpers/utitlties";
 import { DeskareaService } from "./deskarea.service";
 import { CreateDeskAreaDto } from "./dto/create-deskarea.dto";
-import { UpdateDepositeDto } from "./dto/update-deposite.dto";
 import { UpdateDeskAreaDto } from "./dto/update-deskarea.dto";
 
 @UseGuards(AuthorizationGuard)
@@ -20,15 +21,11 @@ export class DeskareaController implements SelectOptions, RelationOptions {
       start_hour: true,
       start_minute: true,
       start_time: true,
-      end_hour: true,
-      end_minute: true,
-      end_time: true,
-      total_price: true,
       status: true,
+      note: true,
+      is_full_day: true,
       created_at: true,
-      updated_at: true,
       createdBy: true,
-      updatedBy: true,
     };
   }
 
@@ -37,27 +34,19 @@ export class DeskareaController implements SelectOptions, RelationOptions {
       individual: {
         id: true,
         name: true,
-        whatsApp: true,
       },
       company: {
         id: true,
-        phone: true,
         name: true,
       },
       studentActivity: {
         id: true,
         name: true,
-        whatsApp: true,
-      },
-      user: {
-        id: true,
-        name: true,
-        whatsApp: true,
       },
       createdBy: {
         id: true,
-        name: true,
-        whatsApp: true,
+        firstName: true,
+        lastName: true,
       },
     };
   }
@@ -129,15 +118,20 @@ export class DeskareaController implements SelectOptions, RelationOptions {
     },
   ])
   async create(@Body() createDeskareaDto: CreateDeskAreaDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    const createTime = getCurrentTime();
+
     return await this.service.create(
       {
-        selected_day: createDeskareaDto.selected_day,
-        start_hour: createDeskareaDto.start_hour,
-        start_minute: createDeskareaDto.start_minute,
-        start_time: createDeskareaDto.start_time,
+        selected_day: formatDate(createDeskareaDto.selected_day),
+        start_hour: createTime.hours,
+        start_minute: createTime.minutes,
+        start_time: createTime.timeOfDay,
+        is_full_day: createDeskareaDto.is_full_day,
+        note: createDeskareaDto.note,
         assignGeneralOffer: req["assignGeneralOffer"],
-        [customerType]: req[customerType],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
         createdBy: req["createdBy"],
       } as CreateDeskAreaDto,
       this.selectOptions(),
@@ -153,16 +147,20 @@ export class DeskareaController implements SelectOptions, RelationOptions {
     },
   ])
   async update(@Body() update: UpdateDeskAreaDto, @Req() req: Request) {
-    const customerType = Object.keys(TypeUser).find(type => req[type]);
+    const createTime = getCurrentTime();
     return await this.service.update(
       {
         id: update.id,
-        selected_day: update.selected_day,
-        end_hour: update.end_hour,
-        end_minute: update.end_minute,
-        end_time: update.end_time,
+        selected_day: formatDate(update.selected_day),
+        start_hour: createTime.hours,
+        start_minute: createTime.minutes,
+        start_time: createTime.timeOfDay,
+        is_full_day: update.is_full_day,
+        note: update.note,
         assignGeneralOffer: req["assignGeneralOffer"],
-        [customerType]: req[customerType],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
         createdBy: req["createdBy"],
       },
       this.selectOptions(),

@@ -1,5 +1,6 @@
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { RevenueChild } from "./revenue-child/revenue-child.entity";
 
 @Entity()
@@ -18,4 +19,7 @@ export class Revenue extends BaseMemberEntity {
 
   @OneToMany(() => RevenueChild, revenueChild => revenueChild.revenue)
   revenueChild: RevenueChild[];
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

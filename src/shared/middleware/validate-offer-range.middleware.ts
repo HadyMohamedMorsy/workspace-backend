@@ -23,11 +23,12 @@ export class ValidateOfferRangeMiddleware implements NestMiddleware {
       throw new BadRequestException("Invalid offer");
     }
 
-    const date = moment(selectedDay, "DD/MM/YYYY");
-    const start = moment(offer.start_date);
-    const end = moment(offer.end_date);
+    // Parse dates with timezone
+    const start = moment(offer.start_date).startOf("day");
+    const end = moment(offer.end_date).endOf("day");
+    const selected = moment(selectedDay).startOf("day");
 
-    if (!start.isSameOrBefore(date) || !end.isSameOrAfter(date)) {
+    if (selected.isBefore(start) || selected.isAfter(end)) {
       throw new BadRequestException("Offer not active for selected date");
     }
   }

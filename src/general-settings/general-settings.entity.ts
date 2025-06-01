@@ -1,7 +1,8 @@
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class GeneralSettings extends BaseMemberEntity {
@@ -25,4 +26,7 @@ export class GeneralSettings extends BaseMemberEntity {
 
   @OneToMany(() => Shared, shared => shared.settings)
   shared: Shared;
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

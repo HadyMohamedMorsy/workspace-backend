@@ -11,7 +11,7 @@ export class CalculateMembershipPriceMiddleware implements NestMiddleware {
     const memeberShip = req["memberShip"];
     const offer = req["offer"];
     if (memeberShip && offer) {
-      const price = memeberShip.price;
+      const price = +memeberShip.price;
       const discount = calculateOfferDiscount(price, offer);
       req["totalPrice"] = price - discount;
     }

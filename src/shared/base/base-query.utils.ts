@@ -1,20 +1,43 @@
 import { SelectQueryBuilder } from "typeorm";
 
 export abstract class BaseQueryUtils<T> {
-  protected getRelationQuery(queryBuilder: SelectQueryBuilder<T>, relations: Record<string, any>) {
+  protected getRelationQuery(
+    queryBuilder: SelectQueryBuilder<T>,
+    relations: Record<string, any>,
+    whereDeep?: Record<string, any>,
+  ) {
     if (relations && Object.keys(relations).length > 0) {
       const processRelation = (relationPath: string, fields: Record<string, any>) => {
-        const selectFields = Object.entries(fields).map(([key]) => `${relationPath}.${key}`);
-        queryBuilder.leftJoin(`e.${relationPath}`, relationPath).addSelect(selectFields);
+        const pathParts = relationPath.split(".");
+        const alias = pathParts[pathParts.length - 1];
+
+        const joinPath =
+          pathParts.length > 1 ? `${pathParts.slice(0, -1).join(".")}.${alias}` : `e.${alias}`;
+
+        queryBuilder.leftJoin(joinPath, alias);
 
         Object.entries(fields).forEach(([key, value]) => {
-          if (typeof value === "object" && !Array.isArray(value))
+          if (typeof value === "object" && !Array.isArray(value)) {
             processRelation(`${relationPath}.${key}`, value);
+          } else {
+            queryBuilder.addSelect(`${alias}.${key}`);
+          }
         });
+        if (whereDeep && pathParts.length === 1 && Object.keys(whereDeep).length > 0) {
+          Object.entries(whereDeep).forEach(([field, value]) => {
+            if (value !== undefined && value !== null) {
+              queryBuilder.andWhere(`${alias}.${field} = :${alias}_${field}`, {
+                [`${alias}_${field}`]: value,
+              });
+            }
+          });
+        }
       };
 
       Object.entries(relations).forEach(([relation, fields]) => {
-        if (typeof fields === "object") processRelation(relation, fields);
+        if (typeof fields === "object") {
+          processRelation(relation, fields);
+        }
       });
     }
   }
@@ -29,7 +52,7 @@ export abstract class BaseQueryUtils<T> {
     }
   }
 
-  protected response(data: T[], totalRecords: number) {
+  protected response(data: T[], totalRecords: number = 0): any {
     return {
       data,
       recordsFiltered: data.length,
