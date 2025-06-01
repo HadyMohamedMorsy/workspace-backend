@@ -164,6 +164,20 @@ export class SharedController implements SelectOptions, RelationOptions {
     });
   }
 
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
+  }
+
   @Put("/update")
   @Permissions([
     {

@@ -182,6 +182,20 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
     });
   }
 
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.AssignesPackage,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
+  }
+
   @Delete("/delete")
   @Permissions([
     {

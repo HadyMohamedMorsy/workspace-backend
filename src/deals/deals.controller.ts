@@ -164,6 +164,20 @@ export class DealsController {
     });
   }
 
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.Deals,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
+  }
+
   @Delete("/delete")
   @Permissions([
     {
