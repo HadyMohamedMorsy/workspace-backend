@@ -234,4 +234,16 @@ export class SharedController implements SelectOptions, RelationOptions {
   async delete(@Body() id: number) {
     return this.service.delete(id);
   }
+
+  @Post("/membership")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findMembershipSharedAll(@Body() filterQueryDto: any) {
+    return this.service.findSharedByMembershipAll(filterQueryDto);
+  }
 }

@@ -165,78 +165,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     return this.queryService.findRoomsByUserAll(filterQueryDto);
   }
 
-  @Post("/packages/individual")
-  @HttpCode(200)
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findIndividuaPackageRoomAll(@Body() filterQueryDto: any) {
-    return this.queryService.findIndividualPackageRoomAll(filterQueryDto);
-  }
-
-  @Post("/packages/company")
-  @HttpCode(200)
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findCompanyPackageRoomAll(@Body() filterQueryDto: any) {
-    return this.queryService.findCompanyPackageRoomAll(filterQueryDto);
-  }
-
-  @Post("/packages/studentActivity")
-  @HttpCode(200)
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findStudentActivityPackageRoomAll(@Body() filterQueryDto: any) {
-    return this.queryService.findStudentActivityPackageRoomAll(filterQueryDto);
-  }
-
-  @Post("/deals/individual")
-  @HttpCode(200)
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findIndividualDealAll(@Body() filterQueryDto: any) {
-    return this.queryService.findIndividualDealAll(filterQueryDto);
-  }
-
-  @Post("/deals/company")
-  @HttpCode(200)
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findCompanyDealAll(@Body() filterQueryDto: any) {
-    return this.queryService.findCompanyDealAll(filterQueryDto);
-  }
-
-  @Post("/deals/studentActivity")
-  @HttpCode(200)
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findStudentActivityDealAll(@Body() filterQueryDto: any) {
-    return this.queryService.findStudentActivityDealAll(filterQueryDto);
-  }
-
   @Post("/store")
   @Permissions([
     {
@@ -313,7 +241,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     },
   ])
   async createDeposite(@Body() create: { reservation_room_id: number }, @Req() req: Request) {
-    console.log(req["deposite"], create.reservation_room_id);
     return await this.service.update({
       id: create.reservation_room_id,
       deposites: req["deposite"],
@@ -357,5 +284,29 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       id: true,
       status: true,
     });
+  }
+
+  @Post("/package")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findPackageRoomAll(@Body() filterQueryDto: any) {
+    return this.queryService.findByPackageRoomAll(filterQueryDto);
+  }
+
+  @Post("/deal")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findDealRoomAll(@Body() filterQueryDto: any) {
+    return this.queryService.findByDealRoomAll(filterQueryDto);
   }
 }

@@ -47,7 +47,6 @@ export class ReservationRoomQueryService {
     return this.apiFeaturesService.setRepository(ReservationRoom).buildQuery(filterData);
   }
 
-  // Specific query methods
   async findRoomsByIndividualAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",
@@ -84,66 +83,21 @@ export class ReservationRoomQueryService {
     });
   }
 
-  async findIndividualPackageRoomAll(filterData: any) {
+  async findByPackageRoomAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
-      relationPath: "individual",
-      alias: "individual",
-      selectFields: ["id", "name", "whatsApp"],
-      filterField: "individual_id",
+      relationPath: "assignesPackages",
+      alias: "assignesPackages",
+      selectFields: ["id", "status"],
+      filterField: "package_id",
     });
   }
 
-  async findCompanyPackageRoomAll(filterData: any) {
+  async findByDealRoomAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
-      relationPath: "company",
-      alias: "company",
-      selectFields: ["id", "name", "phone"],
-      filterField: "company_id",
-    });
-  }
-
-  async findStudentActivityPackageRoomAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "studentActivity",
-      alias: "studentActivity",
-      selectFields: ["id", "name", "unviresty"],
-      filterField: "studentActivity_id",
-    });
-  }
-
-  async findIndividualDealAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "individual",
-      alias: "individual",
-      selectFields: ["id", "name", "whatsApp"],
-      filterField: "individual_id",
-    });
-  }
-
-  async findCompanyDealAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "company",
-      alias: "company",
-      selectFields: ["id", "name", "phone"],
-      filterField: "company_id",
-    });
-  }
-
-  async findStudentActivityDealAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: "studentActivity",
-      alias: "studentActivity",
-      selectFields: ["id", "name", "unviresty"],
-      filterField: "studentActivity_id",
-    });
-  }
-
-  async findRoomsByUserType(filterData: any, userType: string) {
-    return this.findRelatedEntities(filterData, {
-      relationPath: userType,
-      alias: "user",
-      selectFields: ["id", "name"],
-      filterField: `${userType}_id`,
+      relationPath: "deals",
+      alias: "deals",
+      selectFields: ["id", "status"],
+      filterField: "deal_id",
     });
   }
 }

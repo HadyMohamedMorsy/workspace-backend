@@ -84,4 +84,13 @@ export class SharedService
       filterField: "user_id",
     });
   }
+
+  async findSharedByMembershipAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "assignessMemebership",
+      alias: "assignessMemebership",
+      selectFields: ["id", "status"],
+      filterField: "membership_id",
+    });
+  }
 }
