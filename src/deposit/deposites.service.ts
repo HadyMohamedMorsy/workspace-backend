@@ -24,6 +24,7 @@ export class DepositeService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
+      // Package relations
       .leftJoin("e.assignesPackages", "ea_assignespackages")
       .addSelect(["ea_assignespackages.id", "ea_assignespackages.total_price"])
       .leftJoin("ea_assignespackages.individual", "ea_pkg_individual")
@@ -32,36 +33,35 @@ export class DepositeService
       .addSelect(["ea_pkg_company.id", "ea_pkg_company.name"])
       .leftJoin("ea_assignespackages.studentActivity", "ea_pkg_student")
       .addSelect(["ea_pkg_student.id", "ea_pkg_student.name"])
+
+      // Membership relations
       .leftJoin("e.assignessMemebership", "ea_assignessmemebership")
+      .addSelect(["ea_assignessmemebership.id", "ea_assignessmemebership.total_price"])
       .leftJoin("ea_assignessmemebership.individual", "ea_mem_individual")
       .addSelect(["ea_mem_individual.id", "ea_mem_individual.name"])
       .leftJoin("ea_assignessmemebership.company", "ea_mem_company")
       .addSelect(["ea_mem_company.id", "ea_mem_company.name"])
       .leftJoin("ea_assignessmemebership.studentActivity", "ea_mem_student")
       .addSelect(["ea_mem_student.id", "ea_mem_student.name"])
-      .addSelect(["ea_assignessmemebership.id", "ea_assignessmemebership.total_price"]);
 
+      // Room reservation relations
+      .leftJoin("e.reservationRooms", "ea_room")
+      .addSelect(["ea_room.id", "ea_room.total_price"])
+      .leftJoin("ea_room.individual", "ea_room_individual")
+      .addSelect(["ea_room_individual.id", "ea_room_individual.name"])
+      .leftJoin("ea_room.company", "ea_room_company")
+      .addSelect(["ea_room_company.id", "ea_room_company.name"])
+      .leftJoin("ea_room.studentActivity", "ea_room_student")
+      .addSelect(["ea_room_student.id", "ea_room_student.name"]);
     queryBuilder.addSelect(
       `CASE
         WHEN ea_assignespackages.id IS NOT NULL THEN ea_assignespackages.total_price
         WHEN ea_assignessmemebership.id IS NOT NULL THEN ea_assignessmemebership.total_price
+        WHEN ea_room.id IS NOT NULL THEN ea_room.total_price
         ELSE 0
       END`,
       "total_price",
     );
-
-    // queryBuilder.addSelect(
-    //   `CASE
-    //     WHEN ea_pkg_individual.id IS NOT NULL THEN ea_pkg_individual.name
-    //     WHEN ea_pkg_company.id IS NOT NULL THEN ea_pkg_company.name
-    //     WHEN ea_pkg_student.id IS NOT NULL THEN ea_pkg_student.name
-    //     WHEN ea_mem_individual.id IS NOT NULL THEN ea_mem_individual.name
-    //     WHEN ea_mem_company.id IS NOT NULL THEN ea_mem_company.name
-    //     WHEN ea_mem_student.id IS NOT NULL THEN ea_mem_student.name
-    //     ELSE NULL
-    //   END`,
-    //   "customer",
-    // );
 
     // Date filtering
     if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {

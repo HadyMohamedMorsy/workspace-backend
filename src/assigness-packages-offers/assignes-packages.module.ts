@@ -8,6 +8,7 @@ import { IndividualModule } from "src/individual/individual.module";
 import { OfferPackageModule } from "src/offer-packages/offerpackages.module";
 import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
+import { AssignesPackageMiddleware } from "src/shared/middleware/assigness/assignes-package.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { ValidateDateRangeMiddleware } from "src/shared/middleware/validate-date-range.middleware";
@@ -70,6 +71,8 @@ export class AssignesPackagesModule {
       .forRoutes("assignes-package/update");
 
     // Apply middleware to store-deposite route
-    consumer.apply(DepositMiddleware).forRoutes("assignes-package/store-deposite");
+    consumer
+      .apply(AssignesPackageMiddleware, DepositMiddleware)
+      .forRoutes("assignes-package/deposit");
   }
 }

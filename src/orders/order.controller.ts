@@ -105,7 +105,7 @@ export class OrderController implements SelectOptions, RelationOptions {
     }
 
     // Get product details for each order item
-    const orderItemsWithProducts = await Promise.all(
+    const products = await Promise.all(
       order.order_items.map(async item => {
         const product = await this.productService.findOne(item.product_id, {
           id: true,
@@ -116,16 +116,14 @@ export class OrderController implements SelectOptions, RelationOptions {
           featured_image: true,
         });
         return {
-          product,
+          name: product.name,
+          price: product.selling_price,
           quantity: item.quantity,
         };
       }),
     );
 
-    return {
-      ...order,
-      order_items: orderItemsWithProducts,
-    };
+    return products;
   }
 
   @Post("/store")

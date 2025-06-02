@@ -31,7 +31,7 @@ export class DealsService
       .leftJoin("ess.generalOffer", "eg")
       .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
       .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id"]);
+      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"]);
   }
 
   async findDealsByIndividualAll(filterData: any) {

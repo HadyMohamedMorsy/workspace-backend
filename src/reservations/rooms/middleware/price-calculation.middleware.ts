@@ -7,16 +7,18 @@ export class PriceCalculationMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     try {
       const offer = req["offer"];
-      const basePrice = req["diffHours"]
-        ? +req["room"].price * req["diffHours"]
-        : +req["room"].price;
+      const pck = req["assignPackage"];
+      const deal = req["deal"];
+      const room = req["room"];
 
+      let basePrice = 0;
+
+      if (!pck || !deal) {
+        basePrice = req.body.used ? +room.price * req.body.used : +room.price;
+      }
       const discount = calculateOfferDiscount(basePrice, offer);
       const totalPrice = basePrice - discount;
-
       req["totalPrice"] = totalPrice;
-      req["basePrice"] = basePrice;
-      req["discount"] = discount;
 
       next();
     } catch (error) {

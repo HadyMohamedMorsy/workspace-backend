@@ -197,6 +197,7 @@ export class DeskareaController implements SelectOptions, RelationOptions {
         note: update.note,
         assignGeneralOffer: req["assignGeneralOffer"],
         individual: req["individual"],
+        assignessMemebership: req["assignessMemebership"],
         company: req["company"],
         studentActivity: req["studentActivity"],
         createdBy: req["createdBy"],
@@ -206,7 +207,7 @@ export class DeskareaController implements SelectOptions, RelationOptions {
     );
   }
 
-  @Post("/store-deposit")
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,

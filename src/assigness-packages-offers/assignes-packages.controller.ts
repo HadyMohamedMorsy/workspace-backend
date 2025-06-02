@@ -128,7 +128,7 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
     );
   }
 
-  @Post("/store-deposite")
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,

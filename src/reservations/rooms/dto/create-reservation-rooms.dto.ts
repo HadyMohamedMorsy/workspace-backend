@@ -86,9 +86,9 @@ export class CreateReservationRoomDto {
 
   deposites?: Deposite;
 
-  package?: AssignesPackages;
+  deals?: Deals;
 
-  deal?: Deals;
+  assignesPackages?: AssignesPackages;
 
   payment_method?: PaymentMethod;
 

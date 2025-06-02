@@ -79,7 +79,7 @@ export const formatTimeFields = (data: any, createTime: TimeData): TimeFields =>
   };
 };
 
-export const formatTimeData = (data: any, settings: any) => {
+export const formatTimeData = (data: any, dataPrice: any, priceRoom?: any) => {
   const createTime = getCurrentTime();
   const timeFields = formatTimeFields(data, createTime);
   const totalTime = calculateTotalTime(
@@ -93,17 +93,17 @@ export const formatTimeData = (data: any, settings: any) => {
   );
 
   const basePrice = data.is_full_day
-    ? getFullDayPrice(data.type, settings)
-    : getPricePerHour(data.type, settings) * totalTime;
+    ? getFullDayPrice(data.type, dataPrice)
+    : getPricePerHour(data.type, dataPrice) * totalTime;
 
   const discount = calculateDiscount(basePrice, data.offer);
-  const finalPrice = basePrice - discount;
+  const finalPrice = (priceRoom ? priceRoom : basePrice) - discount;
 
   return {
     id: data.id,
     ...timeFields,
     total_price: finalPrice,
-    original_price: basePrice,
+    original_price: priceRoom || basePrice,
     discount_amount: discount,
     total_time: totalTime,
     is_full_day: data.is_full_day,
@@ -128,9 +128,9 @@ export const formatOrderData = (order: any) => {
   };
 };
 
-export const formatRoomData = (room: any, settings: any) => {
+export const formatRoomData = (room: any, roomData: any) => {
   return {
-    ...formatTimeData(room, settings),
+    ...formatTimeData(room, roomData, roomData.price),
     is_full_day: false,
   };
 };

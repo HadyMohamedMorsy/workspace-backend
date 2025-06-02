@@ -97,6 +97,7 @@ export class StudentActivityController implements SelectOptions, RelationOptions
           memeberShip: {
             id: true,
             name: true,
+            type: true,
           },
         },
       },

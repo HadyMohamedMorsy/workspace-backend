@@ -9,6 +9,7 @@ import {
   ValidateIf,
 } from "class-validator";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { Company } from "src/companies/company.entity";
 import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
@@ -95,6 +96,7 @@ export class CreateDeskAreaDto {
   assignGeneralOffer: AssignGeneralOffer;
   deposites?: Deposite;
   individual: Individual;
+  assignessMemebership: AssignesMembership;
   company: Company;
   studentActivity: StudentActivity;
 }

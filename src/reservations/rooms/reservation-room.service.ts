@@ -33,7 +33,7 @@ export class ReservationRoomService
       .leftJoin("e.studentActivity", "es")
       .addSelect(["es.id", "es.name", "es.unviresty"])
       .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id"]);
+      .addSelect(["esdep.id", "esdep.status", "esdep.total_price"]);
 
     if (filteredRecord?.search?.value) {
       queryBuilder.andWhere(`ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name`, {

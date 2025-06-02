@@ -14,46 +14,44 @@ export class CheckActiveAssignessPackagesMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     if (req["individual"]) {
-      const existingActiveMembership = await this.assignesPackagesRepository.findOne({
-        relations: ["individual", "memeberShip"],
+      const existingActivePackage = await this.assignesPackagesRepository.findOne({
+        relations: ["individual", "packages"],
         where: {
           individual: { id: req["individual"].id },
           status: ReservationStatus.ACTIVE,
         },
       });
 
-      if (existingActiveMembership) {
-        throw new ConflictException("An active membership already exists for this individual.");
+      if (existingActivePackage) {
+        throw new ConflictException("An active package already exists for this individual.");
       }
     }
 
     if (req["company"]) {
-      const existingActiveMembership = await this.assignesPackagesRepository.findOne({
-        relations: ["company", "memeberShip"],
+      const existingActivePackage = await this.assignesPackagesRepository.findOne({
+        relations: ["company", "packages"],
         where: {
           company: { id: req["company"].id },
           status: ReservationStatus.ACTIVE,
         },
       });
 
-      if (existingActiveMembership) {
-        throw new ConflictException("An active membership already exists for this company.");
+      if (existingActivePackage) {
+        throw new ConflictException("An active package already exists for this company.");
       }
     }
 
     if (req["studentActivity"]) {
-      const existingActiveMembership = await this.assignesPackagesRepository.findOne({
-        relations: ["studentActivity", "memeberShip"],
+      const existingActivePackage = await this.assignesPackagesRepository.findOne({
+        relations: ["studentActivity", "packages"],
         where: {
           studentActivity: { id: req["studentActivity"].id },
           status: ReservationStatus.ACTIVE,
         },
       });
 
-      if (existingActiveMembership) {
-        throw new ConflictException(
-          "An active membership already exists for this student activity.",
-        );
+      if (existingActivePackage) {
+        throw new ConflictException("An active package already exists for this student activity.");
       }
     }
 

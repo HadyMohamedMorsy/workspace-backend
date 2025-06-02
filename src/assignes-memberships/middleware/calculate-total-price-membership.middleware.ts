@@ -10,11 +10,9 @@ export class CalculateMembershipPriceMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const memeberShip = req["memberShip"];
     const offer = req["offer"];
-    if (memeberShip && offer) {
-      const price = +memeberShip.price;
-      const discount = calculateOfferDiscount(price, offer);
-      req["totalPrice"] = price - discount;
-    }
+    const price = +memeberShip.price;
+    const discount = calculateOfferDiscount(price, offer);
+    req["totalPrice"] = price - discount;
     next();
   }
 }

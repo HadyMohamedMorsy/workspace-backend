@@ -253,6 +253,9 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
         studentActivity: req["studentActivity"],
         assignGeneralOffer: req["assignGeneralOffer"],
         room: req["room"],
+        deposites: req["deposite"],
+        deals: req["deal"],
+        assignesPackages: req["assignPackage"],
         selected_day: formatDate(createDto.selected_day),
         start_hour: createDto.start_hour,
         start_minute: createDto.start_minute,
@@ -279,12 +282,13 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       {
         id: updateDto.id,
         status: updateDto.status,
-        package: req["pkg"],
-        deal: req["deal"],
+        deals: req["deal"],
         total_price: req["total_price"],
         total_time: req["total_time"],
         assignGeneralOffer: req["assignGeneralOffer"],
+        assignesPackages: req["assignPackage"],
         room: req["room"],
+        deposites: req["deposite"],
         note: updateDto.note,
         payment_method: updateDto.payment_method,
         selected_day: formatDate(updateDto.selected_day),
@@ -301,7 +305,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     );
   }
 
-  @Post("/store-deposite")
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,
@@ -309,6 +313,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     },
   ])
   async createDeposite(@Body() create: { reservation_room_id: number }, @Req() req: Request) {
+    console.log(req["deposite"], create.reservation_room_id);
     return await this.service.update({
       id: create.reservation_room_id,
       deposites: req["deposite"],
@@ -351,25 +356,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     return this.service.changeStatus(update.id, update.status, "status", {
       id: true,
       status: true,
-    });
-  }
-
-  @Post("cancel")
-  @Permissions([
-    {
-      resource: Resource.ReservationRoom,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async cancelReservation(@Body() updateDto: UpdateReservationRoomDto, @Req() req: Request) {
-    const pkg = req["pkg"];
-    const deal = req["deal"];
-
-    return this.service.update({
-      id: updateDto.id,
-      status: ReservationStatus.CANCELLED,
-      package: pkg,
-      deal: deal,
     });
   }
 }

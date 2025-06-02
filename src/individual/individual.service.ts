@@ -60,9 +60,10 @@ export class IndividualService
       .leftJoin(
         "e.reservationRooms",
         "rr",
-        "rr.status = :status_room AND rr.deals IS NULL AND rr.assignesPackages IS NULL",
+        "rr.status = :status_room AND rr.deals IS NULL AND rr.assignesPackages IS NULL AND rr.selected_day = :today",
         {
           status_room: ReservationStatus.ACTIVE,
+          today: moment().format("DD/MM/YYYY"),
         },
       )
       .leftJoin("e.orders", "eo", "eo.type_order = :typeOrder", {
@@ -164,9 +165,11 @@ export class IndividualService
       .leftJoin("e.orders", "eo", "eo.type_order = :typeOrder", {
         typeOrder: "HOLD",
       })
-      .leftJoin("e.reservationRooms", "r", "r.status = :status_room", {
+      .leftJoin("e.reservationRooms", "r", "r.status = :status_room AND r.selected_day = :today", {
         status_room: ReservationStatus.ACTIVE,
+        today: moment().format("DD/MM/YYYY"),
       })
+      .leftJoin("r.room", "room")
       .leftJoin("s.assignGeneralOffer", "sgo")
       .leftJoin("sgo.generalOffer", "sgo_offer")
       .leftJoin("d.assignGeneralOffer", "dgo")
@@ -219,6 +222,9 @@ export class IndividualService
         "r.total_price",
         "r.total_time",
         "r.selected_day",
+        "room.id",
+        "room.name",
+        "room.price",
         "rgo.id",
         "rgo_offer.id",
         "rgo_offer.type_discount",
@@ -272,7 +278,7 @@ export class IndividualService
               ...room,
               offer: formatOfferData(room),
             },
-            settings,
+            room.room,
           ),
         )
       : [];

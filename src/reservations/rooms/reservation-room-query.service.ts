@@ -27,7 +27,9 @@ export class ReservationRoomQueryService {
       .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
       .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
-      });
+      })
+      .leftJoin("e.deposites", "esdep")
+      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"]);
 
     const [filteredRecord, totalRecords] = await Promise.all([
       queryBuilder.getMany(),

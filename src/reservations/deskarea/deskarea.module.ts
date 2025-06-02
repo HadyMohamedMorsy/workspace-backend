@@ -8,9 +8,12 @@ import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
+import { AssignesMembershipMiddleware } from "src/shared/middleware/assigness/assignes-membership.middleware";
+import { DeskareaMiddleware } from "src/shared/middleware/co-working-space-reservations/deskarea.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DateFormatMiddleware } from "src/shared/middleware/date-format.middleware";
 import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
+import { UpdateMembershipUsageMiddleware } from "src/shared/middleware/remaining/update-membership-usage.middleware";
 import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
 import { ValidateOfferMiddleware } from "src/shared/middleware/validate-offer.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
@@ -43,21 +46,15 @@ export class DeskareaModule {
       .apply(
         CustomerMiddleware,
         DateFormatMiddleware,
-        ValidateOfferMiddleware,
-        ValidateOfferRangeMiddleware,
-        AssignGeneralOfferMiddleware,
-      )
-      .forRoutes("deskarea/update")
-      .apply(
-        CustomerMiddleware,
-        DateFormatMiddleware,
-        ValidateOfferMiddleware,
-        ValidateOfferRangeMiddleware,
-        AssignGeneralOfferMiddleware,
         DeskareaReservationValidationMiddleware,
+        ValidateOfferMiddleware,
+        ValidateOfferRangeMiddleware,
+        AssignGeneralOfferMiddleware,
+        AssignesMembershipMiddleware,
+        UpdateMembershipUsageMiddleware,
       )
       .forRoutes("deskarea/store")
-      .apply(DepositMiddleware)
-      .forRoutes("deskarea/store-deposit");
+      .apply(DeskareaMiddleware, DepositMiddleware)
+      .forRoutes("deskarea/deposit");
   }
 }

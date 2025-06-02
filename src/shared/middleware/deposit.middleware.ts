@@ -22,15 +22,17 @@ export class DepositMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const entities = {
-      memberShip: { type: "membership", field: "assignMembership" },
-      pkg: { type: "package", field: "assignPackage" },
+      assignMembership: { type: "assignMembership", field: "assignMembership" },
+      assignPackage: { type: "assignPackage", field: "assignPackage" },
       shared: { type: "shared", field: "shared" },
       deskarea: { type: "deskarea", field: "deskarea" },
       reservationRoom: { type: "reservationRoom", field: "reservationRoom" },
+      deal: { type: "deal", field: "deal" },
     };
 
     for (const [key, config] of Object.entries(entities)) {
       const entity = req[key];
+
       if (entity) {
         const deposite = await this.createDeposit(req, entity, config.field);
         this.validateDepositAmount(deposite, entity, config.type);
@@ -50,7 +52,23 @@ export class DepositMiddleware implements NestMiddleware {
       createdBy: req["createdBy"],
     };
 
-    return this.depositeService.create(depositData);
+    if (req.body.deposit_id) {
+      return await this.depositeService.update(
+        {
+          id: req.body.deposit_id,
+          total_price: req.body.total_price,
+        },
+        {
+          id: true,
+          total_price: true,
+        },
+      );
+    } else {
+      return this.depositeService.create(depositData, {
+        id: true,
+        total_price: true,
+      });
+    }
   }
 
   private validateDepositAmount(deposite: any, entity: any, type: string): void {

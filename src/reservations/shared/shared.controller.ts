@@ -196,6 +196,7 @@ export class SharedController implements SelectOptions, RelationOptions {
         end_minute: update.end_minute,
         end_time: update.end_time,
         assignGeneralOffer: req["assignGeneralOffer"],
+        assignessMemebership: req["assignessMemebership"],
         individual: req["individual"],
         company: req["company"],
         studentActivity: req["studentActivity"],
@@ -206,7 +207,7 @@ export class SharedController implements SelectOptions, RelationOptions {
     );
   }
 
-  @Post("/store-deposit")
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,

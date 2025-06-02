@@ -9,13 +9,9 @@ export class CalculateDealPriceMiddleware implements NestMiddleware {
       const { hours, price_hour } = req.body;
       const offer = req["offer"];
 
-      // Calculate base price
       const basePrice = +hours * +price_hour;
-
-      // Calculate discount if offer exists
       const discount = calculateOfferDiscount(+basePrice, offer);
       const totalPrice = +basePrice - +discount;
-      // Attach calculated values to request
       req["total_price"] = +totalPrice;
 
       next();

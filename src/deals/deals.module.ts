@@ -8,6 +8,7 @@ import { IndividualModule } from "src/individual/individual.module";
 import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
 import { RoomsModule } from "src/rooms/rooms.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
+import { DealsMiddleware } from "src/shared/middleware/assigness/deals.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { ValidateDateRangeMiddleware } from "src/shared/middleware/validate-date-range.middleware";
@@ -51,7 +52,7 @@ export class DealsModule {
         CalculateDealPriceMiddleware,
       )
       .forRoutes("deals/store", "deals/update")
-      .apply(DepositMiddleware)
-      .forRoutes("deals/store-deposite");
+      .apply(DealsMiddleware, DepositMiddleware)
+      .forRoutes("deals/deposit");
   }
 }

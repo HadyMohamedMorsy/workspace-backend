@@ -137,7 +137,7 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
     );
   }
 
-  @Post("/store-deposite")
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,

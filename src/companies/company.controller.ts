@@ -115,6 +115,7 @@ export class CompanyController implements SelectOptions, RelationOptions {
           memeberShip: {
             id: true,
             name: true,
+            type: true,
           },
         },
       },

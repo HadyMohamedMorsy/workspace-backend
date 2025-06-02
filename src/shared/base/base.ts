@@ -53,7 +53,7 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     this.getSelectQuery(queryBuilder, selectOptions);
     this.getRelationQuery(queryBuilder, relations, whereDeep);
     const record = await queryBuilder.getOne();
-    if (!record) throw new NotFoundException(`this user is not found`);
+    if (!record) throw new NotFoundException(`this entity is not found`);
     return record;
   }
 

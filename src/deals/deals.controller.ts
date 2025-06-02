@@ -136,7 +136,7 @@ export class DealsController {
     });
   }
 
-  @Post("/store-deposit")
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,

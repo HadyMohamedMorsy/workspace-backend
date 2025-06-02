@@ -7,6 +7,7 @@ import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { OfferCoWorkingSpaceModule } from "src/offer-co-working-space/offer-co-working-space.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
+import { AssignesMembershipMiddleware } from "src/shared/middleware/assigness/assignes-membership.middleware";
 import { OfferCoWorkingSpaceMiddleware } from "src/shared/middleware/co-working-space.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
@@ -24,8 +25,6 @@ import { checkAssignMemebershipMiddleware } from "./middleware/check-active-assi
 @Module({
   imports: [
     OfferCoWorkingSpaceModule,
-    // SharedModule,
-    // DeskareaModule,
     IndividualModule,
     CompanyModule,
     StudentActivityModule,
@@ -70,6 +69,8 @@ export class AssignesMembershipModule {
       .forRoutes("assignes-membership/update");
 
     // Apply middleware to store-deposite route
-    consumer.apply(DepositMiddleware).forRoutes("assignes-membership/store-deposite");
+    consumer
+      .apply(AssignesMembershipMiddleware, DepositMiddleware)
+      .forRoutes("assignes-membership/deposit");
   }
 }
