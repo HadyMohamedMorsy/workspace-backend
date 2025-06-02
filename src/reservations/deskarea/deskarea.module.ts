@@ -56,5 +56,9 @@ export class DeskareaModule {
       .forRoutes("deskarea/store")
       .apply(DeskareaMiddleware, DepositMiddleware)
       .forRoutes("deskarea/deposit");
+
+    consumer
+      .apply(AssignesMembershipMiddleware, UpdateMembershipUsageMiddleware)
+      .forRoutes("deskarea/change-status");
   }
 }

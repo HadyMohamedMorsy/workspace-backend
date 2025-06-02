@@ -18,8 +18,6 @@ export class UpdateDealUsageMiddleware implements NestMiddleware {
           used,
         };
 
-        console.log(used);
-
         if (operator === "min-used") {
           payload.remaining = +deal.remaining + used;
           payload.used = +deal.used - +used;

@@ -73,5 +73,14 @@ export class ReservationRoomModule implements NestModule {
     consumer
       .apply(ReservationRoomMiddleware, DepositMiddleware)
       .forRoutes("reservation-room/deposit");
+
+    consumer
+      .apply(
+        DealsMiddleware,
+        UpdateDealUsageMiddleware,
+        AssignesPackageMiddleware,
+        UpdatePackageUsageMiddleware,
+      )
+      .forRoutes("reservation-room/change-status");
   }
 }

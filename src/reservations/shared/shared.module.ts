@@ -56,5 +56,9 @@ export class SharedModule implements NestModule {
       .forRoutes("shared/store")
       .apply(SharedMiddleware, DepositMiddleware)
       .forRoutes("shared/deposit");
+
+    consumer
+      .apply(AssignesMembershipMiddleware, UpdateMembershipUsageMiddleware)
+      .forRoutes("shared/change-status");
   }
 }
