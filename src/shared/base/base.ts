@@ -1,6 +1,7 @@
 // src/shared/base-crud.service.ts
 import { NotFoundException } from "@nestjs/common";
-import { FindOptionsSelect, In, Repository } from "typeorm";
+import { DeepPartial, FindOptionsSelect, In, Repository } from "typeorm";
+import * as XLSX from 'xlsx';
 import { APIFeaturesService } from "../filters/filter.service";
 import { ICrudService } from "../interface/crud-service.interface";
 import { BaseQueryUtils } from "./base-query.utils";
@@ -132,5 +133,72 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
     const totalRecords = await queryBuilder.getCount();
 
     return this.response(filteredRecord, totalRecords);
+  }
+
+  async importFromExcel<D extends DeepPartial<T>>(
+    filePath: string,
+    options: {
+      requiredFields: (keyof D)[];
+      fieldMappings: Record<string, keyof D>;
+      findKey?: keyof D;
+      start?: number;  // Starting row index (0-based)
+      limit?: number;  // Number of rows to process
+    }
+  ): Promise<{ success: number; errors: string[] }> {
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const allRows: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+    // Calculate the slice of rows to process
+    const start = options.start || 0;
+    const limit = options.limit || 20;
+    const rows = allRows.slice(start, start + limit);
+
+    const errors: string[] = [];
+    let successCount = 0;
+
+    for (const [index, row] of rows.entries()) {
+      const data = {} as D;
+
+      const missingFields = options.requiredFields.filter(field => !data[field]);
+      if (missingFields.length > 0) {
+        errors.push(`Row ${start + index + 2}: Missing required fields (${missingFields.join(', ')})`);
+        continue;
+      }
+      
+      Object.entries(options.fieldMappings).forEach(([excelField, dtoField]) => {
+        const value = row[excelField];
+        if (value !== undefined) {
+          data[dtoField] = value?.toString()?.trim() || null;
+        }
+      });
+
+      try {
+        let existing: T | null = null;
+        
+        if (options.findKey && data[options.findKey]) {
+          existing = await this.repository.findOne({ 
+            where: { [options.findKey]: data[options.findKey] } as any 
+          });
+        }
+
+        await this.handleEntityOperation(existing, data);
+        successCount++;
+
+      } catch (error) {
+        errors.push(`Row ${start + index + 2}: ${error.message || "Database operation failed"}`);
+      }
+    }
+
+    return { success: successCount, errors };
+  }
+
+  private async handleEntityOperation(existing: T | null, data: any): Promise<void> {
+    if (existing) {
+      await this.repository.update((existing as any).id, data);
+    } else {
+      await this.repository.save(data);
+    }
   }
 }

@@ -8,8 +8,11 @@ import {
   Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -254,5 +257,27 @@ export class IndividualController implements SelectOptions, RelationOptions {
   @HttpCode(200)
   async checkInvoice(@Param("id") id: string) {
     return this.service.checkInvoice(id);
+  }
+
+  @Post("/import")
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  @Permissions([
+    {
+      resource: Resource.Individual,
+      actions: [Permission.IMPORT],
+    },
+  ])
+  async importIndividuals(@UploadedFile() file: Express.Multer.File) {
+    return this.service.importFromExcel(file.path, {
+      requiredFields: ['name', 'number', 'whatsApp', 'individual_type'],
+      fieldMappings: {
+        'Name': 'name',
+        'Number': 'number',
+        'WhatsApp': 'whatsApp',
+        'Individual Type': 'individual_type'
+      },
+      findKey: 'number'
+    });
   }
 }

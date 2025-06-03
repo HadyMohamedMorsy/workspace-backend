@@ -92,6 +92,7 @@ export enum Permission {
   DELETE = "delete",
   VIEW = "view",
   INDEX = "index",
+  IMPORT = "import",
   UPDATE_PERMISSION = "update-permissions",
 }
 
