@@ -4,7 +4,7 @@ import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { Permission, Role, UserStatus } from "src/shared/enum/global-enum";
 import { Task } from "src/tasks/tasks.entity";
 import { Vacation } from "src/vacation/vacation.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class User extends BaseMemberEntity {
@@ -77,6 +77,9 @@ export class User extends BaseMemberEntity {
 
   @Column({ type: "enum", enum: UserStatus, nullable: true, default: UserStatus.ACTIVE })
   status: UserStatus;
+
+  @ManyToOne(() => User, user => user.id, { onDelete: "SET NULL" })
+  createdBy: User;
 }
 
 export class PermissionsUser {
