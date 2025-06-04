@@ -1,8 +1,14 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { Company } from "src/companies/company.entity";
 import { Deposite } from "src/deposit/deposites.entity";
-import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { Individual } from "src/individual/individual.entity";
+import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateAssignesMembershipDto {
   @IsNumber()
@@ -23,16 +29,6 @@ export class CreateAssignesMembershipDto {
   @IsNotEmpty()
   @IsAfter("start_date")
   end_date: string;
-
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
-
-  @IsString()
-  @IsOptional()
-  type?: string;
 
   @IsInt()
   @Type(() => Number)
@@ -65,6 +61,11 @@ export class CreateAssignesMembershipDto {
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
 
-  @IsOptional()
   deposites?: Deposite;
+  createdBy: User;
+  assignGeneralOffer: AssignGeneralOffer;
+  memeberShip: CoWorkingSpace;
+  individual: Individual;
+  company: Company;
+  studentActivity: StudentActivity;
 }

@@ -6,20 +6,13 @@ import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { CompanyType } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Company {
+export class Company extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -96,20 +89,8 @@ export class Company {
   @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.company)
   reservationRooms: ReservationRoom[];
 
-  @ManyToOne(() => User, user => user.createdByCompany, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
-
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
 }
 
 export class holder {

@@ -1,186 +1,31 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { GeneralOffer } from "src/general-offer/generalOffer.entity";
-import { TypeMember } from "src/shared/enum/global-enum";
+import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { Repository } from "typeorm";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateCoWorkingSpaceDto } from "./dto/create-offer-co-working-space.dto";
 import { UpdateCoWorkingSpaceDto } from "./dto/update-offer-co-working-space.dto";
 import { CoWorkingSpace } from "./offer-co-working-space.entity";
 
 @Injectable()
-export class OfferCoWorkingSpaceService {
+export class OfferCoWorkingSpaceService
+  extends BaseService<CoWorkingSpace, CreateCoWorkingSpaceDto, UpdateCoWorkingSpaceDto>
+  implements ICrudService<CoWorkingSpace, CreateCoWorkingSpaceDto, UpdateCoWorkingSpaceDto>
+{
   constructor(
     @InjectRepository(CoWorkingSpace)
-    private offerCoWorkingSpaceRepository: Repository<CoWorkingSpace>,
-    protected readonly apiFeaturesService: APIFeaturesService,
-  ) {}
-
-  // Create a new record
-  async create(createCoWorkingSpaceDto: CreateCoWorkingSpaceDto): Promise<CoWorkingSpace> {
-    const generalOffer = this.offerCoWorkingSpaceRepository.create(createCoWorkingSpaceDto);
-    return await this.offerCoWorkingSpaceRepository.save(generalOffer);
+    repository: Repository<CoWorkingSpace>,
+    apiFeaturesService: APIFeaturesService,
+  ) {
+    super(repository, apiFeaturesService);
   }
 
-  // Get all records
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(CoWorkingSpace)
-      .buildQuery(filterData);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findListShared() {
-    const offers = await this.offerCoWorkingSpaceRepository.find({
-      where: { type: TypeMember.Shared },
-    });
-    return {
-      data: offers,
-    };
-  }
-  async findListDeskArea() {
-    const offers = await this.offerCoWorkingSpaceRepository.find({
-      where: { type: TypeMember.DeskaArea },
-    });
-    return {
-      data: offers,
-    };
-  }
-
-  async findOneRelatedIndividual(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignessMemebership", "ea")
-      .leftJoinAndSelect("ea.individual", "ei")
-      .andWhere("e.id = :memeber_id", {
-        memeber_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findOneRelatedCompany(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignessMemebership", "ea")
-      .leftJoinAndSelect("ea.company", "ec")
-      .andWhere("e.id = :memeber_id", {
-        memeber_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findOneRelatedStudentActivity(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignessMemebership", "ea")
-      .leftJoinAndSelect("ea.studentActivity", "es")
-      .andWhere("e.id = :memeber_id", {
-        memeber_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findOneRelatedShared(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignessMemebership", "ea")
-      .leftJoinAndSelect("ea.shared", "ec")
-      .andWhere("e.id = :memeber_id", {
-        memeber_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  async findOneRelatedDeskArea(filterData: any) {
-    this.apiFeaturesService.setRepository(GeneralOffer);
-
-    const queryBuilder = this.apiFeaturesService.setRepository(GeneralOffer).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.assignessMemebership", "ea")
-      .leftJoinAndSelect("ea.deskarea", "ec")
-      .andWhere("e.id = :memeber_id", {
-        memeber_id: filterData.id,
-      });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  // Get record by ID
-  async findOne(id: number): Promise<CoWorkingSpace> {
-    return this.offerCoWorkingSpaceRepository.findOne({ where: { id } });
-  }
-
-  // Update a record
-  async update(updateGeneralOfferDto: UpdateCoWorkingSpaceDto) {
-    await this.offerCoWorkingSpaceRepository.update(
-      updateGeneralOfferDto.id,
-      updateGeneralOfferDto,
-    );
-    return this.offerCoWorkingSpaceRepository.findOne({ where: { id: updateGeneralOfferDto.id } });
-  }
-
-  // Delete a record
-  async remove(id: number) {
-    await this.offerCoWorkingSpaceRepository.delete(id);
+  override queryRelationIndex(
+    queryBuilder?: SelectQueryBuilder<CoWorkingSpace>,
+    filteredRecord?: any,
+  ) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder.leftJoin("e.assignessMemebership", "em").addSelect(["em.id"]);
   }
 }

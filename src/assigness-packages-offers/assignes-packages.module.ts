@@ -1,4 +1,4 @@
-import { forwardRef, MiddlewareConsumer, Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { CompanyModule } from "src/companies/company.module";
@@ -7,18 +7,26 @@ import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { OfferPackageModule } from "src/offer-packages/offerpackages.module";
 import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
+import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
+import { AssignesPackageMiddleware } from "src/shared/middleware/assigness/assignes-package.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
+import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
+import { ValidateDateRangeMiddleware } from "src/shared/middleware/validate-date-range.middleware";
+import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
+import { ValidateOfferMiddleware } from "src/shared/middleware/validate-offer.middleware";
+import { ValidatePackageMiddleware } from "src/shared/middleware/validate-package.middleware";
 import { StudentActivityModule } from "src/student-activity/studentActivity.module";
 import { UsersModule } from "src/users/users.module";
 import { AssignesPackageController } from "./assignes-packages.controller";
 import { AssignesPackages } from "./assignes-packages.entity";
 import { AssignesPackagesService } from "./assignes-packages.service";
-import { CheckActivePackagesMiddleware } from "./middleware/assigness-packages,middleware";
+import { CalculatePackagesPriceMiddleware } from "./middleware/calculate-total-price-packages.middleware";
+import { CheckActiveAssignessPackagesMiddleware } from "./middleware/check-active-assigness-packages.middleware";
 
 @Module({
   imports: [
     CompanyModule,
-    forwardRef(() => ReservationRoomModule),
+    ReservationRoomModule,
     IndividualModule,
     StudentActivityModule,
     AssignGeneralOfferModule,
@@ -34,8 +42,37 @@ import { CheckActivePackagesMiddleware } from "./middleware/assigness-packages,m
 })
 export class AssignesPackagesModule {
   configure(consumer: MiddlewareConsumer) {
+    // Apply middleware to store route
     consumer
-      .apply(CheckActivePackagesMiddleware, CustomerMiddleware)
+      .apply(
+        ValidateDateRangeMiddleware,
+        CustomerMiddleware,
+        ValidatePackageMiddleware,
+        CheckActiveAssignessPackagesMiddleware,
+        ValidateOfferMiddleware,
+        ValidateOfferRangeMiddleware,
+        AssignGeneralOfferMiddleware,
+        CalculatePackagesPriceMiddleware,
+      )
       .forRoutes("assignes-package/store");
+
+    // Apply middleware to update route
+    consumer
+      .apply(
+        ValidateDateRangeMiddleware,
+        CustomerMiddleware,
+        ValidatePackageMiddleware,
+        CheckActiveAssignessPackagesMiddleware,
+        ValidateOfferMiddleware,
+        ValidateOfferRangeMiddleware,
+        AssignGeneralOfferMiddleware,
+        CalculatePackagesPriceMiddleware,
+      )
+      .forRoutes("assignes-package/update");
+
+    // Apply middleware to store-deposite route
+    consumer
+      .apply(AssignesPackageMiddleware, DepositMiddleware)
+      .forRoutes("assignes-package/deposit");
   }
 }

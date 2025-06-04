@@ -9,6 +9,8 @@ import {
   MaxLength,
   MinLength,
 } from "class-validator";
+import { Category } from "src/categories/category.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateProductDto {
   @IsString()
@@ -55,4 +57,8 @@ export class CreateProductDto {
   @IsArray()
   @Type(() => Number)
   category_ids: number[];
+
+  categories: Category[];
+
+  createdBy: User;
 }

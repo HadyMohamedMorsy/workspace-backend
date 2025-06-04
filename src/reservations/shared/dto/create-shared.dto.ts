@@ -8,7 +8,14 @@ import {
   IsString,
   ValidateIf,
 } from "class-validator";
-import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { Company } from "src/companies/company.entity";
+import { Deposite } from "src/deposit/deposites.entity";
+import { Individual } from "src/individual/individual.entity";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateSharedDto {
   @IsString()
@@ -41,8 +48,28 @@ export class CreateSharedDto {
   @Type(() => Number)
   customer_id: number;
 
-  @IsOptional()
   @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  total_price: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  end_hour: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  end_minute: number;
+
+  @IsString()
+  @IsOptional()
+  @IsEnum(TimeOfDay)
+  end_time: TimeOfDay;
+
+  @IsNumber()
+  @IsOptional()
   @Type(() => Number)
   offer_id: number;
 
@@ -56,12 +83,6 @@ export class CreateSharedDto {
   @Type(() => Number)
   membership_id: number;
 
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
-
   @IsString()
   @IsOptional()
   note: string;
@@ -69,4 +90,17 @@ export class CreateSharedDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  total_time: number;
+
+  createdBy: User;
+  assignGeneralOffer: AssignGeneralOffer;
+  deposites?: Deposite;
+  individual: Individual;
+  company: Company;
+  assignessMemebership: AssignesMembership;
+  studentActivity: StudentActivity;
 }

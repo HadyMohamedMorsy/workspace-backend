@@ -1,52 +1,28 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { Repository } from "typeorm"; // Change to update-task.dto
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateTaskDto } from "./dto/create-tasks.dto";
 import { UpdateTaskDto } from "./dto/update-tasks.dto";
-import { Task } from "./tasks.entity"; // Change to Task entity
+import { Task } from "./tasks.entity";
 
 @Injectable()
-export class TaskService {
-  // Change service name to TaskService
+export class TaskService
+  extends BaseService<Task, CreateTaskDto, UpdateTaskDto>
+  implements ICrudService<Task, CreateTaskDto, UpdateTaskDto>
+{
   constructor(
+    apiFeaturesService: APIFeaturesService,
     @InjectRepository(Task)
-    private taskRepository: Repository<Task>,
-    protected readonly apiFeaturesService: APIFeaturesService,
-  ) {}
-
-  async create(create: CreateTaskDto) {
-    const task = this.taskRepository.create(create);
-    const newTask = await this.taskRepository.save(task);
-    return this.taskRepository.findOne({
-      where: { id: newTask.id },
-      relations: ["user", "createdBy"],
-    });
-  }
-
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Task).buildQuery(filterData);
-
-    queryBuilder
-      .leftJoin("e.user", "eu")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["eu.id", "eu.firstName", "eu.lastName"])
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    repository: Repository<Task>,
+  ) {
+    super(repository, apiFeaturesService);
   }
 
   async findUserAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Task).buildQuery(filterData);
+    const queryBuilder = this.apiService.setRepository(Task).buildQuery(filterData);
 
     queryBuilder
       .leftJoin("e.user", "ec")
@@ -58,35 +34,11 @@ export class TaskService {
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
+    return this.response(filteredRecord, totalRecords);
   }
 
-  async findOne(id: number): Promise<Task> {
-    const task = await this.taskRepository.findOne({ where: { id } });
-    if (!task) {
-      throw new NotFoundException(`Task with id ${id} not found`);
-    }
-    return task;
-  }
-
-  async update(updateTaskDto: UpdateTaskDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { user_id, ...payload } = updateTaskDto;
-    await this.taskRepository.update(updateTaskDto.id, payload);
-    return this.taskRepository.findOne({
-      where: { id: updateTaskDto.id },
-      relations: ["user"],
-    });
-  }
-
-  // Delete a task
-  async remove(id: number) {
-    await this.taskRepository.delete(id);
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder.leftJoin("e.user", "eu").addSelect(["eu.id", "eu.firstName", "eu.lastName"]);
   }
 }

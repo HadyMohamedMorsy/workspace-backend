@@ -1,7 +1,10 @@
 import { IsNotEmpty, IsString } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateCategoryDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   name: string;
+
+  createdBy?: User;
 }

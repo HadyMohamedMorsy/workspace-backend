@@ -83,7 +83,7 @@ export class APIFeaturesService {
       );
       if (searchableColumns.length) {
         searchableColumns.forEach(column => {
-          queryBuilder.orWhere(`e.${column.name} LIKE :search`, {
+          queryBuilder.orWhere(`LOWER(e.${column.name}) LIKE LOWER(:search)`, {
             search: `%${filterData.search.value}%`,
           });
         });

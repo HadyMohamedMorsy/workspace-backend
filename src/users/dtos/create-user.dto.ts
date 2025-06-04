@@ -13,10 +13,11 @@ import {
   MinLength,
   ValidateNested,
 } from "class-validator";
-import { Permission, Role } from "src/shared/enum/global-enum";
+import { Permission, Role, UserStatus } from "src/shared/enum/global-enum";
+import { User } from "../user.entity";
 import { Match } from "./custom/match-password";
 
-export class CreateUserDto {
+export class UserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(3)
@@ -39,6 +40,11 @@ export class CreateUserDto {
   @MinLength(3)
   @MaxLength(96)
   username: string;
+
+  @IsEnum(UserStatus, {
+    message: "Status must be one of the following: active, inactive",
+  })
+  status: UserStatus = UserStatus.ACTIVE;
 
   @IsEnum(Role, {
     message:
@@ -76,14 +82,16 @@ export class CreateUserDto {
   password_confirmation: string;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   @Type(() => Number)
   annual_start: number;
 
   @IsNumber()
-  @IsNotEmpty()
+  @IsOptional()
   @Type(() => Number)
   annual_increase: number;
+
+  createdBy: User;
 }
 
 export class ResourcePermissionDto {

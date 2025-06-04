@@ -1,18 +1,20 @@
 import { Category } from "src/categories/category.entity";
-import { Purchases } from "src/purchases/purchases.entity";
+import { Purchase } from "src/purchase/purchase.entity";
 import { Returns } from "src/returns/returns.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { User } from "src/users/user.entity";
 import {
   Column,
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from "typeorm";
 
 @Entity()
-export class Product {
+export class Product extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -28,7 +30,7 @@ export class Product {
   @Column({ nullable: true })
   purshase_price: number;
 
-  @Column()
+  @Column({ nullable: true })
   store: number;
 
   @Column({ nullable: true })
@@ -37,19 +39,18 @@ export class Product {
   @Column({ nullable: true })
   featured_image: string;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
-
-  @ManyToMany(() => Category, category => category.products)
+  @ManyToMany(() => Category, category => category.products, {
+    onDelete: "CASCADE",
+  })
   @JoinTable()
   categories: Category[];
 
-  @OneToMany(() => Purchases, purchase => purchase.product)
-  purchases: Purchases[];
+  @OneToMany(() => Purchase, purchase => purchase.product)
+  purchases: Purchase[];
 
   @OneToMany(() => Returns, returns => returns.product)
-  returns: Purchases[];
+  returns: Purchase[];
+
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

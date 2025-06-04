@@ -1,76 +1,32 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { TypeSallary } from "src/shared/enum/global-enum";
+import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { User } from "src/users/user.entity";
-import { UserService } from "src/users/user.service";
-import { Repository } from "typeorm";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateExpenseSalariesDto } from "./dto/create-expense-salaries.dto";
 import { UpdateExpenseSalariesDto } from "./dto/update-expense-salaries.dto";
 import { ExpenseSalaries } from "./expense-salaries.entity";
 
 @Injectable()
-export class ExpensesSalariesService {
+export class ExpensesSalariesService
+  extends BaseService<ExpenseSalaries, CreateExpenseSalariesDto, UpdateExpenseSalariesDto>
+  implements ICrudService<ExpenseSalaries, CreateExpenseSalariesDto, UpdateExpenseSalariesDto>
+{
   constructor(
     @InjectRepository(ExpenseSalaries)
     private expensesSalariesRepository: Repository<ExpenseSalaries>,
     protected readonly apiFeaturesService: APIFeaturesService,
-    private readonly usersService: UserService,
-  ) {}
+  ) {
+    super(expensesSalariesRepository, apiFeaturesService);
+  }
 
-  // Create a new record
-  async create(createExpensesSalariesDto: CreateExpenseSalariesDto): Promise<ExpenseSalaries> {
-    const { user_id, type_sallary, sallary } = createExpensesSalariesDto;
-
-    const user =
-      type_sallary === TypeSallary.Internal ? await this.validateUser(user_id) : undefined;
-    // Calculate values once
-    const annual = await this.calcAnnual(+sallary, user);
-    const updatedSalary = +sallary + annual;
-    const netSallary = updatedSalary + this.calcNetSallary(createExpensesSalariesDto);
-    // Create base entity
-    const expensesSalaries = this.expensesSalariesRepository.create({
-      ...createExpensesSalariesDto,
-      annual,
-      net_sallary: netSallary,
-      ...(user && { user }),
+  async findLatestByUser(userId: number): Promise<ExpenseSalaries | null> {
+    return this.expensesSalariesRepository.findOne({
+      relations: ["user"],
+      where: { user: { id: userId } },
+      order: { created_at: "DESC" },
     });
-
-    return this.expensesSalariesRepository.save(expensesSalaries);
-  }
-
-  private async validateUser(userId: number): Promise<User> {
-    const user = await this.usersService.findOneById(userId);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
-    }
-    return user;
-  }
-
-  // Get all records
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(ExpenseSalaries)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoin("e.user", "ep")
-      .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"]);
-
-    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
-      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filterData.customFilters.start_date,
-        end_date: filterData.customFilters.end_date,
-      });
-    }
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
   }
 
   async findByUserAll(filterData) {
@@ -78,82 +34,27 @@ export class ExpensesSalariesService {
       .setRepository(ExpenseSalaries)
       .buildQuery(filterData);
 
-    queryBuilder
-      .leftJoin("e.user", "ep")
-      .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"])
-      .andWhere("ep.id = :user_id", { user_id: filterData.user_id });
-
+    queryBuilder.andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+    this.queryRelationIndex(queryBuilder);
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
-
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
+    return this.response(filteredRecord, totalRecords);
   }
 
-  // Get record by ID
-  async findOne(id: number): Promise<ExpenseSalaries> {
-    const expensesSalaries = await this.expensesSalariesRepository.findOne({ where: { id } });
-    if (!expensesSalaries) {
-      throw new NotFoundException(`${expensesSalaries} with id ${id} not found`);
-    }
-    return expensesSalaries;
-  }
+  override queryRelationIndex(
+    queryBuilder?: SelectQueryBuilder<ExpenseSalaries>,
+    filteredRecord?: any,
+  ) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder
+      .leftJoin("e.user", "ep")
+      .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"]);
 
-  // Update a record
-  async update(updateExpensesSalariesDto: UpdateExpenseSalariesDto) {
-    let user: User | null = null;
-    const { user_id, ...updateDto } = updateExpensesSalariesDto;
-
-    if (updateExpensesSalariesDto.type_sallary === TypeSallary.Internal) {
-      user = await this.usersService.findOneById(user_id);
-      if (!user) {
-        throw new NotFoundException(`user is not found `);
-      }
-
-      await this.expensesSalariesRepository.update(updateDto.id, {
-        ...updateDto,
-        user,
+    if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filteredRecord.customFilters.start_date,
+        end_date: filteredRecord.customFilters.end_date,
       });
-    } else {
-      await this.expensesSalariesRepository.update(updateDto.id, updateDto);
     }
-    return this.expensesSalariesRepository.findOne({
-      where: { id: updateExpensesSalariesDto.id },
-      relations: ["user"],
-    });
-  }
-
-  // Delete a record
-  async remove(id: number) {
-    await this.expensesSalariesRepository.delete(id);
-  }
-
-  calcNetSallary(createExpensesSalariesDto: CreateExpenseSalariesDto) {
-    return (
-      (createExpensesSalariesDto.incentives ?? 0) +
-      (createExpensesSalariesDto.rewards ?? 0) -
-      (createExpensesSalariesDto.discounts ?? 0)
-    );
-  }
-
-  async calcAnnual(salary: number, user?: User) {
-    if (user) {
-      const currentDate = new Date();
-      const userRelated = await this.expensesSalariesRepository.findOne({
-        where: { user: { id: user.id } },
-        order: { created_at: "DESC" },
-      });
-
-      if (currentDate.getMonth() === user.annual_start) {
-        return salary * (user.annual_increase / 100) + userRelated?.annual;
-      }
-
-      return userRelated?.annual || 0;
-    }
-
-    return 0;
   }
 }

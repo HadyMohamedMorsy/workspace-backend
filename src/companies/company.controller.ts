@@ -4,28 +4,70 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
+  Param,
   Post,
+  Put,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Permission, Resource } from "src/shared/enum/global-enum";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { GeneralSettingsService } from "src/general-settings/settings.service";
+import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CompanyService } from "./company.service";
 import { CreateCompanyDto } from "./dto/create-company.dto";
 import { UpdateCompanyDto } from "./dto/update-company.dto";
+
 @UseGuards(AuthorizationGuard)
 @Controller("company")
-export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+export class CompanyController implements SelectOptions, RelationOptions {
+  constructor(
+    private readonly service: CompanyService,
+    private readonly generalSettingsService: GeneralSettingsService,
+  ) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      address: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      assign_memberships: {
+        id: true,
+        status: true,
+      },
+      assignesPackages: {
+        id: true,
+        status: true,
+      },
+      orders: {
+        id: true,
+        type_order: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Company,
@@ -33,7 +75,13 @@ export class CompanyController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.companyService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
+  }
+
+  @Post("/show")
+  @HttpCode(200)
+  async findOne(@Body() filterQueryDto: any) {
+    return this.service.findOne(filterQueryDto);
   }
 
   @Post("/user")
@@ -44,13 +92,103 @@ export class CompanyController {
     },
   ])
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   async findByUserAll(@Body() filterQueryDto: any) {
-    return this.companyService.findByUserAll(filterQueryDto);
+    return this.service.findByUserAll(filterQueryDto);
+  }
+
+  @Get("/assignes-membership/:id")
+  async assignesMembershipById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        assign_memberships: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          payment_method: true,
+          memeberShip: {
+            id: true,
+            name: true,
+            type: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
+  }
+
+  @Get("/assignes-package/:id")
+  async assignesPackageById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        assignesPackages: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          payment_method: true,
+          packages: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
+  }
+  @Get("/assignes-deal/:id")
+  async assignesDealById(@Param("id") id: number) {
+    return this.service.findOne(
+      id,
+      {
+        id: true,
+        name: true,
+      },
+      {
+        deals: {
+          id: true,
+          status: true,
+          start_date: true,
+          end_date: true,
+          used: true,
+          total_used: true,
+          remaining: true,
+          total_price: true,
+          price_hour: true,
+          hours: true,
+          payment_method: true,
+          room: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      undefined,
+      { status: ReservationStatus.ACTIVE },
+    );
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Company,
@@ -58,32 +196,109 @@ export class CompanyController {
     },
   ])
   async create(@Body() createCompanyDto: CreateCompanyDto, @Req() req: Request) {
-    const payload = { ...createCompanyDto, createdBy: req["createdBy"] };
-    return await this.companyService.create(payload);
+    return await this.service.create(
+      {
+        name: createCompanyDto.name,
+        phone: createCompanyDto.phone,
+        city: createCompanyDto.city,
+        company_type: createCompanyDto.company_type,
+        address: createCompanyDto.address,
+        nationality: createCompanyDto.nationality,
+        email: createCompanyDto.email,
+        featured_image: createCompanyDto.featured_image,
+        holders: createCompanyDto.holders,
+        note: createCompanyDto.note,
+        whatsApp: createCompanyDto.whatsApp,
+        facebook: createCompanyDto.facebook,
+        website: createCompanyDto.website,
+        instagram: createCompanyDto.instagram,
+        linkedin: createCompanyDto.linkedin,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/update")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Company,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateCompanyDto: UpdateCompanyDto, @Req() req: Request) {
-    const payload = { ...updateCompanyDto, createdBy: req["createdBy"] };
-    return await this.companyService.update(payload);
+  async update(@Body() update: UpdateCompanyDto, @Req() req: Request) {
+    return await this.service.update(
+      {
+        id: update.id,
+        name: update.name,
+        phone: update.phone,
+        city: update.city,
+        company_type: update.company_type,
+        address: update.address,
+        nationality: update.nationality,
+        email: update.email,
+        featured_image: update.featured_image,
+        holders: update.holders,
+        note: update.note,
+        whatsApp: update.whatsApp,
+        facebook: update.facebook,
+        website: update.website,
+        instagram: update.instagram,
+        linkedin: update.linkedin,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Company,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.companyService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
+  }
+
+  @Post("/import")
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor("file"))
+  @Permissions([
+    {
+      resource: Resource.Company,
+      actions: [Permission.IMPORT],
+    },
+  ])
+  async importCompany(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return this.service.importFromExcel(
+      file.buffer,
+      {
+        requiredFields: [
+          "name",
+          "phone",
+          "city",
+          "company_type",
+          "nationality",
+          "email",
+          "whatsApp",
+        ],
+        fieldMappings: {
+          Name: "name",
+          Phone: "phone",
+          City: "city",
+          "Company Type": "company_type",
+          Nationality: "nationality",
+          Email: "email",
+          WhatsApp: "whatsApp",
+        },
+        findKey: "phone",
+      },
+      createdBy,
+    );
   }
 }

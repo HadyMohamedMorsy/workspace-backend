@@ -2,20 +2,13 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { DepositeStatus, PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Deposite {
+export class Deposite extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -45,16 +38,6 @@ export class Deposite {
   @OneToOne(() => AssignesMembership, assignesMembership => assignesMembership.deposites)
   assignessMemebership: AssignesMembership;
 
-  @ManyToOne(() => User, user => user.createdByDeposite)
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
-
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
 }

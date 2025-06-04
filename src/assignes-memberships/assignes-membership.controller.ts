@@ -3,31 +3,66 @@ import {
   Controller,
   Delete,
   HttpCode,
+  Patch,
   Post,
+  Put,
   Req,
   UseGuards,
-  UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { AssignesMembershipService } from "./assignes-membership.service";
 import { CreateAssignesMembershipDto } from "./dto/create-assignes-membership.dto";
 import { UpdateAssignesMembershipDto } from "./dto/update-assignes-membership.dto";
-
 @UseGuards(AuthorizationGuard)
 @Controller("assignes-membership")
-export class AssignesMembershipController {
-  constructor(private readonly assignesMembershipService: AssignesMembershipService) {}
+export class AssignesMembershipController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: AssignesMembershipService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      start_date: true,
+      end_date: true,
+      total_price: true,
+      used: true,
+      remaining: true,
+      total_used: true,
+      payment_method: true,
+      status: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      assignGeneralOffer: {
+        id: true,
+      },
+      memeberShip: {
+        id: true,
+      },
+      deposites: {
+        id: true,
+        total_price: true,
+      },
+      shared: {
+        id: true,
+      },
+      deskarea: {
+        id: true,
+      },
+    };
+  }
 
   @Post("/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -35,12 +70,11 @@ export class AssignesMembershipController {
     },
   ])
   async findIndividualAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByIndividual(filterQueryDto);
+    return this.service.findAssignesByIndividual(filterQueryDto);
   }
 
   @Post("/company")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -48,12 +82,11 @@ export class AssignesMembershipController {
     },
   ])
   async findCompanyAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByCompany(filterQueryDto);
+    return this.service.findAssignesByCompany(filterQueryDto);
   }
 
   @Post("/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -61,12 +94,11 @@ export class AssignesMembershipController {
     },
   ])
   async findStudentActivityAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByStudentActivity(filterQueryDto);
+    return this.service.findAssignesByStudentActivity(filterQueryDto);
   }
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
@@ -74,86 +106,113 @@ export class AssignesMembershipController {
     },
   ])
   async findUserAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignesMembershipService.findAssignesByUser(filterQueryDto);
+    return this.service.findAssignesByUser(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
       actions: [Permission.CREATE],
     },
   ])
-  async create(
-    @Body() createAssignesMembershipDto: CreateAssignesMembershipDto,
-    @Req() req: Request,
-  ) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.assignesMembershipService.create(createAssignesMembershipDto, {
-      customer,
-      createdBy,
-    });
+  async create(@Body() create: CreateAssignesMembershipDto, @Req() req: Request) {
+    return await this.service.create(
+      {
+        start_date: create.start_date,
+        end_date: create.end_date,
+        createdBy: req["createdBy"],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        memeberShip: req["memberShip"],
+        total_price: req["totalPrice"],
+        used: 0,
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
+        remaining: +req["memberShip"].days,
+        total_used: +req["memberShip"].days,
+      } as CreateAssignesMembershipDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/store-deposite")
-  @ClearCacheAnotherModules(["/api/v1/deposite"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,
       actions: [Permission.CREATE],
     },
   ])
-  async createDeposite(
-    @Body() createAssignesMembershipDepositeDto: CreateDepositeDto,
-    @Req() req: Request,
-  ) {
-    const createdBy = req["createdBy"];
-    return await this.assignesMembershipService.createDeposite(
-      createAssignesMembershipDepositeDto,
-      createdBy,
+  async createDeposite(@Body() create: { membership_id: number }, @Req() req: Request) {
+    return await this.service.update({
+      id: create.membership_id,
+      deposites: req["deposite"],
+    });
+  }
+
+  @Put("/update")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async update(@Body() update: UpdateAssignesMembershipDto, @Req() req: Request) {
+    return await this.service.update(
+      {
+        id: update.id,
+        start_date: update.start_date,
+        end_date: update.end_date,
+        createdBy: req["createdBy"],
+        assignGeneralOffer: req["assignGeneralOffer"],
+        memeberShip: req["memberShip"],
+        total_price: req["totalPrice"],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
     );
   }
 
-  @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignesMembership,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async update(@Body() updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
-    return await this.assignesMembershipService.update(updateAssignesMembershipDto);
-  }
-
-  @Post("/update-entity")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignesMembership,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async updateEntity(@Body() updateAssignesMembershipDto: UpdateAssignesMembershipDto) {
-    return await this.assignesMembershipService.updateEntity(updateAssignesMembershipDto);
-  }
-
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignesMembership,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.assignesMembershipService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
+  }
+
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
+  }
+
+  @Patch("/change-payment-method")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
   }
 }

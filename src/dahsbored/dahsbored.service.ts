@@ -9,7 +9,7 @@ import { ExpensePlace } from "src/expenses-place/expense-place.entity";
 import { ExpensePlaceChild } from "src/expenses-place/expenses-place-child/expense-place-child.entity";
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
 import { Order } from "src/orders/order.entity";
-import { Purchases } from "src/purchases/purchases.entity";
+import { Purchase } from "src/purchase/purchase.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
@@ -47,8 +47,8 @@ export class DahboredService {
     @InjectRepository(ExpenseSalaries)
     private readonly expenseSalariesRepository: Repository<ExpenseSalaries>,
 
-    @InjectRepository(Purchases)
-    private readonly purchasesRepository: Repository<Purchases>,
+    @InjectRepository(Purchase)
+    private readonly purchasesRepository: Repository<Purchase>,
 
     @InjectRepository(Returns)
     private readonly returnsRepository: Repository<Returns>,

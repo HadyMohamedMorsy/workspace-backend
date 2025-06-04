@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { PRODUCT_TYPE } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
+import { User } from "src/users/user.entity";
 import { IsMaxDiscount } from "./custom/ismax-discount";
 
 export enum DiscountType {
@@ -21,7 +22,7 @@ export class CreateGeneralOfferDto {
 
   @IsString()
   @IsNotEmpty()
-  start_date;
+  start_date: string;
 
   @IsString()
   @IsNotEmpty()
@@ -38,4 +39,6 @@ export class CreateGeneralOfferDto {
     message: 'If discount type is "percentage", discount must not exceed 100',
   })
   discount: number;
+
+  createdBy?: User;
 }

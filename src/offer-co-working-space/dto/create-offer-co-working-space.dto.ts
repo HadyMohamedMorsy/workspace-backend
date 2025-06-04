@@ -1,7 +1,8 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
 import { TypeMember } from "src/shared/enum/global-enum";
-import { Column } from "typeorm";
+import { User } from "src/users/user.entity";
+
 export class CreateCoWorkingSpaceDto {
   @IsString()
   @IsNotEmpty()
@@ -19,6 +20,8 @@ export class CreateCoWorkingSpaceDto {
   @IsNotEmpty()
   days: number;
 
-  @Column({ type: "enum", enum: TypeMember })
+  @IsEnum(TypeMember)
   type: TypeMember;
+
+  createdBy?: User;
 }

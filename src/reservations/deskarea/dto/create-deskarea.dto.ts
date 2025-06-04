@@ -8,7 +8,14 @@ import {
   IsString,
   ValidateIf,
 } from "class-validator";
-import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { Company } from "src/companies/company.entity";
+import { Deposite } from "src/deposit/deposites.entity";
+import { Individual } from "src/individual/individual.entity";
+import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateDeskAreaDto {
   @IsString()
@@ -16,6 +23,7 @@ export class CreateDeskAreaDto {
   selected_day: string;
 
   @IsBoolean()
+  @IsOptional()
   is_full_day: boolean;
 
   @ValidateIf(obj => !obj.is_full_day)
@@ -39,11 +47,6 @@ export class CreateDeskAreaDto {
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
-  customer_id: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Type(() => Number)
   setting_id: number;
 
   @IsOptional()
@@ -56,17 +59,44 @@ export class CreateDeskAreaDto {
   @Type(() => Number)
   membership_id: number;
 
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
-
   @IsString()
   @IsOptional()
   note: string;
 
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  total_price: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  end_hour: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  end_minute: number;
+
+  @IsString()
+  @IsOptional()
+  @IsEnum(TimeOfDay)
+  end_time: TimeOfDay;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  total_time: number;
+
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  createdBy: User;
+  assignGeneralOffer: AssignGeneralOffer;
+  deposites?: Deposite;
+  individual: Individual;
+  assignessMemebership: AssignesMembership;
+  company: Company;
+  studentActivity: StudentActivity;
 }

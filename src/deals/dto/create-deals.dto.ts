@@ -1,8 +1,15 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { Company } from "src/companies/company.entity";
 import { Deposite } from "src/deposit/deposites.entity";
-import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { GeneralOffer } from "src/general-offer/generalOffer.entity";
+import { Individual } from "src/individual/individual.entity";
+import { Room } from "src/rooms/room.entity";
+import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateDealsDto {
   @IsNumber()
@@ -25,6 +32,10 @@ export class CreateDealsDto {
   @IsNotEmpty()
   hours: number;
 
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  payment_method: PaymentMethod;
+
   @IsString()
   @IsNotEmpty()
   start_date: string;
@@ -36,19 +47,13 @@ export class CreateDealsDto {
 
   @IsNumber()
   @Type(() => Number)
-  @IsNotEmpty()
-  total: number;
+  @IsOptional()
+  total_price: number;
 
   @IsNumber()
   @Type(() => Number)
   @IsNotEmpty()
   price_hour: number;
-
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
 
   @IsOptional()
   @Type(() => Number)
@@ -73,4 +78,20 @@ export class CreateDealsDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
+
+  room?: Room;
+
+  offer?: GeneralOffer;
+
+  customer?: Individual | Company | StudentActivity;
+
+  createdBy: User;
+
+  assignGeneralOffer: AssignGeneralOffer;
+
+  individual?: Individual;
+
+  company?: Company;
+
+  studentActivity?: StudentActivity;
 }

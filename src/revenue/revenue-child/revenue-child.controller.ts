@@ -1,18 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
 import { CreateRevenueChildDto } from "./dto/create-revenue-child.dto";
 import { UpdateRevenueChildDto } from "./dto/update-revenue-child.dto";
@@ -20,12 +9,34 @@ import { RevenueChildService } from "./revenue-child.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("revenue-child")
-export class RevenueChildController {
-  constructor(private readonly revenueChildService: RevenueChildService) {}
+export class RevenueChildController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: RevenueChildService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      amount: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      revenue: {
+        id: true,
+        name: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Revenue,
@@ -33,44 +44,48 @@ export class RevenueChildController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.revenueChildService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
+
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/revenue"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Revenue,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createRevenueDto: CreateRevenueChildDto) {
-    return await this.revenueChildService.create(createRevenueDto);
+  async create(@Body() createRevenueChildDto: CreateRevenueChildDto, @Req() req: Request) {
+    return await this.service.create({
+      amount: createRevenueChildDto.amount,
+      revenue: req["revenue"],
+      createdBy: req["createdBy"],
+    } as CreateRevenueChildDto);
   }
 
-  @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/revenue"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Revenue,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateRevenueDto: UpdateRevenueChildDto) {
-    return await this.revenueChildService.update(updateRevenueDto);
+  async update(@Body() updateRevenueChildDto: UpdateRevenueChildDto, @Req() req: Request) {
+    return await this.service.update({
+      id: updateRevenueChildDto.id,
+      amount: updateRevenueChildDto.amount,
+      revenue: updateRevenueChildDto.revenue,
+      createdBy: req["createdBy"],
+    });
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/revenue"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Revenue,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.revenueChildService.remove(bodyDelete.id);
+  public delete(@Body() { id }: { id: number }) {
+    return this.service.delete(id);
   }
 }

@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { AssignUserMiddleware } from "src/shared/middleware/assign-user.middleware";
 import { UsersModule } from "src/users/users.module";
-import { VacationMiddleware } from "./middleware/vacation.middleware";
 import { VacationController } from "./vacation.controller";
 import { Vacation } from "./vacation.entity";
 import { VacationService } from "./vacation.service";
@@ -14,6 +14,6 @@ import { VacationService } from "./vacation.service";
 })
 export class VacationModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(VacationMiddleware).forRoutes("vacation/store", "vacation/update");
+    consumer.apply(AssignUserMiddleware).forRoutes("vacation/store", "vacation/update");
   }
 }

@@ -1,16 +1,11 @@
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class GeneralSettings {
+export class GeneralSettings extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -26,19 +21,12 @@ export class GeneralSettings {
   @Column()
   full_day_price_shared: number;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
   @OneToMany(() => Deskarea, deskarea => deskarea.settings)
   deskarea: Deskarea;
 
   @OneToMany(() => Shared, shared => shared.settings)
   shared: Shared;
 
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

@@ -1,8 +1,14 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { Company } from "src/companies/company.entity";
 import { Deposite } from "src/deposit/deposites.entity";
-import { ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { Individual } from "src/individual/individual.entity";
+import { OfferPackages } from "src/offer-packages/offer-package.entity";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateAssignesPackageDto {
   @IsNumber()
@@ -19,12 +25,6 @@ export class CreateAssignesPackageDto {
   @Type(() => Number)
   @IsOptional()
   offer_id?: number;
-
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
 
   @IsString()
   @IsNotEmpty()
@@ -63,4 +63,16 @@ export class CreateAssignesPackageDto {
 
   @IsOptional()
   deposites?: Deposite;
+
+  createdBy: User;
+
+  assignGeneralOffer: AssignGeneralOffer;
+
+  packages: OfferPackages;
+
+  individual: Individual;
+
+  company: Company;
+
+  studentActivity: StudentActivity;
 }

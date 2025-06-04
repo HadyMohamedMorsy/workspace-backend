@@ -1,100 +1,52 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { Repository } from "typeorm";
-import { RevenueService } from "../revenue.service";
+import { Repository, SelectQueryBuilder } from "typeorm";
+import { BaseService } from "../../shared/base/base";
+import { APIFeaturesService } from "../../shared/filters/filter.service";
+import { ICrudService } from "../../shared/interface/crud-service.interface";
 import { CreateRevenueChildDto } from "./dto/create-revenue-child.dto";
 import { UpdateRevenueChildDto } from "./dto/update-revenue-child.dto";
 import { RevenueChild } from "./revenue-child.entity";
 
 @Injectable()
-export class RevenueChildService {
+export class RevenueChildService
+  extends BaseService<RevenueChild, CreateRevenueChildDto, UpdateRevenueChildDto>
+  implements ICrudService<RevenueChild, CreateRevenueChildDto, UpdateRevenueChildDto>
+{
   constructor(
-    @InjectRepository(RevenueChild)
-    private revenueChildRepository: Repository<RevenueChild>,
-    protected readonly apiFeaturesService: APIFeaturesService,
-    protected readonly revenueService: RevenueService,
-  ) {}
-
-  // Create a new record
-  async create(createRevenueChildDto: CreateRevenueChildDto): Promise<RevenueChild> {
-    const revenue = await this.revenueService.findOne(createRevenueChildDto.revenueChild_id);
-    const totalRevenue = (revenue.total || 0) + createRevenueChildDto.amount;
-    revenue.total = totalRevenue;
-
-    await this.revenueService.update({
-      id: revenue.id,
-      total: totalRevenue,
-    });
-
-    const revenueChild = this.revenueChildRepository.create({
-      ...createRevenueChildDto,
-      revenue: revenue,
-    });
-
-    return await this.revenueChildRepository.save(revenueChild);
+    @InjectRepository(RevenueChild) repository: Repository<RevenueChild>,
+    private readonly apiFeaturesService: APIFeaturesService,
+  ) {
+    super(repository, apiFeaturesService);
   }
 
-  // Get all records
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(RevenueChild).buildQuery(filterData);
-
-    if (filterData.revenueChild_id) {
-      queryBuilder.leftJoin("e.revenue", "r").andWhere("r.id = :revenueChild_id", {
-        revenueChild_id: filterData.revenueChild_id,
-      });
-    }
-
-    if (filterData?.customFilters?.start_date && filterData?.customFilters?.end_date) {
-      queryBuilder.andWhere("r.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filterData.customFilters.start_date,
-        end_date: filterData.customFilters.end_date,
-      });
-    }
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
+  async findUserAll(userId: number) {
+    const queryBuilder = this.repository.createQueryBuilder("revenueChild");
+    queryBuilder.leftJoinAndSelect("revenueChild.user", "user");
+    queryBuilder.leftJoinAndSelect("revenueChild.createdBy", "createdBy");
+    queryBuilder.where("revenueChild.userId = :userId", { userId });
+    const [revenueChildren, total] = await queryBuilder.getManyAndCount();
     return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
+      data: revenueChildren,
+      total,
     };
   }
 
-  // Get record by ID
-  async findOne(id: number): Promise<RevenueChild> {
-    const revenueChild = await this.revenueChildRepository.findOne({ where: { id } });
-    if (!revenueChild) {
-      throw new NotFoundException(`${revenueChild} with id ${id} not found`);
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    if (filteredRecord.revenueChild_id) {
+      queryBuilder
+        .leftJoin("e.revenue", "er")
+        .andWhere("er.id = :revenueChild_id", {
+          revenueChild_id: filteredRecord.revenueChild_id,
+        })
+        .addSelect(["er.id", "er.name"]);
     }
-    return revenueChild;
-  }
-
-  // Update a record
-  async update(updateRevenueChildDto: UpdateRevenueChildDto) {
-    const revenue = await this.revenueService.findOne(updateRevenueChildDto.revenueChild_id);
-
-    const totalRevenue = (revenue.total || 0) + updateRevenueChildDto.amount;
-    revenue.total = totalRevenue;
-
-    await this.revenueService.update({
-      id: revenue.id,
-      total: totalRevenue,
-    });
-
-    await this.revenueChildRepository.update(updateRevenueChildDto.id, {
-      ...updateRevenueChildDto,
-      revenue: revenue,
-    });
-
-    return this.revenueChildRepository.findOne({
-      where: { id: updateRevenueChildDto.id },
-    });
-  }
-
-  // Delete a record
-  async remove(id: number) {
-    await this.revenueChildRepository.delete(id);
+    if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: filteredRecord.customFilters.start_date,
+        end_date: filteredRecord.customFilters.end_date,
+      });
+    }
   }
 }

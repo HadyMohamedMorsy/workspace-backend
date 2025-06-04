@@ -1,7 +1,15 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { Company } from "src/companies/company.entity";
+import { Deals } from "src/deals/deals.entity";
 import { Deposite } from "src/deposit/deposites.entity";
-import { ReservationStatus, TimeOfDay, TypeUser } from "src/shared/enum/global-enum";
+import { Individual } from "src/individual/individual.entity";
+import { Room } from "src/rooms/room.entity";
+import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { StudentActivity } from "src/student-activity/StudentActivity.entity";
+import { User } from "src/users/user.entity";
 
 export class CreateReservationRoomDto {
   @IsString()
@@ -63,12 +71,6 @@ export class CreateReservationRoomDto {
   @Type(() => Number)
   package_id: number;
 
-  @IsEnum(TypeUser, {
-    message:
-      "type order must be one of the following: individual or company or studentActivity or User",
-  })
-  type_user: TypeUser;
-
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
@@ -82,6 +84,29 @@ export class CreateReservationRoomDto {
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
 
-  @IsOptional()
   deposites?: Deposite;
+
+  deals?: Deals;
+
+  assignesPackages?: AssignesPackages;
+
+  payment_method?: PaymentMethod;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  total_price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  total_time?: number;
+
+  createdBy: User;
+
+  assignGeneralOffer?: AssignGeneralOffer;
+  individual: Individual;
+  company: Company;
+  studentActivity: StudentActivity;
+  room: Room;
 }

@@ -1,58 +1,39 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
 import { Repository } from "typeorm";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
 import { Room } from "./room.entity";
 
 @Injectable()
-export class RoomsService {
+export class RoomsService
+  extends BaseService<Room, CreateRoomDto, UpdateRoomDto>
+  implements ICrudService<Room, CreateRoomDto, UpdateRoomDto>
+{
   constructor(
+    apiFeaturesService: APIFeaturesService,
     @InjectRepository(Room)
-    private roomsRepository: Repository<Room>,
-    protected readonly apiFeaturesService: APIFeaturesService,
-  ) {}
-
-  // Create a new record
-  async create(createRoomsDto: CreateRoomDto): Promise<Room> {
-    const rooms = this.roomsRepository.create(createRoomsDto);
-    return await this.roomsRepository.save(rooms);
+    repository: Repository<Room>,
+  ) {
+    super(repository, apiFeaturesService);
   }
 
-  // Get all records
-  async findAll(filterData) {
-    const queryBuilder = this.apiFeaturesService.setRepository(Room).buildQuery(filterData);
+  async findUserAll(filterData) {
+    const queryBuilder = this.apiService.setRepository(Room).buildQuery(filterData);
+
+    queryBuilder
+      .leftJoin("e.user", "ec")
+      .leftJoin("e.createdBy", "eu")
+      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
+      .addSelect(["eu.id", "eu.firstName", "eu.lastName"])
+      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 
-    return {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-  }
-
-  public async findList() {
-    const rooms = await this.roomsRepository.find({});
-    return {
-      data: rooms,
-    };
-  }
-
-  // Get record by ID
-  async findOne(id: number): Promise<Room> {
-    return this.roomsRepository.findOne({ where: { id } });
-  }
-
-  // Update a record
-  async update(updateRoomsDto: UpdateRoomDto) {
-    await this.roomsRepository.update(updateRoomsDto.id, updateRoomsDto);
-    return this.roomsRepository.findOne({ where: { id: updateRoomsDto.id } });
-  }
-
-  // Delete a record
-  async remove(id: number) {
-    await this.roomsRepository.delete(id);
+    return this.response(filteredRecord, totalRecords);
   }
 }

@@ -1,19 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Post,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
@@ -21,12 +9,30 @@ import { UpdateCategoryDto } from "./dto/update-category.dto";
 
 @UseGuards(AuthorizationGuard)
 @Controller("category")
-export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+export class CategoryController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: CategoryService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      name: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Category,
@@ -34,58 +40,51 @@ export class CategoryController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.categoryService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Get("/list-categories")
-  @UseInterceptors(CachingInterceptor)
   async findList() {
-    return this.categoryService.findlist();
-  }
-
-  @Post("/show")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  async findRelList(@Body() filterQueryDto: any) {
-    return this.categoryService.findOne(filterQueryDto);
+    return this.service.getList({}, [], { name: true, id: true });
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Category,
       actions: [Permission.CREATE],
     },
   ])
-  async create(@Body() createProductDto: CreateCategoryDto) {
-    return await this.categoryService.create(createProductDto);
+  async create(@Body() createCategoryDto: CreateCategoryDto, @Req() req: Request) {
+    return await this.service.create({
+      name: createCategoryDto.name,
+      createdBy: req["createdBy"],
+    } as CreateCategoryDto);
   }
 
-  @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.Category,
       actions: [Permission.UPDATE],
     },
   ])
-  async update(@Body() updateProductDto: UpdateCategoryDto) {
-    return await this.categoryService.update(updateProductDto);
+  async update(@Body() updateCategoryDto: UpdateCategoryDto, @Req() req: Request) {
+    return await this.service.update({
+      id: updateCategoryDto.id,
+      name: updateCategoryDto.name,
+      createdBy: req["createdBy"],
+    } as UpdateCategoryDto);
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Category,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.categoryService.remove(bodyDelete.id);
+  public delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }

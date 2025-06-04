@@ -1,19 +1,12 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PRODUCT_TYPE } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { DiscountType } from "./dto/create-general-offer.dto";
 
 @Entity()
-export class GeneralOffer {
+export class GeneralOffer extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -42,18 +35,6 @@ export class GeneralOffer {
   @Column({ type: "enum", enum: PRODUCT_TYPE, default: PRODUCT_TYPE.Room })
   product: PRODUCT_TYPE;
 
-  @ManyToOne(() => User, user => user.globalOffer, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
-
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
 }

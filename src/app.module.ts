@@ -1,5 +1,5 @@
 import { CacheModule } from "@nestjs/cache-manager";
-import { MiddlewareConsumer, Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
@@ -27,11 +27,12 @@ import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.modul
 import { GeneralOfferModule } from "./general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "./general-settings/settings.module";
 import { IndividualModule } from "./individual/individual.module";
+import { InvoiceModule } from "./invoice/invoice.module";
 import { OfferCoWorkingSpaceModule } from "./offer-co-working-space/offer-co-working-space.module";
 import { OfferPackageModule } from "./offer-packages/offerpackages.module";
 import { OrdersModule } from "./orders/orders.module";
 import { ProductsModule } from "./products/products.module";
-import { PurchasesModule } from "./purchases/purchases.module";
+import { PurchaseModule } from "./purchase/purchase.module";
 import { DeskareaModule } from "./reservations/deskarea/deskarea.module";
 import { ReservationRoomModule } from "./reservations/rooms/reservation-room.module";
 import { SharedModule } from "./reservations/shared/shared.module";
@@ -58,28 +59,22 @@ import { VacationModule } from "./vacation/vacation.module";
 const ENV = process.env.NODE_ENV;
 @Module({
   imports: [
+    AssignesPackagesModule,
+    AssignGeneralOfferModule,
+    AssignesMembershipModule,
+    DealsModule,
     UploadsModule,
+    GeneralSettingsModule,
     CompanyModule,
     DashboredModule,
+    InvoiceModule,
     OfferPackageModule,
     RoomsModule,
     listModule,
     SearchModule,
     GeneralOfferModule,
-    GeneralSettingsModule,
     DepositesModule,
     TaskModule,
-    RevenueModule,
-    RevenueChildModule,
-    AssignesPackagesModule,
-    DeskareaModule,
-    ReservationRoomModule,
-    VacationModule,
-    SharedModule,
-    AssignGeneralOfferModule,
-    AssignesMembershipModule,
-    OfferCoWorkingSpaceModule,
-    DealsModule,
     IndividualModule,
     AttendModule,
     ExpensesSalariesModule,
@@ -87,13 +82,21 @@ const ENV = process.env.NODE_ENV;
     ExpensesPlaceModule,
     CategoryModule,
     ReturnsModule,
-    PurchasesModule,
+    PurchaseModule,
     ProductsModule,
     OrdersModule,
     StudentActivityModule,
     FilterDateModule,
     UsersModule,
     AuthModule,
+    RevenueModule,
+    RevenueChildModule,
+    ReservationRoomModule,
+    VacationModule,
+    SharedModule,
+    DeskareaModule,
+    OfferCoWorkingSpaceModule,
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, "..", "uploads"),
       serveRoot: "/uploads",
@@ -146,9 +149,9 @@ const ENV = process.env.NODE_ENV;
     },
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
-    consumer.apply(UserMiddleware).exclude("auth/login", "user/store-tech").forRoutes("*");
+    consumer.apply(UserMiddleware).exclude("auth/login").forRoutes("*");
   }
 }

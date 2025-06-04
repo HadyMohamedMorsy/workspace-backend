@@ -7,6 +7,7 @@ import {
   MaxLength,
   ValidateNested,
 } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateStudentActivityDto {
   @IsString()
@@ -31,6 +32,8 @@ export class CreateStudentActivityDto {
   @ValidateNested({ each: true })
   @Type(() => CreateHolderDto)
   holders: CreateHolderDto[];
+
+  createdBy: User;
 }
 
 export class CreateHolderDto {

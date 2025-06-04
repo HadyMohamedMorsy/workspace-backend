@@ -1,17 +1,10 @@
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { TasksStatus } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Task {
+export class Task extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,28 +13,15 @@ export class Task {
   })
   user: User;
 
-  @Column({ type: "enum", enum: TasksStatus })
-  status: TasksStatus;
-
-  @ManyToOne(() => User, user => user.createdByTasks, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn({ name: "createdById" })
-  createdBy: User;
+  @Column({ type: "enum", enum: TasksStatus, default: TasksStatus.ACTIVE })
+  status: TasksStatus = TasksStatus.ACTIVE;
 
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   note: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

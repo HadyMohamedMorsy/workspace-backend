@@ -1,15 +1,10 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { RevenueChild } from "./revenue-child/revenue-child.entity";
 
 @Entity()
-export class Revenue {
+export class Revenue extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -25,13 +20,6 @@ export class Revenue {
   @OneToMany(() => RevenueChild, revenueChild => revenueChild.revenue)
   revenueChild: RevenueChild[];
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

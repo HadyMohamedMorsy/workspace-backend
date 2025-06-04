@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateRoomDto {
   @IsString()
@@ -23,4 +24,6 @@ export class CreateRoomDto {
   @IsString()
   @IsOptional()
   note: string;
+
+  createdBy: User;
 }

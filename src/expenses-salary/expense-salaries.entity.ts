@@ -1,16 +1,10 @@
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { TypeSallary } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class ExpenseSalaries {
+export class ExpenseSalaries extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -46,13 +40,6 @@ export class ExpenseSalaries {
   })
   user: User;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

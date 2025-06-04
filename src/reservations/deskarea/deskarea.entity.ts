@@ -4,20 +4,21 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { Company } from "src/companies/company.entity";
 import { GeneralSettings } from "src/general-settings/general-settings.entity";
 import { Individual } from "src/individual/individual.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Deskarea {
+export class Deskarea extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   selected_day: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: false })
   is_full_day: boolean;
 
   @Column({ nullable: true })
@@ -36,7 +37,7 @@ export class Deskarea {
   @Column({ nullable: true })
   end_minute: number;
 
-  @Column({ type: "enum", enum: ReservationStatus })
+  @Column({ type: "enum", enum: ReservationStatus, default: ReservationStatus.ACTIVE })
   status: ReservationStatus;
 
   @Column({ type: "enum", enum: TimeOfDay, nullable: true })
@@ -90,14 +91,6 @@ export class Deskarea {
   @Column({ nullable: true })
   total_time: number;
 
-  @ManyToOne(() => User, user => user.createdByShared, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
-
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 }

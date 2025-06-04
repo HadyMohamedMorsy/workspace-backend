@@ -1,16 +1,11 @@
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { TypeMember } from "src/shared/enum/global-enum";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class CoWorkingSpace {
+export class CoWorkingSpace extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -29,13 +24,6 @@ export class CoWorkingSpace {
   @OneToMany(() => AssignesMembership, assignesMembership => assignesMembership.memeberShip)
   assignessMemebership: AssignesMembership[];
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

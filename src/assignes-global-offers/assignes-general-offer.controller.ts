@@ -1,126 +1,112 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  HttpCode,
-  Post,
-  Req,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Delete, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { AssignGeneralOfferservice } from "./assignes-general-offer.service";
-import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.dto";
-import { UpdateAssignGeneralOfferDto } from "./dto/update-assign-general-offer.dto";
 
 @UseGuards(AuthorizationGuard)
 @Controller("assign-general-offer")
-export class AssignGeneralOfferController {
-  constructor(private readonly assignGeneralOfferservice: AssignGeneralOfferservice) {}
+export class AssignGeneralOfferController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: AssignGeneralOfferservice) {}
 
-  @Post("/individual")
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      created_at: true,
+      updated_at: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      generalOffer: {
+        id: true,
+        name: true,
+      },
+      individual: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+      company: {
+        id: true,
+        name: true,
+      },
+      studentActivity: {
+        id: true,
+        name: true,
+      },
+      shared: {
+        id: true,
+        name: true,
+      },
+      deskarea: {
+        id: true,
+        name: true,
+      },
+      reservationRooms: {
+        id: true,
+        name: true,
+      },
+    };
+  }
+
+  @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.AssignGeneralOffer,
       actions: [Permission.INDEX],
     },
   ])
-  async findIndividuaAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignGeneralOfferservice.findAssignesByIndividual(filterQueryDto);
+  async findAll(@Body() filterQueryDto: any) {
+    return this.service.findAssignesByUser(filterQueryDto);
   }
 
-  @Post("/company")
+  @Post("/show")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignGeneralOffer,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findCompanyAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignGeneralOfferservice.findAssignesByCompany(filterQueryDto);
-  }
-
-  @Post("/studentActivity")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignGeneralOffer,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findStudentAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignGeneralOfferservice.findAssignesByStudentActivity(filterQueryDto);
-  }
-
-  @Post("/user")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignGeneralOffer,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findUserAssigneslAll(@Body() filterQueryDto: any) {
-    return this.assignGeneralOfferservice.findAssignesByUser(filterQueryDto);
-  }
-
-  @Post("/store")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignGeneralOffer,
-      actions: [Permission.CREATE],
-    },
-  ])
-  async create(
-    @Body() createAssignGeneralOfferDto: CreateAssignGeneralOfferDto,
-    @Req() req: Request,
-  ) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-
-    return await this.assignGeneralOfferservice.create(createAssignGeneralOfferDto, {
-      customer,
-      createdBy,
-    });
-  }
-
-  @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.AssignGeneralOffer,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async update(@Body() updateAssignGeneralOfferDto: UpdateAssignGeneralOfferDto) {
-    return await this.assignGeneralOfferservice.update(updateAssignGeneralOfferDto);
+  async findOne(@Body() filterQueryDto: any) {
+    return this.service.findOne(filterQueryDto.id);
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/individual", "/api/v1/company", "/api/v1/studentActivity"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.AssignGeneralOffer,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.assignGeneralOfferservice.remove(bodyDelete.id);
+  public delete(@Body() id: number) {
+    return this.service.delete(id);
+  }
+
+  @Post("/user")
+  @HttpCode(200)
+  async findByUser(@Body() filterQueryDto: any) {
+    return this.service.findAssignesByUser(filterQueryDto);
+  }
+
+  @Post("/individual")
+  @HttpCode(200)
+  async findByIndividual(@Body() filterQueryDto: any) {
+    return this.service.findAssignesByIndividual(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  async findByCompany(@Body() filterQueryDto: any) {
+    return this.service.findAssignesByCompany(filterQueryDto);
+  }
+
+  @Post("/studentActivity")
+  @HttpCode(200)
+  async findByStudentActivity(@Body() filterQueryDto: any) {
+    return this.service.findAssignesByStudentActivity(filterQueryDto);
   }
 }

@@ -4,34 +4,27 @@ import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Room } from "src/rooms/room.entity";
-import { PaymentMethod, ReservationStatus, TypeUser } from "src/shared/enum/global-enum";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 import {
   Column,
-  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from "typeorm";
 
 @Entity()
-export class Deals {
+export class Deals extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "enum", enum: ReservationStatus, nullable: true })
+  @Column({ type: "enum", enum: ReservationStatus, default: ReservationStatus.ACTIVE })
   status: ReservationStatus;
-
-  @Column({
-    type: "enum",
-    enum: TypeUser,
-  })
-  type_user: TypeUser;
 
   @Column()
   hours: number;
@@ -42,7 +35,7 @@ export class Deals {
   @Column({ type: "timestamp", nullable: true })
   end_date: Date;
 
-  @Column()
+  @Column({ nullable: true })
   price_hour: number;
 
   @Column({ nullable: true })
@@ -93,22 +86,10 @@ export class Deals {
   })
   assignGeneralOffer: AssignGeneralOffer;
 
-  @ManyToOne(() => User, user => user.createdByDeal, {
-    onDelete: "CASCADE",
-  })
-  createdBy: User;
-
   @OneToOne(() => Deposite, deposite => deposite.deal, { onDelete: "SET NULL" })
   @JoinColumn()
   deposites: Deposite;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

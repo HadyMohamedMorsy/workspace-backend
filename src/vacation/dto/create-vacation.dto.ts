@@ -1,17 +1,16 @@
-import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
-import { Column } from "typeorm";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { User } from "src/users/user.entity";
 
 export class CreateVacationDto {
-  @IsNumber()
-  @Type(() => Number)
-  @IsNotEmpty()
-  user_id: number;
-
-  @Column()
-  selected_day: string;
+  @IsString()
+  @IsOptional()
+  note: string;
 
   @IsString()
   @IsNotEmpty()
-  note: string;
+  selected_day: string;
+
+  user: User;
+
+  createdBy: User;
 }

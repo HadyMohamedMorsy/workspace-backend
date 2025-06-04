@@ -1,19 +1,13 @@
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { PaymentMethod, TypeOrder, TypeUser } from "src/shared/enum/global-enum";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { PaymentMethod, TypeOrder } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Order {
+export class Order extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -23,14 +17,9 @@ export class Order {
   @Column({
     type: "enum",
     enum: TypeOrder,
+    nullable: true,
   })
   type_order: TypeOrder;
-
-  @Column({
-    type: "enum",
-    enum: TypeUser,
-  })
-  type_user: TypeUser;
 
   @ManyToOne(() => Individual, individual => individual.orders, {
     onDelete: "CASCADE",
@@ -72,23 +61,11 @@ export class Order {
     quantity: number;
   }> | null;
 
-  @ManyToOne(() => User, user => user.createdByOrder, {
-    onDelete: "CASCADE",
-  })
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
-
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
-  updated_at: Date;
 }
 
 export class OrderItemDto {
-  product: number;
+  product_id: number;
   quantity: number;
 }

@@ -3,30 +3,65 @@ import {
   Controller,
   Delete,
   HttpCode,
+  Patch,
   Post,
+  Put,
   Req,
   UseGuards,
-  UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
+import { UpdateDepositeDto } from "src/deposit/dto/update-deposites.dto";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
+import { formatDate, getCurrentTime } from "../helpers/utitlties";
 import { CreateSharedDto } from "./dto/create-shared.dto";
-import { UpdateSharedNoteDto } from "./dto/update-shared.-note.dto copy";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { SharedService } from "./shared.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("shared")
-export class SharedController {
-  constructor(private readonly sharedService: SharedService) {}
+export class SharedController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: SharedService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      selected_day: true,
+      start_hour: true,
+      start_minute: true,
+      start_time: true,
+      status: true,
+      note: true,
+      is_full_day: true,
+      created_at: true,
+      createdBy: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      individual: {
+        id: true,
+        name: true,
+      },
+      company: {
+        id: true,
+        name: true,
+      },
+      studentActivity: {
+        id: true,
+        name: true,
+      },
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
-  @UseInterceptors(CachingInterceptor)
   @HttpCode(200)
   @Permissions([
     {
@@ -35,38 +70,23 @@ export class SharedController {
     },
   ])
   async findAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
   }
 
   @Post("/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
       actions: [Permission.INDEX],
     },
   ])
-  async findIndividuaSharedAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findSharedByIndividualAll(filterQueryDto);
-  }
-
-  @Post("/company")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Shared,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findCompanySharedAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findSharedByComapnyAll(filterQueryDto);
+  async findIndividualSharedAll(@Body() filterQueryDto: any) {
+    return this.service.findSharedByIndividualAll(filterQueryDto);
   }
 
   @Post("/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
@@ -74,12 +94,23 @@ export class SharedController {
     },
   ])
   async findStudentSharedAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findSharedByStudentActivityAll(filterQueryDto);
+    return this.service.findSharedByStudentActivityAll(filterQueryDto);
+  }
+
+  @Post("/company")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findCompanySharedAll(@Body() filterQueryDto: any) {
+    return this.service.findSharedByComapnyAll(filterQueryDto);
   }
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
@@ -87,18 +118,10 @@ export class SharedController {
     },
   ])
   async findUserSharedAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findSharedByUserAll(filterQueryDto);
+    return this.service.findSharedByUserAll(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assign-general-offer",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
@@ -106,128 +129,122 @@ export class SharedController {
     },
   ])
   async create(@Body() createSharedDto: CreateSharedDto, @Req() req: Request) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.sharedService.create(createSharedDto, {
-      customer,
-      createdBy,
-    });
+    const createTime = getCurrentTime();
+
+    return await this.service.create(
+      {
+        selected_day: formatDate(createSharedDto.selected_day),
+        start_hour: createTime.hours,
+        start_minute: createTime.minutes,
+        start_time: createTime.timeOfDay,
+        note: createSharedDto.note,
+        is_full_day: createSharedDto.is_full_day,
+        assignGeneralOffer: req["assignGeneralOffer"],
+        assignessMemebership: req["assignMembership"],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
+        createdBy: req["createdBy"],
+      } as CreateSharedDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
-  @Post("/store/reservation")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-membership",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+
+  @Patch("/change-payment-method")
   @Permissions([
     {
       resource: Resource.Shared,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
+  }
+
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
+  }
+
+  @Put("/update")
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async update(@Body() update: UpdateSharedDto, @Req() req: Request) {
+    return await this.service.update(
+      {
+        id: update.id,
+        selected_day: formatDate(update.selected_day),
+        is_full_day: update.is_full_day,
+        note: update.note,
+        end_hour: update.end_hour,
+        end_minute: update.end_minute,
+        end_time: update.end_time,
+        assignGeneralOffer: req["assignGeneralOffer"],
+        assignessMemebership: req["assignMembership"],
+        individual: req["individual"],
+        company: req["company"],
+        studentActivity: req["studentActivity"],
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
+  }
+
+  @Post("/deposit")
+  @Permissions([
+    {
+      resource: Resource.Deposite,
       actions: [Permission.CREATE],
     },
   ])
-  async createReservationByMememberShip(
-    @Body() createSharedDto: CreateSharedDto,
+  async createDeposit(
+    @Body() create: UpdateDepositeDto & { shared_id: number },
     @Req() req: Request,
   ) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.sharedService.createReservationByMememberShip(createSharedDto, {
-      customer,
-      createdBy,
-    });
-  }
-
-  @Post("reservation/individual")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Shared,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findReservationIndividualAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findReservationsByIndividual(filterQueryDto);
-  }
-
-  @Post("reservation/company")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Shared,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findReservationCompanyAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findReservationsByCompany(filterQueryDto);
-  }
-
-  @Post("reservation/studentActivity")
-  @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
-  @Permissions([
-    {
-      resource: Resource.Shared,
-      actions: [Permission.INDEX],
-    },
-  ])
-  async findReservationStudentActivityAll(@Body() filterQueryDto: any) {
-    return this.sharedService.findReservationsByStudentActivity(filterQueryDto);
-  }
-
-  @Post("/update")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assign-general-offer",
-    "/api/v1/assignes-membership",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.Shared,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async update(@Body() updateSharedDto: UpdateSharedDto) {
-    return await this.sharedService.update(updateSharedDto);
-  }
-
-  @Post("/update-entity")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assign-general-offer",
-    "/api/v1/assignes-membership",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.Shared,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async updateEntity(@Body() updateSharedDto: UpdateSharedNoteDto) {
-    return await this.sharedService.updateEntity(updateSharedDto);
+    return await this.service.update({
+      id: create.shared_id,
+      deposites: req["deposite"],
+    } as UpdateSharedDto);
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Shared,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.sharedService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
+  }
+
+  @Post("/membership")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.Shared,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findMembershipSharedAll(@Body() filterQueryDto: any) {
+    return this.service.findSharedByMembershipAll(filterQueryDto);
   }
 }

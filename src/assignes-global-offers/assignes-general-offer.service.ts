@@ -1,179 +1,82 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Company } from "src/companies/company.entity";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
-import { Individual } from "src/individual/individual.entity";
+import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
-import { StudentActivity } from "src/student-activity/StudentActivity.entity";
-import { User } from "src/users/user.entity";
-import { Repository } from "typeorm";
+import { ICrudService } from "src/shared/interface/crud-service.interface";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { AssignGeneralOffer } from "./assignes-general-offer.entity";
 import { CreateAssignGeneralOfferDto } from "./dto/create-assign-general-offer.dto";
 import { UpdateAssignGeneralOfferDto } from "./dto/update-assign-general-offer.dto";
 
 @Injectable()
-export class AssignGeneralOfferservice {
+export class AssignGeneralOfferservice
+  extends BaseService<AssignGeneralOffer, CreateAssignGeneralOfferDto, UpdateAssignGeneralOfferDto>
+  implements
+    ICrudService<AssignGeneralOffer, CreateAssignGeneralOfferDto, UpdateAssignGeneralOfferDto>
+{
   constructor(
     @InjectRepository(AssignGeneralOffer)
-    private assignGeneralOfferRepository: Repository<AssignGeneralOffer>,
+    repository: Repository<AssignGeneralOffer>,
     protected readonly apiFeaturesService: APIFeaturesService,
     protected readonly generalOfferService: GeneralOfferService,
-  ) {}
-
-  // Create a new record
-  async create(
-    create: CreateAssignGeneralOfferDto,
-    reqBody: {
-      customer: Individual | Company | StudentActivity;
-      createdBy: User;
-    },
-  ): Promise<AssignGeneralOffer> {
-    const generalOffer = await this.generalOfferService.findOne(create.offer_id);
-
-    if (!generalOffer) {
-      throw new NotFoundException(`${generalOffer} with  not found`);
-    }
-
-    const assignGeneralOffer = this.assignGeneralOfferRepository.create({
-      ...create,
-      createdBy: reqBody.createdBy,
-      [create.type_user]: reqBody.customer,
-      generalOffer,
-    });
-    return await this.assignGeneralOfferRepository.save(assignGeneralOffer);
+  ) {
+    super(repository, apiFeaturesService);
   }
 
-  // Get a single record by ID
-  async findOne(id: number): Promise<AssignGeneralOffer> {
-    const assignGeneralOffer = await this.assignGeneralOfferRepository.findOne({
-      where: { id },
-      relations: ["generalOffer"],
-    });
-    if (!assignGeneralOffer) {
-      throw new NotFoundException(`AssignGeneralOffer  not found`);
-    }
-    return assignGeneralOffer;
+  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder
+      .leftJoin("e.generalOffer", "eg")
+      .addSelect([
+        "eg.id",
+        "eg.name",
+        "eg.discount",
+        "eg.type_discount",
+        "eg.start_date",
+        "eg.end_date",
+      ])
+      .leftJoin("e.shared", "es")
+      .addSelect(["es.id"])
+      .leftJoin("e.deskarea", "ed")
+      .addSelect(["ed.id"])
+      .leftJoin("e.reservationRooms", "er")
+      .addSelect(["er.id"]);
   }
 
   async findAssignesByUser(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.generalOffer", "eg")
-      .leftJoinAndSelect("e.shared", "es")
-      .leftJoinAndSelect("e.deskarea", "ed")
-      .leftJoinAndSelect("e.reservationRooms", "er")
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"])
-      .andWhere("ec.id = :user_id", { user_id: filterData.user_id });
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
-  }
-  async findAssignesByIndividual(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.individual", "ei")
-      .leftJoinAndSelect("e.generalOffer", "eg")
-      .leftJoinAndSelect("e.shared", "es")
-      .leftJoinAndSelect("e.deskarea", "ed")
-      .leftJoinAndSelect("e.reservationRooms", "er")
-      .andWhere("ei.id = :individual_id", { individual_id: filterData.individual_id })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
-  }
-  async findAssignesByCompany(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.company", "ec")
-      .leftJoinAndSelect("e.generalOffer", "eg")
-      .leftJoinAndSelect("e.shared", "es")
-      .leftJoinAndSelect("e.deskarea", "ed")
-      .leftJoinAndSelect("e.reservationRooms", "er")
-      .andWhere("ec.id = :company_id", { company_id: filterData.company_id })
-      .leftJoin("e.createdBy", "ecr")
-      .addSelect(["ecr.id", "ecr.firstName", "ecr.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
-  }
-  async findAssignesByStudentActivity(filterData: any) {
-    const queryBuilder = this.apiFeaturesService
-      .setRepository(AssignGeneralOffer)
-      .buildQuery(filterData);
-
-    queryBuilder
-      .leftJoinAndSelect("e.studentActivity", "es")
-      .leftJoinAndSelect("e.generalOffer", "eg")
-      .leftJoinAndSelect("e.shared", "ess")
-      .leftJoinAndSelect("e.deskarea", "ed")
-      .leftJoinAndSelect("e.reservationRooms", "er")
-      .andWhere("es.id = :studentActivity_id", {
-        studentActivity_id: filterData.studentActivity_id,
-      })
-      .leftJoin("e.createdBy", "ec")
-      .addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
-
-    const filteredRecord = await queryBuilder.getMany();
-    const totalRecords = await queryBuilder.getCount();
-
-    const results = {
-      data: filteredRecord,
-      recordsFiltered: filteredRecord.length,
-      totalRecords: +totalRecords,
-    };
-
-    return results;
-  }
-
-  // Update a record
-  async update(updateAssignGeneralOfferDto: UpdateAssignGeneralOfferDto) {
-    await this.assignGeneralOfferRepository.update(
-      updateAssignGeneralOfferDto.id,
-      updateAssignGeneralOfferDto,
-    );
-    return this.assignGeneralOfferRepository.findOne({
-      where: { id: updateAssignGeneralOfferDto.id },
+    return this.findRelatedEntities(filterData, {
+      relationPath: "createdBy",
+      alias: "user",
+      selectFields: ["id", "firstName", "lastName"],
+      filterField: "user_id",
     });
   }
 
-  // Delete a record
-  async remove(id: number) {
-    await this.assignGeneralOfferRepository.delete(id);
+  async findAssignesByIndividual(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "individual",
+      alias: "individual",
+      selectFields: ["id", "name"],
+      filterField: "individual_id",
+    });
+  }
+
+  async findAssignesByCompany(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "company",
+      alias: "company",
+      selectFields: ["id", "name"],
+      filterField: "company_id",
+    });
+  }
+
+  async findAssignesByStudentActivity(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      relationPath: "studentActivity",
+      alias: "studentActivity",
+      selectFields: ["id", "name"],
+      filterField: "studentActivity_id",
+    });
   }
 }

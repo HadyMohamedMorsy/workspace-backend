@@ -1,10 +1,12 @@
 import { Deals } from "src/deals/deals.entity";
 import { OfferPackages } from "src/offer-packages/offer-package.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { User } from "src/users/user.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Room {
+export class Room extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,21 +22,20 @@ export class Room {
   @Column()
   price: number;
 
-  @Column({ type: "text" })
+  @Column({ type: "text", nullable: true })
   note: string;
 
   @OneToMany(() => OfferPackages, offerPackages => offerPackages.room)
   offersRoom: OfferPackages[];
 
-  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.room)
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.room, {
+    onDelete: "CASCADE",
+  })
   reservationRoom: ReservationRoom[];
 
   @OneToMany(() => Deals, deals => deals.room)
-  deal_room: OfferPackages[];
+  deal_room: Deals[];
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
+  createdBy: User;
 }

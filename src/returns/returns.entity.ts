@@ -1,5 +1,13 @@
 import { Product } from "src/products/product.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { User } from "src/users/user.entity";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from "typeorm";
 
 @Entity()
 export class Returns {
@@ -39,6 +47,10 @@ export class Returns {
 
   @Column({ type: "text", nullable: true })
   note: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: "createdById" })
+  createdBy: User;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;

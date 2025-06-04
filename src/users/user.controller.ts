@@ -2,31 +2,58 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
+  Patch,
   Post,
+  Put,
+  Query,
+  Req,
   UseGuards,
-  UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { Auth } from "src/shared/decorators/auth.decorator";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
-import { AuthType, Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
+import { Permission, Resource } from "src/shared/enum/global-enum";
+import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
-import { CreateUserDto } from "./dtos/create-user.dto";
+import { UserDto } from "./dtos/create-user.dto";
 import { PatchUserDto } from "./dtos/patch-user.dto";
 import { UserService } from "./user.service";
 
 @UseGuards(AuthorizationGuard)
 @Controller("user")
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+export class UserController implements SelectOptions, RelationOptions {
+  constructor(private readonly service: UserService) {}
+
+  public selectOptions(): Record<string, boolean> {
+    return {
+      id: true,
+      created_at: true,
+      updated_at: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      username: true,
+      phone: true,
+      role: true,
+      status: true,
+      annual_start: true,
+      annual_increase: true,
+      permission: true,
+    };
+  }
+
+  public getRelationOptions(): Record<string, any> {
+    return {
+      createdBy: {
+        id: true,
+        firstName: true,
+        lastName: true,
+      },
+    };
+  }
 
   @Post("/index")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.User,
@@ -34,44 +61,70 @@ export class UserController {
     },
   ])
   public index(@Body() filterQueryDto: any) {
-    return this.userService.findAll(filterQueryDto);
+    return this.service.findAll(filterQueryDto);
+  }
+
+  @Get("/permission")
+  public permission(@Query("id") id: number) {
+    return this.service.permission(id);
   }
 
   @Post("/store")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.User,
       actions: [Permission.CREATE],
     },
   ])
-  public createUsers(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+  public create(@Body() userDto: UserDto, @Req() req: Request) {
+    return this.service.create(
+      {
+        firstName: userDto.firstName,
+        lastName: userDto.lastName,
+        email: userDto.email,
+        username: userDto.username,
+        role: userDto.role,
+        password: req["password"],
+        phone: userDto.phone,
+        annual_start: userDto.annual_start,
+        annual_increase: userDto.annual_increase,
+        permission: req["permission"] || userDto.permission,
+        createdBy: req["createdBy"],
+      } as UserDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
-  @Post("/store-tech")
-  @UseInterceptors(DeleteCacheInterceptor)
-  @Auth(AuthType.None)
-  public createByTechUsers(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
-  }
-
-  @Post("/update")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
+  @Put("/update")
   @Permissions([
     {
       resource: Resource.User,
       actions: [Permission.UPDATE],
     },
   ])
-  public async updateUsers(@Body() updateProductDto: PatchUserDto) {
-    return await this.userService.updateUser(updateProductDto);
+  public async update(@Body() updateProductDto: PatchUserDto, @Req() req: Request) {
+    const updateData: PatchUserDto = {
+      id: updateProductDto.id,
+      firstName: updateProductDto.firstName,
+      lastName: updateProductDto.lastName,
+      email: updateProductDto.email,
+      username: updateProductDto.username,
+      role: updateProductDto.role,
+      phone: updateProductDto.phone,
+      annual_start: updateProductDto.annual_start,
+      status: updateProductDto.status,
+      annual_increase: updateProductDto.annual_increase,
+      permission: updateProductDto.permission,
+      createdBy: req["createdBy"],
+    };
+    if (req["password"]) updateData.password = req["password"];
+    if (req["permission"]) updateData.permission = req["permission"];
+
+    return await this.service.update(updateData, this.selectOptions(), this.getRelationOptions());
   }
 
   @Delete("/delete")
-  @ClearCacheAnotherModules(["/api/v1/lists"])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.User,
@@ -79,6 +132,20 @@ export class UserController {
     },
   ])
   public delete(@Body() id: number) {
-    return this.userService.delete(id);
+    return this.service.delete(id);
+  }
+
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.User,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
   }
 }

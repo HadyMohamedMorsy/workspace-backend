@@ -10,6 +10,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -20,6 +21,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -30,6 +32,7 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {

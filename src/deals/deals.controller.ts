@@ -3,18 +3,14 @@ import {
   Controller,
   Delete,
   HttpCode,
+  Patch,
   Post,
+  Put,
   Req,
   UseGuards,
-  UseInterceptors,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
-import { ClearCacheAnotherModules } from "src/shared/decorators/clear-cache.decorator";
 import { Permission, Resource } from "src/shared/enum/global-enum";
-import { ClearCacheAnotherModulesIsnterceptor } from "src/shared/interceptor/caching-delete-antoher-modeule.interceptor";
-import { DeleteCacheInterceptor } from "src/shared/interceptor/caching-delete-response.interceptor";
-import { CachingInterceptor } from "src/shared/interceptor/caching-response.interceptor";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { DealsService } from "./deals.service";
 import { CreateDealsDto } from "./dto/create-deals.dto";
@@ -23,11 +19,22 @@ import { UpdateDealsDto } from "./dto/update-deals.dto";
 @UseGuards(AuthorizationGuard)
 @Controller("deals")
 export class DealsController {
-  constructor(private readonly dealsService: DealsService) {}
+  constructor(private readonly service: DealsService) {}
+
+  @Post("/index")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.Deals,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findAll(@Body() filterQueryDto: any) {
+    return this.service.findAll(filterQueryDto);
+  }
 
   @Post("/individual")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
@@ -35,12 +42,11 @@ export class DealsController {
     },
   ])
   async findIndividuaDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByIndividualAll(filterQueryDto);
+    return this.service.findDealsByIndividualAll(filterQueryDto);
   }
 
   @Post("/studentActivity")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
@@ -48,12 +54,11 @@ export class DealsController {
     },
   ])
   async findStudentDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByStudentActivityAll(filterQueryDto);
+    return this.service.findDealsByStudentActivityAll(filterQueryDto);
   }
 
   @Post("/company")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
@@ -61,12 +66,11 @@ export class DealsController {
     },
   ])
   async findCompanyDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByComapnyAll(filterQueryDto);
+    return this.service.findDealsByComapnyAll(filterQueryDto);
   }
 
   @Post("/user")
   @HttpCode(200)
-  @UseInterceptors(CachingInterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
@@ -74,19 +78,10 @@ export class DealsController {
     },
   ])
   async findUserDealsAll(@Body() filterQueryDto: any) {
-    return this.dealsService.findDealsByUserAll(filterQueryDto);
+    return this.service.findDealsByUserAll(filterQueryDto);
   }
 
   @Post("/store")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-package",
-    "/api/v1/deals",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
@@ -94,76 +89,103 @@ export class DealsController {
     },
   ])
   async create(@Body() createDealsDto: CreateDealsDto, @Req() req: Request) {
-    const customer = req["customer"];
-    const createdBy = req["createdBy"];
-    return await this.dealsService.create(createDealsDto, {
-      customer,
-      createdBy,
+    return await this.service.create({
+      hours: +createDealsDto.hours,
+      start_date: createDealsDto.start_date,
+      end_date: createDealsDto.end_date,
+      total_price: +req["total_price"],
+      used: 0,
+      total_used: +createDealsDto.hours,
+      remaining: +createDealsDto.hours,
+      status: createDealsDto.status,
+      price_hour: +createDealsDto.price_hour,
+      payment_method: createDealsDto.payment_method,
+      room: req["room"],
+      assignGeneralOffer: req["assignGeneralOffer"],
+      individual: req["individual"],
+      company: req["company"],
+      studentActivity: req["studentActivity"],
+      createdBy: req["createdBy"],
+    } as CreateDealsDto);
+  }
+
+  @Put("/update")
+  @Permissions([
+    {
+      resource: Resource.Deals,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async update(@Body() update: UpdateDealsDto, @Req() req: Request) {
+    return await this.service.update({
+      id: update.id,
+      deposites: update.deposites,
+      hours: +update.hours,
+      start_date: update.start_date,
+      end_date: update.end_date,
+      total_price: +req["total_price"],
+      status: update.status,
+      price_hour: +update.price_hour,
+      payment_method: update.payment_method,
+      room: req["room"],
+      assignGeneralOffer: req["assignGeneralOffer"],
+      individual: req["individual"],
+      company: req["company"],
+      studentActivity: req["studentActivity"],
+      createdBy: req["createdBy"],
     });
   }
 
-  @Post("/update")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-package",
-    "/api/v1/deals",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deals,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async update(@Body() updateDealsDto: UpdateDealsDto) {
-    return await this.dealsService.update(updateDealsDto);
-  }
-
-  @Post("/update-entity")
-  @ClearCacheAnotherModules([
-    "/api/v1/individual",
-    "/api/v1/company",
-    "/api/v1/studentActivity",
-    "/api/v1/user",
-    "/api/v1/assignes-package",
-    "/api/v1/deals",
-  ])
-  @UseInterceptors(DeleteCacheInterceptor, ClearCacheAnotherModulesIsnterceptor)
-  @Permissions([
-    {
-      resource: Resource.Deals,
-      actions: [Permission.UPDATE],
-    },
-  ])
-  async updateEntity(@Body() updateDealsDto: UpdateDealsDto) {
-    return await this.dealsService.updateEntity(updateDealsDto);
-  }
-
-  @Post("/store-deposite")
-  @UseInterceptors(DeleteCacheInterceptor)
+  @Post("/deposit")
   @Permissions([
     {
       resource: Resource.Deposite,
       actions: [Permission.CREATE],
     },
   ])
-  async createDeposite(@Body() createDealsDto: CreateDepositeDto, @Req() req: Request) {
-    const createdBy = req["createdBy"];
-    return await this.dealsService.createDeposite(createDealsDto, createdBy);
+  async createDeposite(@Body() createDealsDto: { deal_id: number }, @Req() req: Request) {
+    return await this.service.update({
+      id: createDealsDto.deal_id,
+      deposites: req["deposite"],
+    });
+  }
+
+  @Patch("/change-payment-method")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
+  }
+
+  @Patch("/change-status")
+  @Permissions([
+    {
+      resource: Resource.Deals,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeStatus(@Body() update: { id: number; status: boolean }) {
+    return this.service.changeStatus(update.id, update.status, "status", {
+      id: true,
+      status: true,
+    });
   }
 
   @Delete("/delete")
-  @UseInterceptors(DeleteCacheInterceptor)
   @Permissions([
     {
       resource: Resource.Deals,
       actions: [Permission.DELETE],
     },
   ])
-  async remove(@Body() bodyDelete: { id: number }): Promise<void> {
-    return this.dealsService.remove(bodyDelete.id);
+  async delete(@Body() id: number) {
+    return this.service.delete(id);
   }
 }
