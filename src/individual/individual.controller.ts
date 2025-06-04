@@ -261,23 +261,29 @@ export class IndividualController implements SelectOptions, RelationOptions {
 
   @Post("/import")
   @HttpCode(200)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor("file"))
   @Permissions([
     {
       resource: Resource.Individual,
       actions: [Permission.IMPORT],
     },
   ])
-  async importIndividuals(@UploadedFile() file: Express.Multer.File) {
-    return this.service.importFromExcel(file.path, {
-      requiredFields: ['name', 'number', 'whatsApp', 'individual_type'],
-      fieldMappings: {
-        'Name': 'name',
-        'Number': 'number',
-        'WhatsApp': 'whatsApp',
-        'Individual Type': 'individual_type'
+  async importIndividuals(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return this.service.importFromExcel(
+      file.buffer,
+      {
+        requiredFields: ["name", "number", "whatsApp", "individual_type", "nationality"],
+        fieldMappings: {
+          Name: "name",
+          Number: "number",
+          WhatsApp: "whatsApp",
+          "Individual Type": "individual_type",
+          Nationality: "nationality",
+        },
+        findKey: "number",
       },
-      findKey: 'number'
-    });
+      createdBy,
+    );
   }
 }

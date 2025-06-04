@@ -142,3 +142,10 @@ export enum DiscountType {
   PERCENTAGE = "percentage",
   AMOUNT = "amount",
 }
+
+export enum type_work {
+  STUDENT = "student",
+  EMPLOYED = "employed",
+  FREELANCER = "freelancer",
+  OTHER = "other",
+}

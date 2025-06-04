@@ -88,7 +88,7 @@ export class UserController implements SelectOptions, RelationOptions {
         phone: userDto.phone,
         annual_start: userDto.annual_start,
         annual_increase: userDto.annual_increase,
-        permission: req["permission"],
+        permission: req["permission"] || userDto.permission,
         createdBy: req["createdBy"],
       } as UserDto,
       this.selectOptions(),
@@ -115,7 +115,7 @@ export class UserController implements SelectOptions, RelationOptions {
       annual_start: updateProductDto.annual_start,
       status: updateProductDto.status,
       annual_increase: updateProductDto.annual_increase,
-      permission: req["permission"],
+      permission: updateProductDto.permission,
       createdBy: req["createdBy"],
     };
     if (req["password"]) updateData.password = req["password"];

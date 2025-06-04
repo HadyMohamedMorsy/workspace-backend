@@ -266,26 +266,39 @@ export class CompanyController implements SelectOptions, RelationOptions {
 
   @Post("/import")
   @HttpCode(200)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor("file"))
   @Permissions([
     {
       resource: Resource.Company,
       actions: [Permission.IMPORT],
     },
   ])
-  async importCompany(@UploadedFile() file: Express.Multer.File) {
-    return this.service.importFromExcel(file.path, {
-      requiredFields: ['name', 'phone', 'city', 'company_type' , 'nationality' , 'email' , 'whatsApp'],
-      fieldMappings: {
-        'Name': 'name',
-        'Phone': 'phone',
-        'City': 'city',
-        'Company Type': 'company_type',
-        'Nationality': 'nationality',
-        'Email': 'email',
-        'WhatsApp': 'whatsApp',
+  async importCompany(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return this.service.importFromExcel(
+      file.buffer,
+      {
+        requiredFields: [
+          "name",
+          "phone",
+          "city",
+          "company_type",
+          "nationality",
+          "email",
+          "whatsApp",
+        ],
+        fieldMappings: {
+          Name: "name",
+          Phone: "phone",
+          City: "city",
+          "Company Type": "company_type",
+          Nationality: "nationality",
+          Email: "email",
+          WhatsApp: "whatsApp",
+        },
+        findKey: "phone",
       },
-      findKey: 'phone'
-    });
+      createdBy,
+    );
   }
 }

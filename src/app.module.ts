@@ -1,4 +1,3 @@
-import { BullModule } from '@nestjs/bull';
 import { CacheModule } from "@nestjs/cache-manager";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -134,15 +133,6 @@ const ENV = process.env.NODE_ENV;
     }),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
-    BullModule.forRoot({
-      redis: {
-        host: 'localhost',
-        port: 6379,
-      },
-    }),
-    BullModule.registerQueue({
-      name: 'excel-import',
-    }),
   ],
   controllers: [AppController],
   providers: [
@@ -162,6 +152,6 @@ const ENV = process.env.NODE_ENV;
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
-    consumer.apply(UserMiddleware).exclude("auth/login", "user/store-tech").forRoutes("*");
+    consumer.apply(UserMiddleware).exclude("auth/login").forRoutes("*");
   }
 }

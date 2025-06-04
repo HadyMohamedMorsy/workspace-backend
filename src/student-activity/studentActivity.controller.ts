@@ -232,23 +232,28 @@ export class StudentActivityController implements SelectOptions, RelationOptions
 
   @Post("/import")
   @HttpCode(200)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor("file"))
   @Permissions([
     {
       resource: Resource.StudentActivity,
       actions: [Permission.IMPORT],
     },
   ])
-  async importStudentActivity(@UploadedFile() file: Express.Multer.File) {
-    return this.service.importFromExcel(file.path, {
-      requiredFields: ['name', 'university', 'college', 'subjects'],
-      fieldMappings: {
-        'Name': 'name',
-        'University': 'university',
-        'College': 'college',
-        'Subjects': 'subjects',
+  async importStudentActivity(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return this.service.importFromExcel(
+      file.buffer,
+      {
+        requiredFields: ["name", "university", "college", "subjects"],
+        fieldMappings: {
+          Name: "name",
+          University: "university",
+          College: "college",
+          Subjects: "subjects",
+        },
+        findKey: "name",
       },
-      findKey: 'name'
-    });
+      createdBy,
+    );
   }
 }
