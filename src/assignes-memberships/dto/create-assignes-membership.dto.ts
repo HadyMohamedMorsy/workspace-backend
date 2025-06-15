@@ -40,6 +40,11 @@ export class CreateAssignesMembershipDto {
   @IsOptional()
   offer_id?: number;
 
+  @IsInt()
+  @Type(() => Number)
+  @IsOptional()
+  start_deposite?: number;
+
   @IsOptional()
   @Type(() => Number)
   used: number;

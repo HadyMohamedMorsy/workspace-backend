@@ -46,5 +46,5 @@ export interface Room {
   total_time: number;
   offer_type: string;
   discount_amount: number;
-  is_full_day: boolean;
+  original_price: number;
 }

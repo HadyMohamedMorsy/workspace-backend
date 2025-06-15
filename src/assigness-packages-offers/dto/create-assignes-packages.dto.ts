@@ -52,6 +52,10 @@ export class CreateAssignesPackageDto {
   @IsNotEmpty()
   total_price: number;
 
+  @IsOptional()
+  @Type(() => Number)
+  start_deposite?: number;
+
   @IsInt()
   @Type(() => Number)
   @IsOptional()

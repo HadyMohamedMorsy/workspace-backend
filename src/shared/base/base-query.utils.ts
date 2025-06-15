@@ -11,14 +11,32 @@ export abstract class BaseQueryUtils<T> {
         const pathParts = relationPath.split(".");
         const alias = pathParts[pathParts.length - 1];
 
-        const joinPath =
-          pathParts.length > 1 ? `${pathParts.slice(0, -1).join(".")}.${alias}` : `e.${alias}`;
+        let joinPath;
+        if (pathParts.length > 1) {
+          joinPath = `${pathParts.slice(0, -1).join(".")}.${alias}`;
+        } else {
+          joinPath = `e.${alias}`;
+        }
 
         queryBuilder.leftJoin(joinPath, alias);
 
         Object.entries(fields).forEach(([key, value]) => {
           if (typeof value === "object" && !Array.isArray(value)) {
-            processRelation(`${relationPath}.${key}`, value);
+            const nestedPath = `${alias}.${key}`;
+            queryBuilder.leftJoin(nestedPath, key);
+
+            Object.entries(value).forEach(([nestedKey, nestedValue]) => {
+              if (typeof nestedValue === "object" && !Array.isArray(nestedValue)) {
+                const deepPath = `${key}.${nestedKey}`;
+                queryBuilder.leftJoin(deepPath, nestedKey);
+
+                Object.keys(nestedValue).forEach(deepKey => {
+                  queryBuilder.addSelect(`${nestedKey}.${deepKey}`);
+                });
+              } else {
+                queryBuilder.addSelect(`${key}.${nestedKey}`);
+              }
+            });
           } else {
             queryBuilder.addSelect(`${alias}.${key}`);
           }

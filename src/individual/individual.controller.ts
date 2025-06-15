@@ -119,6 +119,10 @@ export class IndividualController implements SelectOptions, RelationOptions {
             name: true,
             type: true,
           },
+          deposites: {
+            id: true,
+            total_price: true,
+          },
         },
       },
       undefined,
@@ -148,6 +152,14 @@ export class IndividualController implements SelectOptions, RelationOptions {
           packages: {
             id: true,
             name: true,
+            room: {
+              id: true,
+              name: true,
+            },
+          },
+          deposites: {
+            id: true,
+            total_price: true,
           },
         },
       },
@@ -179,6 +191,10 @@ export class IndividualController implements SelectOptions, RelationOptions {
           room: {
             id: true,
             name: true,
+          },
+          deposites: {
+            id: true,
+            total_price: true,
           },
         },
       },

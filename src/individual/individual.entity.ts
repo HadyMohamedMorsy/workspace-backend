@@ -44,7 +44,7 @@ export class Individual extends BaseMemberEntity {
   nationality: string;
 
   @OneToMany(() => Deals, deals => deals.individual)
-  deals: Deals;
+  deals: Deals[];
 
   @OneToMany(() => Order, order => order.individual)
   orders: Order;

@@ -30,7 +30,11 @@ export class DeskareaService
       .leftJoin("e.company", "eco")
       .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "esa")
-      .addSelect(["esa.id", "esa.name", "esa.unviresty"]);
+      .addSelect(["esa.id", "esa.name", "esa.unviresty"])
+      .leftJoin("e.assignGeneralOffer", "ego")
+      .addSelect(["ego.id"])
+      .leftJoin("ego.generalOffer", "egog")
+      .addSelect(["egog.id", "egog.type_discount", "egog.discount"]);
 
     if (filteredRecord?.search?.value) {
       queryBuilder.andWhere(`ei.name LIKE :name OR eco.name LIKE :name OR esa.name LIKE :name`, {

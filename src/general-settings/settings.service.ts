@@ -29,6 +29,6 @@ export class GeneralSettingsService
   }
 
   protected override response(data: GeneralSettings[]) {
-    return data[0];
+    return data[0] ? data[0] : null;
   }
 }

@@ -24,7 +24,6 @@ export class DepositeService
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
-      // Package relations
       .leftJoin("e.assignesPackages", "ea_assignespackages")
       .addSelect(["ea_assignespackages.id", "ea_assignespackages.total_price"])
       .leftJoin("ea_assignespackages.individual", "ea_pkg_individual")
@@ -34,7 +33,6 @@ export class DepositeService
       .leftJoin("ea_assignespackages.studentActivity", "ea_pkg_student")
       .addSelect(["ea_pkg_student.id", "ea_pkg_student.name"])
 
-      // Membership relations
       .leftJoin("e.assignessMemebership", "ea_assignessmemebership")
       .addSelect(["ea_assignessmemebership.id", "ea_assignessmemebership.total_price"])
       .leftJoin("ea_assignessmemebership.individual", "ea_mem_individual")
@@ -44,7 +42,6 @@ export class DepositeService
       .leftJoin("ea_assignessmemebership.studentActivity", "ea_mem_student")
       .addSelect(["ea_mem_student.id", "ea_mem_student.name"])
 
-      // Room reservation relations
       .leftJoin("e.reservationRooms", "ea_room")
       .addSelect(["ea_room.id", "ea_room.total_price"])
       .leftJoin("ea_room.individual", "ea_room_individual")
@@ -53,6 +50,7 @@ export class DepositeService
       .addSelect(["ea_room_company.id", "ea_room_company.name"])
       .leftJoin("ea_room.studentActivity", "ea_room_student")
       .addSelect(["ea_room_student.id", "ea_room_student.name"]);
+
     queryBuilder.addSelect(
       `CASE
         WHEN ea_assignespackages.id IS NOT NULL THEN ea_assignespackages.total_price
@@ -63,7 +61,6 @@ export class DepositeService
       "total_price",
     );
 
-    // Date filtering
     if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
         start_date: filteredRecord.customFilters.start_date,
@@ -71,7 +68,6 @@ export class DepositeService
       });
     }
 
-    // Search filtering
     if (filteredRecord?.search?.value) {
       const searchTerm = `%${filteredRecord.search?.value}%`;
       queryBuilder.andWhere(
@@ -82,15 +78,39 @@ export class DepositeService
             .orWhere("ea_mem_individual.name LIKE :search", { search: searchTerm })
             .orWhere("ea_mem_company.name LIKE :search", { search: searchTerm })
             .orWhere("ea_mem_student.name LIKE :search", { search: searchTerm })
-            .orWhere("eas_individual.name LIKE :search", { search: searchTerm })
-            .orWhere("eas_company.name LIKE :search", { search: searchTerm })
-            .orWhere("eas_student.name LIKE :search", { search: searchTerm })
-            .orWhere("er_individual.name LIKE :search", { search: searchTerm })
-            .orWhere("er_company.name LIKE :search", { search: searchTerm })
-            .orWhere("er_student.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_room_individual.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_room_company.name LIKE :search", { search: searchTerm })
+            .orWhere("ea_room_student.name LIKE :search", { search: searchTerm })
             .orWhere("CONCAT(ec.firstName, ' ', ec.lastName) LIKE :search", { search: searchTerm });
         }),
       );
     }
+  }
+
+  protected override response(data: Deposite[], totalRecords: number = 0) {
+    const getCustomerInfo = (assignment: any) => {
+      if (!assignment) return { customer_name: null, customer_id: null };
+
+      const customer = assignment.individual || assignment.company || assignment.studentActivity;
+      return {
+        customer_name: customer?.name || null,
+        customer_id: customer?.id || null,
+      };
+    };
+
+    const transformedData = data.map(deposit => {
+      const assignment =
+        deposit.assignesPackages || deposit.assignessMemebership || deposit.reservationRooms;
+      return {
+        ...deposit,
+        ...getCustomerInfo(assignment),
+      };
+    });
+
+    return {
+      data: transformedData,
+      recordsFiltered: data.length,
+      totalRecords: +totalRecords,
+    };
   }
 }

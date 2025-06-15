@@ -33,7 +33,11 @@ export class ReservationRoomService
       .leftJoin("e.studentActivity", "es")
       .addSelect(["es.id", "es.name", "es.unviresty"])
       .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id", "esdep.status", "esdep.total_price"]);
+      .addSelect(["esdep.id", "esdep.status", "esdep.total_price"])
+      .leftJoin("e.assignGeneralOffer", "ego")
+      .addSelect(["ego.id"])
+      .leftJoin("ego.generalOffer", "egog")
+      .addSelect(["egog.id", "egog.type_discount", "egog.discount"]);
 
     if (filteredRecord?.search?.value) {
       queryBuilder.andWhere(`ep.name LIKE :name OR ec.name LIKE :name OR es.name LIKE :name`, {

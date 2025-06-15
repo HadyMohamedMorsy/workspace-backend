@@ -41,14 +41,6 @@ export const calculateTotalTime = (
   });
 };
 
-export const getPricePerHour = (type: string, settings: any): number => {
-  return type === "shared" ? settings.price_shared : settings.price_deskarea;
-};
-
-export const getFullDayPrice = (type: string, settings: any): number => {
-  return type === "shared" ? settings.full_day_price_shared : settings.full_day_price_deskarea;
-};
-
 export const calculateDiscount = (price: number, offer?: Offer): number => {
   if (!offer) return 0;
 
@@ -57,15 +49,6 @@ export const calculateDiscount = (price: number, offer?: Offer): number => {
   }
 
   return offer.value;
-};
-
-export const calculatePrice = (data: any, totalTime: number, settings: any): number => {
-  const basePrice = data.is_full_day
-    ? getFullDayPrice(data.type, settings)
-    : getPricePerHour(data.type, settings) * totalTime;
-
-  const discount = calculateDiscount(basePrice, data.offer);
-  return basePrice - discount;
 };
 
 export const formatTimeFields = (data: any, createTime: TimeData): TimeFields => {
@@ -79,7 +62,7 @@ export const formatTimeFields = (data: any, createTime: TimeData): TimeFields =>
   };
 };
 
-export const formatTimeData = (data: any, dataPrice: any, priceRoom?: any) => {
+export const formatTimeData = (data: any, price?: any) => {
   const createTime = getCurrentTime();
   const timeFields = formatTimeFields(data, createTime);
   const totalTime = calculateTotalTime(
@@ -92,18 +75,15 @@ export const formatTimeData = (data: any, dataPrice: any, priceRoom?: any) => {
     data.is_full_day,
   );
 
-  const basePrice = data.is_full_day
-    ? getFullDayPrice(data.type, dataPrice)
-    : getPricePerHour(data.type, dataPrice) * totalTime;
-
+  const basePrice = data.is_full_day ? price : price * totalTime;
   const discount = calculateDiscount(basePrice, data.offer);
-  const finalPrice = (priceRoom ? priceRoom : basePrice) - discount;
+  const finalPrice = basePrice - discount;
 
   return {
     id: data.id,
     ...timeFields,
     total_price: finalPrice,
-    original_price: priceRoom || basePrice,
+    original_price: price,
     discount_amount: discount,
     total_time: totalTime,
     is_full_day: data.is_full_day,
@@ -128,9 +108,9 @@ export const formatOrderData = (order: any) => {
   };
 };
 
-export const formatRoomData = (room: any, roomData: any) => {
+export const formatRoomData = (room: any, price: number) => {
   return {
-    ...formatTimeData(room, roomData, roomData.price),
+    ...formatTimeData(room, price),
     is_full_day: false,
   };
 };
@@ -145,3 +125,51 @@ export const formatOfferData = (item: any) => {
     value: generalOffer.discount,
   };
 };
+
+export function getPriceCoWorkingSpace(item: any, type: string, settings: any): number {
+  const isShared = type === "shared";
+
+  const priceKey = isShared
+    ? item.is_full_day
+      ? "full_day_price_shared"
+      : "price_shared"
+    : item.is_full_day
+      ? "full_day_price_deskarea"
+      : "price_deskarea";
+
+  return +settings[priceKey];
+}
+
+export function formatItem(
+  item: any,
+  type: string,
+  settings: any,
+  hasMembership: boolean,
+  membershipType: string,
+) {
+  const data = formatTimeData(
+    { ...item, type, offer: formatOfferData(item) },
+    getPriceCoWorkingSpace(item, type, settings),
+  );
+  const isMembershipType = membershipType === type;
+  return {
+    ...data,
+    total_price: hasMembership && isMembershipType ? 0 : +data.total_price,
+    original_price: hasMembership && isMembershipType ? 0 : +data.original_price,
+    is_membership: hasMembership && isMembershipType ? "yes" : "no",
+  };
+}
+
+export function formatRoom(room: any, hasPackage: boolean, hasDeal: boolean) {
+  const data = formatRoomData(
+    { ...room, type: "room", offer: formatOfferData(room) },
+    +room.room.price,
+  );
+  return {
+    ...data,
+    total_price: hasPackage || hasDeal ? 0 : +data.total_price,
+    original_price: hasPackage || hasDeal ? 0 : +data.original_price,
+    is_package: hasPackage ? "yes" : "no",
+    is_deal: hasDeal ? "yes" : "no",
+  };
+}

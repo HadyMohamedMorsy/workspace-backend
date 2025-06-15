@@ -45,6 +45,10 @@ export class CreateDealsDto {
   @IsAfter("start_date")
   end_date: string;
 
+  @IsOptional()
+  @Type(() => Number)
+  start_deposite?: number;
+
   @IsNumber()
   @Type(() => Number)
   @IsOptional()
