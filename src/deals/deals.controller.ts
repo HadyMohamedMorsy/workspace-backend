@@ -10,6 +10,8 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
+import { DepositeService } from "src/deposit/deposites.service";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { Permissions } from "../shared/decorators/permissions.decorator";
 import { DealsService } from "./deals.service";
@@ -19,7 +21,10 @@ import { UpdateDealsDto } from "./dto/update-deals.dto";
 @UseGuards(AuthorizationGuard)
 @Controller("deals")
 export class DealsController {
-  constructor(private readonly service: DealsService) {}
+  constructor(
+    private readonly service: DealsService,
+    private readonly depositeService: DepositeService,
+  ) {}
 
   @Post("/index")
   @HttpCode(200)
@@ -89,7 +94,7 @@ export class DealsController {
     },
   ])
   async create(@Body() createDealsDto: CreateDealsDto, @Req() req: Request) {
-    return await this.service.create({
+    const deal = await this.service.create({
       hours: +createDealsDto.hours,
       start_date: createDealsDto.start_date,
       end_date: createDealsDto.end_date,
@@ -107,6 +112,21 @@ export class DealsController {
       studentActivity: req["studentActivity"],
       createdBy: req["createdBy"],
     } as CreateDealsDto);
+
+    if (createDealsDto.start_deposite) {
+      const deposite = await this.depositeService.create({
+        total_price: createDealsDto.start_deposite,
+        deal: deal,
+        createdBy: req["createdBy"],
+      } as CreateDepositeDto);
+
+      await this.service.update({
+        id: deal.id,
+        deposites: deposite,
+      });
+    }
+
+    return deal;
   }
 
   @Put("/update")

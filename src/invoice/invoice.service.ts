@@ -4,8 +4,7 @@ import { OrdersService } from "src/orders/orders.service";
 import { DeskareaService } from "src/reservations/deskarea/deskarea.service";
 import {
   calculateDiscount,
-  getFullDayPrice,
-  getPricePerHour,
+  getPriceCoWorkingSpace,
   Offer,
 } from "src/reservations/helpers/client.utils";
 import { ReservationRoomService } from "src/reservations/rooms/reservation-room.service";
@@ -41,9 +40,7 @@ export class InvoiceService {
     if (invoice.shared?.length) {
       await Promise.all(
         invoice.shared.map(async shared => {
-          const basePrice = shared.is_full_day
-            ? getFullDayPrice("shared", settings)
-            : getPricePerHour("shared", settings) * shared.total_time;
+          const basePrice = getPriceCoWorkingSpace(shared, "shared", settings) * shared.total_time;
 
           const discount = calculateDiscount(basePrice, {
             id: shared.id.toString(),
@@ -70,9 +67,8 @@ export class InvoiceService {
     if (invoice.deskarea?.length) {
       await Promise.all(
         invoice.deskarea.map(async deskarea => {
-          const basePrice = deskarea.is_full_day
-            ? getFullDayPrice("deskarea", settings)
-            : getPricePerHour("deskarea", settings) * deskarea.total_time;
+          const basePrice =
+            getPriceCoWorkingSpace(deskarea, "deskarea", settings) * deskarea.total_time;
 
           const discount = calculateDiscount(basePrice, {
             id: deskarea.id.toString(),
@@ -98,9 +94,7 @@ export class InvoiceService {
     if (invoice.room?.length) {
       await Promise.all(
         invoice.room.map(async room => {
-          const basePrice = room.is_full_day
-            ? getFullDayPrice("room", settings)
-            : getPricePerHour("room", settings) * room.total_time;
+          const basePrice = +room.original_price * room.total_time;
 
           const discount = calculateDiscount(basePrice, {
             id: room.id.toString(),

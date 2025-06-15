@@ -34,10 +34,10 @@ export class Returns {
   @Column({ nullable: true })
   weight_product: number;
 
-  @Column()
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   return_qty: number;
 
-  @Column()
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   total: number;
 
   @ManyToOne(() => Product, product => product.purchases, {

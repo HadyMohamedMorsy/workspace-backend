@@ -14,6 +14,8 @@ import {
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DealsService } from "src/deals/deals.service";
+import { DepositeService } from "src/deposit/deposites.service";
+import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { formatDate } from "src/reservations/helpers/utitlties";
 import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -35,6 +37,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     private readonly packageRooms: AssignesPackagesService,
     private readonly queryService: ReservationRoomQueryService,
     private readonly calendarService: ReservationCalendarService,
+    private readonly depositeService: DepositeService,
   ) {}
 
   public selectOptions(): Record<string, boolean> {
@@ -173,7 +176,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     },
   ])
   async create(@Body() createDto: CreateReservationRoomDto, @Req() req: Request) {
-    return await this.service.create(
+    const reservationRoom = await this.service.create(
       {
         status: ReservationStatus.ACTIVE,
         individual: req["individual"],
@@ -182,6 +185,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
         assignGeneralOffer: req["assignGeneralOffer"],
         room: req["room"],
         deposites: req["deposite"],
+        total_price: req["totalPrice"],
         deals: req["deal"],
         assignesPackages: req["assignPackage"],
         selected_day: formatDate(createDto.selected_day),
@@ -196,6 +200,20 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       this.selectOptions(),
       this.getRelationOptions(),
     );
+
+    if (createDto.start_deposite) {
+      const deposite = await this.depositeService.create({
+        total_price: createDto.start_deposite,
+        reservationRoom: reservationRoom,
+      } as CreateDepositeDto);
+
+      await this.service.update({
+        id: reservationRoom.id,
+        deposites: deposite,
+      });
+    }
+
+    return reservationRoom;
   }
 
   @Put("/update")

@@ -117,6 +117,10 @@ export class CompanyController implements SelectOptions, RelationOptions {
             name: true,
             type: true,
           },
+          deposites: {
+            id: true,
+            total_price: true,
+          },
         },
       },
       undefined,
@@ -146,6 +150,10 @@ export class CompanyController implements SelectOptions, RelationOptions {
           packages: {
             id: true,
             name: true,
+          },
+          deposites: {
+            id: true,
+            total_price: true,
           },
         },
       },
@@ -177,6 +185,10 @@ export class CompanyController implements SelectOptions, RelationOptions {
           room: {
             id: true,
             name: true,
+          },
+          deposites: {
+            id: true,
+            total_price: true,
           },
         },
       },

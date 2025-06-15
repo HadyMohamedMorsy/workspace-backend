@@ -69,6 +69,11 @@ export class CreateReservationRoomDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
+  start_deposite: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   package_id: number;
 
   @IsNumber()
