@@ -12,6 +12,9 @@ export class ExpensePlaceChild extends BaseMemberEntity {
   cost: number;
 
   @Column({ nullable: true })
+  note: string;
+
+  @Column({ nullable: true })
   featured_image: string;
 
   @ManyToOne(() => ExpensePlace, expense => expense.expensePlaceChild, {

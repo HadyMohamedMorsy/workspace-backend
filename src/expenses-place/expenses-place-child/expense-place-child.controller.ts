@@ -17,6 +17,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
       id: true,
       cost: true,
       featured_image: true,
+      note: true,
       created_at: true,
       updated_at: true,
     };
@@ -59,6 +60,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
     return await this.service.create(
       {
         cost: create.cost,
+        note: create.note,
         featured_image: create.featured_image,
         expensePlace: req["expensePlace"],
         createdBy: req["createdBy"],
@@ -80,6 +82,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
       {
         id: update.id,
         cost: update.cost,
+        note: update.note,
         featured_image: update.featured_image,
         expensePlace: req["expensePlace"],
         createdBy: req["createdBy"],

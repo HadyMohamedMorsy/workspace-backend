@@ -11,6 +11,9 @@ export class RevenueChild extends BaseMemberEntity {
   @Column()
   amount: number;
 
+  @Column({ nullable: true })
+  note: string;
+
   @ManyToOne(() => Revenue, revenue => revenue.revenueChild, {
     onDelete: "CASCADE",
   })

@@ -13,6 +13,10 @@ export class CreateExpensePlaceChildDto {
   @IsOptional()
   featured_image: string;
 
+  @IsString()
+  @IsOptional()
+  note: string;
+
   @IsNumber()
   @Type(() => Number)
   expensePlace_id: number;
