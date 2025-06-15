@@ -7,6 +7,7 @@ import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { type_work } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -24,8 +25,8 @@ export class Individual extends BaseMemberEntity {
   @Column({ unique: true, nullable: true })
   whatsApp: string;
 
-  @Column({ default: "freelancer" })
-  individual_type: string;
+  @Column({ enum: type_work, default: type_work.FREELANCER })
+  individual_type: type_work;
 
   @Column({ nullable: true })
   employed_job: string;

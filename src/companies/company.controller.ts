@@ -10,8 +10,11 @@ import {
   Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
@@ -271,5 +274,43 @@ export class CompanyController implements SelectOptions, RelationOptions {
   ])
   async delete(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Post("/import")
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor("file"))
+  @Permissions([
+    {
+      resource: Resource.Company,
+      actions: [Permission.IMPORT],
+    },
+  ])
+  async importCompany(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return this.service.importFromExcel(
+      file.buffer,
+      {
+        requiredFields: [
+          "name",
+          "phone",
+          "city",
+          "company_type",
+          "nationality",
+          "email",
+          "whatsApp",
+        ],
+        fieldMappings: {
+          Name: "name",
+          Phone: "phone",
+          City: "city",
+          "Company Type": "company_type",
+          Nationality: "nationality",
+          Email: "email",
+          WhatsApp: "whatsApp",
+        },
+        findKey: "phone",
+      },
+      createdBy,
+    );
   }
 }

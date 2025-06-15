@@ -152,6 +152,6 @@ const ENV = process.env.NODE_ENV;
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LanMiddleware).forRoutes("*");
-    consumer.apply(UserMiddleware).exclude("auth/login", "user/store-tech").forRoutes("*");
+    consumer.apply(UserMiddleware).exclude("auth/login").forRoutes("*");
   }
 }

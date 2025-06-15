@@ -92,6 +92,7 @@ export enum Permission {
   DELETE = "delete",
   VIEW = "view",
   INDEX = "index",
+  IMPORT = "import",
   UPDATE_PERMISSION = "update-permissions",
 }
 
@@ -140,4 +141,11 @@ export enum UserStatus {
 export enum DiscountType {
   PERCENTAGE = "percentage",
   AMOUNT = "amount",
+}
+
+export enum type_work {
+  STUDENT = "student",
+  EMPLOYED = "employed",
+  FREELANCER = "freelancer",
+  OTHER = "other",
 }

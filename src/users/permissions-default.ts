@@ -26,6 +26,7 @@ export const TECHNICALSUPPORT: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -36,6 +37,7 @@ export const TECHNICALSUPPORT: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -46,6 +48,7 @@ export const TECHNICALSUPPORT: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -262,6 +265,7 @@ export const GENERALMANGER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -272,6 +276,7 @@ export const GENERALMANGER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -282,6 +287,7 @@ export const GENERALMANGER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -494,6 +500,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -504,6 +511,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -514,6 +522,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -524,6 +533,7 @@ export const OPERATIONMANGER: PermissionsUser[] = [
       Permission.VIEW,
       Permission.DELETE,
       Permission.INDEX,
+      Permission.UPDATE_PERMISSION,
     ],
   },
 ];
@@ -627,6 +637,7 @@ export const FOUNDER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -637,6 +648,7 @@ export const FOUNDER: PermissionsUser[] = [
       Permission.DELETE,
       Permission.VIEW,
       Permission.INDEX,
+      Permission.IMPORT,
     ],
   },
   {
@@ -657,6 +669,7 @@ export const FOUNDER: PermissionsUser[] = [
       Permission.VIEW,
       Permission.DELETE,
       Permission.INDEX,
+      Permission.UPDATE_PERMISSION,
     ],
   },
 ];

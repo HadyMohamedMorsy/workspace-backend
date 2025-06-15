@@ -8,8 +8,11 @@ import {
   Post,
   Put,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -237,5 +240,32 @@ export class StudentActivityController implements SelectOptions, RelationOptions
   ])
   async remove(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Post("/import")
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor("file"))
+  @Permissions([
+    {
+      resource: Resource.StudentActivity,
+      actions: [Permission.IMPORT],
+    },
+  ])
+  async importStudentActivity(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const createdBy = req["createdBy"];
+    return this.service.importFromExcel(
+      file.buffer,
+      {
+        requiredFields: ["name", "university", "college", "subjects"],
+        fieldMappings: {
+          Name: "name",
+          University: "university",
+          College: "college",
+          Subjects: "subjects",
+        },
+        findKey: "name",
+      },
+      createdBy,
+    );
   }
 }
