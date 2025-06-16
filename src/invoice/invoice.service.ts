@@ -40,7 +40,8 @@ export class InvoiceService {
     if (invoice.shared?.length) {
       await Promise.all(
         invoice.shared.map(async shared => {
-          const basePrice = getPriceCoWorkingSpace(shared, "shared", settings) * shared.total_time;
+          const total_time = shared.is_full_day ? 1 : shared.total_time;
+          const basePrice = getPriceCoWorkingSpace(shared, "shared", settings) * total_time;
 
           const discount = calculateDiscount(basePrice, {
             id: shared.id.toString(),
@@ -67,8 +68,8 @@ export class InvoiceService {
     if (invoice.deskarea?.length) {
       await Promise.all(
         invoice.deskarea.map(async deskarea => {
-          const basePrice =
-            getPriceCoWorkingSpace(deskarea, "deskarea", settings) * deskarea.total_time;
+          const total_time = deskarea.is_full_day ? 1 : deskarea.total_time;
+          const basePrice = getPriceCoWorkingSpace(deskarea, "deskarea", settings) * total_time;
 
           const discount = calculateDiscount(basePrice, {
             id: deskarea.id.toString(),
