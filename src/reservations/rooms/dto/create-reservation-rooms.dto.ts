@@ -81,6 +81,10 @@ export class CreateReservationRoomDto {
   @Type(() => Number)
   price: number;
 
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  payment_method: PaymentMethod;
+
   @IsString()
   @IsOptional()
   note: string;
@@ -94,8 +98,6 @@ export class CreateReservationRoomDto {
   deals?: Deals;
 
   assignesPackages?: AssignesPackages;
-
-  payment_method?: PaymentMethod;
 
   @IsOptional()
   @IsNumber()

@@ -12,10 +12,10 @@ export class OfferPackages extends BaseMemberEntity {
   @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   hours: number;
 
-  @Column()
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   price: number;
 
   @ManyToOne(() => Room, room => room.offersRoom, {

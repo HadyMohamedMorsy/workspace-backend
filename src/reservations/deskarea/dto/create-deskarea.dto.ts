@@ -13,7 +13,7 @@ import { AssignesMembership } from "src/assignes-memberships/assignes-membership
 import { Company } from "src/companies/company.entity";
 import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
-import { ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 
@@ -21,6 +21,10 @@ export class CreateDeskAreaDto {
   @IsString()
   @IsNotEmpty()
   selected_day: string;
+
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  payment_method: PaymentMethod;
 
   @IsBoolean()
   @IsOptional()

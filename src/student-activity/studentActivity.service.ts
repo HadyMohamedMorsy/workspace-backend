@@ -2,7 +2,12 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as moment from "moment";
 import { GeneralSettingsService } from "src/general-settings/settings.service";
-import { formatItem, formatOrderData, formatRoom } from "src/reservations/helpers/client.utils";
+import {
+  formatItem,
+  formatOrderData,
+  formatRoom,
+  selectingInvoice,
+} from "src/reservations/helpers/client.utils";
 import { BaseService } from "src/shared/base/base";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -180,62 +185,7 @@ export class StudentActivityService
         })
         .leftJoin("am.memeberShip", "ms")
         .where("e.id = :id", { id })
-        .addSelect([
-          "s.id",
-          "s.start_time",
-          "s.start_hour",
-          "s.start_minute",
-          "s.end_time",
-          "s.end_hour",
-          "s.end_minute",
-          "s.total_price",
-          "s.total_time",
-          "s.is_full_day",
-          "s.selected_day",
-          "sgo.id",
-          "sgo_offer.id",
-          "sgo_offer.type_discount",
-          "sgo_offer.discount",
-          "d.id",
-          "d.start_time",
-          "d.start_hour",
-          "d.start_minute",
-          "d.end_time",
-          "d.end_hour",
-          "d.end_minute",
-          "d.total_price",
-          "d.total_time",
-          "d.is_full_day",
-          "d.selected_day",
-          "dgo.id",
-          "dgo_offer.id",
-          "dgo_offer.type_discount",
-          "dgo_offer.discount",
-          "eo.id",
-          "eo.order_number",
-          "eo.order_price",
-          "eo.total_order",
-          "r.id",
-          "r.start_time",
-          "r.start_hour",
-          "r.start_minute",
-          "r.end_time",
-          "r.end_hour",
-          "r.end_minute",
-          "r.total_price",
-          "r.total_time",
-          "r.selected_day",
-          "room.id",
-          "room.name",
-          "room.price",
-          "rgo.id",
-          "rgo_offer.id",
-          "rgo_offer.type_discount",
-          "rgo_offer.discount",
-          "am.id",
-          "ms.id",
-          "ms.type",
-        ]);
+        .addSelect(selectingInvoice);
 
       const [individual, settings] = await Promise.all([
         queryBuilder.getOne(),

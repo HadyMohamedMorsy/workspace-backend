@@ -41,10 +41,10 @@ export class Order extends BaseMemberEntity {
   })
   employed: User;
 
-  @Column({ nullable: true })
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   order_price: number;
 
-  @Column({ nullable: true })
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   total_order: number;
 
   @Column({

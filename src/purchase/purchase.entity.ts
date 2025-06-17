@@ -11,7 +11,12 @@ export class Purchase extends BaseMemberEntity {
   @Column({ default: "item" })
   type_store: string;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   purshase_price: number;
 
   @Column({
@@ -22,16 +27,36 @@ export class Purchase extends BaseMemberEntity {
   })
   weight_kg: number;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   weight_g: number;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   weight_product: number;
 
-  @Column({ type: "decimal", precision: 10, scale: 2 })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   purshase_qty: number;
 
-  @Column({ type: "decimal", precision: 10, scale: 2 })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   total: number;
 
   @ManyToOne(() => Product, product => product.purchases, {

@@ -19,7 +19,7 @@ export class Room extends BaseMemberEntity {
   @Column()
   capacity: number;
 
-  @Column()
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   price: number;
 
   @Column({ type: "text", nullable: true })

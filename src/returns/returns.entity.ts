@@ -1,23 +1,22 @@
 import { Product } from "src/products/product.entity";
+import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Returns {
+export class Returns extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ default: "item" })
   type_store: string;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   return_price: number;
 
   @Column({
@@ -28,16 +27,36 @@ export class Returns {
   })
   weight_kg: number;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   weight_g: number;
 
-  @Column({ nullable: true })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   weight_product: number;
 
-  @Column({ type: "decimal", precision: 10, scale: 2 })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   return_qty: number;
 
-  @Column({ type: "decimal", precision: 10, scale: 2 })
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   total: number;
 
   @ManyToOne(() => Product, product => product.purchases, {
@@ -51,10 +70,4 @@ export class Returns {
   @ManyToOne(() => User)
   @JoinColumn({ name: "createdById" })
   createdBy: User;
-
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 }

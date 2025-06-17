@@ -12,7 +12,7 @@ export class CoWorkingSpace extends BaseMemberEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   price: number;
 
   @Column()

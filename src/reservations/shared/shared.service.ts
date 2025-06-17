@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
-import { Repository, SelectQueryBuilder } from "typeorm";
+import { Brackets, Repository, SelectQueryBuilder } from "typeorm";
 import { CreateSharedDto } from "./dto/create-shared.dto";
 import { UpdateSharedDto } from "./dto/update-shared.dto";
 import { Shared } from "./shared.entity";
@@ -51,6 +51,20 @@ export class SharedService
         end_date: filteredRecord.customFilters.end_date,
       });
     }
+
+    if (filteredRecord?.search?.value) {
+      const searchTerm = `%${filteredRecord.search?.value}%`;
+      queryBuilder.andWhere(
+        new Brackets(qb => {
+          qb.where("ei.name LIKE :search", { search: searchTerm })
+            .orWhere("eco.name LIKE :search", { search: searchTerm })
+            .orWhere("esa.name LIKE :search", { search: searchTerm })
+            .orWhere("CONCAT(ec.firstName, ' ', ec.lastName) LIKE :search", {
+              search: searchTerm,
+            });
+        }),
+      );
+    }
   }
 
   async findSharedByIndividualAll(filterData: any) {
@@ -96,5 +110,28 @@ export class SharedService
       selectFields: ["id", "status"],
       filterField: "membership_id",
     });
+  }
+
+  protected override response(data: Shared[], totalRecords: number = 0) {
+    const getCustomerInfo = (shared: Shared) => {
+      if (!shared) return { customer_name: null, customer_id: null };
+
+      const customer = shared.individual || shared.company || shared.studentActivity;
+      return {
+        customer_name: customer?.name || null,
+        customer_id: customer?.id || null,
+      };
+    };
+
+    const transformedData = data.map(shared => ({
+      ...shared,
+      ...getCustomerInfo(shared),
+    }));
+
+    return {
+      data: transformedData,
+      recordsFiltered: data.length,
+      totalRecords: +totalRecords,
+    };
   }
 }

@@ -1,3 +1,5 @@
+import { PaymentMethod } from "../enum/global-enum";
+
 export interface Invoice {
   deskarea: Deskarea[];
   shared: Shared[];
@@ -18,6 +20,9 @@ export interface Deskarea {
   offer_type: string;
   discount_amount: number;
   is_full_day: boolean;
+  is_membership: "yes" | "no";
+  payment_method: PaymentMethod;
+  status: string;
 }
 
 export interface Shared {
@@ -33,6 +38,9 @@ export interface Shared {
   offer_type: string;
   discount_amount: number;
   is_full_day: boolean;
+  is_membership: "yes" | "no";
+  payment_method: PaymentMethod;
+  status: string;
 }
 
 export interface Room {
@@ -47,4 +55,8 @@ export interface Room {
   offer_type: string;
   discount_amount: number;
   original_price: number;
+  is_deal: "yes" | "no";
+  is_package: "yes" | "no";
+  payment_method: PaymentMethod;
+  status: string;
 }

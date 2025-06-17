@@ -23,5 +23,10 @@ export class CreateGeneralSettingsDto {
   @IsNotEmpty()
   full_day_price_shared: number;
 
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  full_day_hours: number;
+
   createdBy: User;
 }

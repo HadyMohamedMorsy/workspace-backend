@@ -9,17 +9,20 @@ export class GeneralSettings extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   price_shared: number;
 
-  @Column()
+  @Column({ nullable: true })
   price_deskarea: number;
 
-  @Column()
+  @Column({ nullable: true })
   full_day_price_deskarea: number;
 
-  @Column()
+  @Column({ nullable: true })
   full_day_price_shared: number;
+
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
+  full_day_hours: number;
 
   @OneToMany(() => Deskarea, deskarea => deskarea.settings)
   deskarea: Deskarea;

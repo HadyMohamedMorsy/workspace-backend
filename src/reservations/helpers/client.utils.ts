@@ -28,17 +28,17 @@ export const calculateTotalTime = (
   endHour: number,
   endMinute: number,
   endTime: string,
-  isFullDay: boolean,
 ): number => {
-  if (isFullDay) return 24;
-  return calculateHours({
-    start_hour: startHour,
-    start_minute: startMinute,
-    start_time: startTime,
-    end_hour: endHour,
-    end_minute: endMinute,
-    end_time: endTime,
-  });
+  return (
+    calculateHours({
+      start_hour: startHour,
+      start_minute: startMinute,
+      start_time: startTime,
+      end_hour: endHour,
+      end_minute: endMinute,
+      end_time: endTime,
+    }) || 1
+  );
 };
 
 export const calculateDiscount = (price: number, offer?: Offer): number => {
@@ -72,7 +72,6 @@ export const formatTimeData = (data: any, price?: any) => {
     timeFields.end_hour,
     timeFields.end_minute,
     timeFields.end_time,
-    data.is_full_day,
   );
 
   const basePrice = data.is_full_day ? price : price * totalTime;
@@ -82,12 +81,14 @@ export const formatTimeData = (data: any, price?: any) => {
   return {
     id: data.id,
     ...timeFields,
-    total_price: finalPrice,
+    total_price: finalPrice < 0 ? 0 : finalPrice,
     original_price: price,
     discount_amount: discount,
     total_time: totalTime,
     is_full_day: data.is_full_day,
     selected_day: data.selected_day,
+    status: data.status,
+    payment_method: data.payment_method,
     offer: data.offer
       ? {
           id: data.offer.id,
@@ -173,3 +174,74 @@ export function formatRoom(room: any, hasPackage: boolean, hasDeal: boolean) {
     is_deal: hasDeal ? "yes" : "no",
   };
 }
+
+export const getTotalTime = (
+  totalTime: number,
+  isFullDay: boolean,
+  fullDayHours: number,
+): number => {
+  return isFullDay || totalTime > fullDayHours || totalTime === 0 ? 1 : totalTime;
+};
+
+export const selectingInvoice = [
+  "s.id",
+  "s.start_time",
+  "s.start_hour",
+  "s.start_minute",
+  "s.end_time",
+  "s.end_hour",
+  "s.end_minute",
+  "s.total_price",
+  "s.total_time",
+  "s.is_full_day",
+  "s.status",
+  "s.payment_method",
+  "s.selected_day",
+  "sgo.id",
+  "sgo_offer.id",
+  "sgo_offer.type_discount",
+  "sgo_offer.discount",
+  "d.id",
+  "d.start_time",
+  "d.start_hour",
+  "d.start_minute",
+  "d.end_time",
+  "d.end_hour",
+  "d.status",
+  "d.end_minute",
+  "d.total_price",
+  "d.total_time",
+  "d.payment_method",
+  "d.is_full_day",
+  "d.selected_day",
+  "dgo.id",
+  "dgo_offer.id",
+  "dgo_offer.type_discount",
+  "dgo_offer.discount",
+  "eo.id",
+  "eo.order_number",
+  "eo.order_price",
+  "eo.total_order",
+  "r.id",
+  "r.start_time",
+  "r.start_hour",
+  "r.start_minute",
+  "r.end_time",
+  "r.status",
+  "r.payment_method",
+  "r.end_hour",
+  "r.end_minute",
+  "r.total_price",
+  "r.total_time",
+  "r.selected_day",
+  "room.id",
+  "room.name",
+  "room.price",
+  "rgo.id",
+  "rgo_offer.id",
+  "rgo_offer.type_discount",
+  "rgo_offer.discount",
+  "am.id",
+  "ms.id",
+  "ms.type",
+];
