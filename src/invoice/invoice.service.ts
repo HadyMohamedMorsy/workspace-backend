@@ -48,7 +48,7 @@ export class InvoiceService {
         invoice.shared.map(async shared => {
           const total_time =
             shared.is_membership === "no"
-              ? getTotalTime(shared.total_time, shared.is_full_day, settings.full_day_hours)
+              ? getTotalTime(shared.total_time, shared.is_full_day, +settings.full_day_hours)
               : 0;
           const basePrice = getPriceCoWorkingSpace(shared, "shared", settings) * total_time;
 
@@ -72,7 +72,7 @@ export class InvoiceService {
             end_minute: shared.end_minute,
             total_price:
               shared.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
-            is_full_day: shared.is_full_day || total_time > settings.full_day_hours,
+            is_full_day: shared.is_full_day || total_time > +settings.full_day_hours,
             end_time: shared.end_time as TimeOfDay,
           });
         }),
@@ -85,7 +85,7 @@ export class InvoiceService {
         invoice.deskarea.map(async deskarea => {
           const total_time =
             deskarea.is_membership === "no"
-              ? getTotalTime(deskarea.total_time, deskarea.is_full_day, settings.full_day_hours)
+              ? getTotalTime(deskarea.total_time, deskarea.is_full_day, +settings.full_day_hours)
               : 0;
           const basePrice = getPriceCoWorkingSpace(deskarea, "deskarea", settings) * total_time;
 
