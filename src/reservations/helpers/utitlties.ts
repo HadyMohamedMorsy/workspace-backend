@@ -86,6 +86,20 @@ export function diffrentHour(rest: Partial<UpdateDeskAreaDto | UpdateSharedDto>)
 export function calculateHours(details: calulateHour) {
   const start = convertTo24HourDate(details.start_hour, details.start_minute, details.start_time);
   const end = convertTo24HourDate(details.end_hour, details.end_minute, details.end_time);
+
+  // Check if end time should be on the next day
+  // If start is PM and end is AM, or if start hour > end hour and both are same period
+  const startHour24 = ato24h(details.start_hour, details.start_time);
+  const endHour24 = ato24h(details.end_hour, details.end_time);
+
+  if (
+    (startHour24 >= 12 && endHour24 < 12) ||
+    (startHour24 > endHour24 && details.start_time === details.end_time)
+  ) {
+    // End time should be on the next day
+    end.setDate(end.getDate() + 1);
+  }
+
   const diffMs = Math.abs(end.getTime() - start.getTime());
   const totalMinutes = Math.floor(diffMs / (1000 * 60));
   const hours = Math.floor(totalMinutes / 60);
@@ -102,9 +116,11 @@ export function calculateOfferDiscount(basePrice: number, offer: any): number {
 
 export function getCurrentTime() {
   const now = new Date();
+  const egyptTime = new Date(now.toLocaleString("en-US", { timeZone: "Africa/Cairo" }));
+
   return {
-    hours: now.getHours() % 12 || 12,
-    minutes: now.getMinutes(),
-    timeOfDay: now.getHours() >= 12 ? TimeOfDay.PM : TimeOfDay.AM,
+    hours: egyptTime.getHours() % 12 || 12,
+    minutes: egyptTime.getMinutes(),
+    timeOfDay: egyptTime.getHours() >= 12 ? TimeOfDay.PM : TimeOfDay.AM,
   };
 }

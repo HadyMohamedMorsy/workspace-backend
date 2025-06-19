@@ -104,6 +104,33 @@ export class StudentActivityService
       queryBuilder.andWhere(`e.created_at ${operator} :date`, { date });
     }
 
+    // Filter by invoice status
+    if (filterData?.invoice_filter) {
+      if (filterData.invoice_filter === "invoice") {
+        // Get individuals who have current active services that would generate an invoice
+        queryBuilder.andWhere(
+          `(s.status = :status_shared OR da.status = :status_deskarea OR rr.status = :status_room OR eo.type_order = :typeOrder)`,
+          {
+            status_shared: ReservationStatus.ACTIVE,
+            status_deskarea: ReservationStatus.ACTIVE,
+            status_room: ReservationStatus.ACTIVE,
+            typeOrder: "HOLD",
+          },
+        );
+      } else if (filterData.invoice_filter === "not_invoice") {
+        // Get individuals who don't have any current active services
+        queryBuilder.andWhere(
+          `(s.id IS NULL OR s.status != :status_shared) AND (da.id IS NULL OR da.status != :status_deskarea) AND (rr.id IS NULL OR rr.status != :status_room) AND (eo.id IS NULL OR eo.type_order != :typeOrder)`,
+          {
+            status_shared: ReservationStatus.ACTIVE,
+            status_deskarea: ReservationStatus.ACTIVE,
+            status_room: ReservationStatus.ACTIVE,
+            typeOrder: "HOLD",
+          },
+        );
+      }
+    }
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 

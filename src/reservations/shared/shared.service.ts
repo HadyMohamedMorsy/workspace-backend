@@ -26,7 +26,7 @@ export class SharedService
 
     queryBuilder
       .leftJoin("e.individual", "ei")
-      .addSelect(["ei.id", "ei.name", "ei.whatsApp"])
+      .addSelect(["ei.id", "ei.name", "ei.whatsApp", "ei.number"])
       .leftJoin("e.company", "eco")
       .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "esa")
@@ -115,11 +115,13 @@ export class SharedService
   protected override response(data: Shared[], totalRecords: number = 0) {
     const getCustomerInfo = (shared: Shared) => {
       if (!shared) return { customer_name: null, customer_id: null };
-
       const customer = shared.individual || shared.company || shared.studentActivity;
+      const phone = shared.individual?.number || shared.company?.phone || null;
+
       return {
         customer_name: customer?.name || null,
         customer_id: customer?.id || null,
+        customer_phone: phone,
       };
     };
 

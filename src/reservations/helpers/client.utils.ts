@@ -153,11 +153,27 @@ export function formatItem(
     getPriceCoWorkingSpace(item, type, settings),
   );
   const isMembershipType = membershipType === type;
+  const isMembership = hasMembership && isMembershipType;
+  const totalTime = data.total_time > +settings.full_day_hours ? 1 : data.total_time;
+
   return {
     ...data,
-    total_price: hasMembership && isMembershipType ? 0 : +data.total_price,
-    original_price: hasMembership && isMembershipType ? 0 : +data.original_price,
-    is_membership: hasMembership && isMembershipType ? "yes" : "no",
+    total_price: isMembership
+      ? 0
+      : getPriceCoWorkingSpace(
+          { ...item, is_full_day: data.is_full_day || totalTime > +settings.full_day_hours },
+          type,
+          settings,
+        ) * totalTime,
+    original_price: isMembership
+      ? 0
+      : getPriceCoWorkingSpace(
+          { ...item, is_full_day: data.is_full_day || totalTime > +settings.full_day_hours },
+          type,
+          settings,
+        ) * totalTime,
+    is_membership: isMembership ? "yes" : "no",
+    is_full_day: totalTime > +settings.full_day_hours ? true : data.is_full_day,
   };
 }
 
