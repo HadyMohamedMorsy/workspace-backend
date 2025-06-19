@@ -161,19 +161,19 @@ export function formatItem(
     total_price: isMembership
       ? 0
       : getPriceCoWorkingSpace(
-          { ...item, is_full_day: data.is_full_day || totalTime > +settings.full_day_hours },
+          { ...item, is_full_day: data.is_full_day || data.total_time > +settings.full_day_hours },
           type,
           settings,
         ) * totalTime,
     original_price: isMembership
       ? 0
       : getPriceCoWorkingSpace(
-          { ...item, is_full_day: data.is_full_day || totalTime > +settings.full_day_hours },
+          { ...item, is_full_day: data.is_full_day || data.total_time > +settings.full_day_hours },
           type,
           settings,
         ) * totalTime,
     is_membership: isMembership ? "yes" : "no",
-    is_full_day: totalTime > +settings.full_day_hours ? true : data.is_full_day,
+    is_full_day: data.is_full_day || data.total_time > +settings.full_day_hours,
   };
 }
 

@@ -50,11 +50,12 @@ export class InvoiceService {
             shared.is_membership === "no"
               ? getTotalTime(shared.total_time, shared.is_full_day, +settings.full_day_hours)
               : 0;
+
           const basePrice =
             getPriceCoWorkingSpace(
               {
                 ...shared,
-                is_full_day: shared.is_full_day || total_time > +settings.full_day_hours,
+                is_full_day: shared.is_full_day || shared.total_time > +settings.full_day_hours,
               },
               "shared",
               settings,
@@ -80,7 +81,7 @@ export class InvoiceService {
             end_minute: shared.end_minute,
             total_price:
               shared.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
-            is_full_day: shared.is_full_day || total_time > +settings.full_day_hours,
+            is_full_day: shared.is_full_day || shared.total_time > +settings.full_day_hours,
             end_time: shared.end_time as TimeOfDay,
           });
         }),
@@ -100,7 +101,7 @@ export class InvoiceService {
             getPriceCoWorkingSpace(
               {
                 ...deskarea,
-                is_full_day: deskarea.is_full_day || total_time > +settings.full_day_hours,
+                is_full_day: deskarea.is_full_day || deskarea.total_time > +settings.full_day_hours,
               },
               "deskarea",
               settings,
@@ -125,7 +126,7 @@ export class InvoiceService {
             end_minute: deskarea.end_minute,
             total_price:
               deskarea.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
-            is_full_day: deskarea.is_full_day ? true : total_time > +settings.full_day_hours,
+            is_full_day: deskarea.is_full_day || deskarea.total_time > +settings.full_day_hours,
             end_time: deskarea.end_time as TimeOfDay,
           });
         }),

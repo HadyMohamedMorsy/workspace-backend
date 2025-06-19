@@ -50,10 +50,10 @@ export class DeskareaService
       );
     }
 
-    if (filteredRecord?.customFilters?.start_date && filteredRecord?.customFilters?.end_date) {
+    if (filteredRecord?.start_date && filteredRecord?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filteredRecord.customFilters.start_date,
-        end_date: filteredRecord.customFilters.end_date,
+        start_date: filteredRecord.start_date,
+        end_date: filteredRecord.end_date,
       });
     }
   }
