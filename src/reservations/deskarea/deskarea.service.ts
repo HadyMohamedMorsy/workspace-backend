@@ -26,7 +26,7 @@ export class DeskareaService
 
     queryBuilder
       .leftJoin("e.individual", "ei")
-      .addSelect(["ei.id", "ei.name", "ei.whatsApp"])
+      .addSelect(["ei.id", "ei.name", "ei.whatsApp", "ei.number"])
       .leftJoin("e.company", "eco")
       .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "esa")
@@ -108,9 +108,12 @@ export class DeskareaService
       if (!deskarea) return { customer_name: null, customer_id: null };
 
       const customer = deskarea.individual || deskarea.company || deskarea.studentActivity;
+      const phone = deskarea.individual?.number || deskarea.company?.phone || null;
+
       return {
         customer_name: customer?.name || null,
         customer_id: customer?.id || null,
+        customer_phone: phone,
       };
     };
 
