@@ -154,7 +154,8 @@ export function formatItem(
   );
   const isMembershipType = membershipType === type;
   const isMembership = hasMembership && isMembershipType;
-  const totalTime = data.total_time > +settings.full_day_hours ? 1 : data.total_time;
+  const totalTime =
+    data.is_full_day || data.total_time > +settings.full_day_hours ? 1 : data.total_time;
 
   return {
     ...data,
@@ -196,7 +197,7 @@ export const getTotalTime = (
   isFullDay: boolean,
   fullDayHours: number,
 ): number => {
-  return isFullDay || totalTime > fullDayHours || totalTime === 0 ? 1 : totalTime;
+  return isFullDay || totalTime > fullDayHours || totalTime == 0 ? 1 : totalTime;
 };
 
 export const selectingInvoice = [
