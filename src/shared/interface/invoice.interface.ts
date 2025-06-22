@@ -1,10 +1,14 @@
-import { PaymentMethod } from "../enum/global-enum";
+import { PaymentMethod, TypeOrder } from "../enum/global-enum";
 
 export interface Invoice {
   deskarea: Deskarea[];
   shared: Shared[];
   room: Room[];
-  order: { id: number }[];
+  order: {
+    payment_method: PaymentMethod;
+    id: number;
+    type_order: TypeOrder;
+  }[];
 }
 
 export interface Deskarea {

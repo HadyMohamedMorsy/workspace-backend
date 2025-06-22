@@ -10,7 +10,7 @@ import {
 } from "class-validator";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
-import { TypeOrder } from "src/shared/enum/global-enum";
+import { PaymentMethod, TypeOrder } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
 
@@ -23,6 +23,10 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   order_number: string;
+
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  payment_method: PaymentMethod;
 
   @IsNumber()
   @Type(() => Number)

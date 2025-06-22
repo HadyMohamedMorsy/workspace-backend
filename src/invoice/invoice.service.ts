@@ -33,10 +33,11 @@ export class InvoiceService {
     // Handle orders
     if (invoice.order?.length) {
       await Promise.all(
-        invoice.order.map(id =>
+        invoice.order.map(order =>
           this.orderService.update({
-            id: id.id,
+            id: order.id,
             type_order: TypeOrder.PAID,
+            payment_method: order.payment_method || PaymentMethod.Cach,
           }),
         ),
       );
