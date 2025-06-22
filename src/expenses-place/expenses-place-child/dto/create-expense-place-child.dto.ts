@@ -1,6 +1,7 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ExpensePlace } from "src/expenses-place/expense-place.entity";
+import { PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 
 export class CreateExpensePlaceChildDto {
@@ -12,6 +13,10 @@ export class CreateExpensePlaceChildDto {
   @IsString()
   @IsOptional()
   featured_image: string;
+
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  payment_method: PaymentMethod;
 
   @IsString()
   @IsOptional()

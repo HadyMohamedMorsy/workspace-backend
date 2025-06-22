@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -16,6 +26,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
     return {
       id: true,
       cost: true,
+      payment_method: true,
       featured_image: true,
       note: true,
       created_at: true,
@@ -61,6 +72,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
       {
         cost: create.cost,
         note: create.note,
+        payment_method: create.payment_method,
         featured_image: create.featured_image,
         expensePlace: req["expensePlace"],
         createdBy: req["createdBy"],
@@ -83,6 +95,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
         id: update.id,
         cost: update.cost,
         note: update.note,
+        payment_method: update.payment_method,
         featured_image: update.featured_image,
         expensePlace: req["expensePlace"],
         createdBy: req["createdBy"],
@@ -101,5 +114,19 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
   ])
   async delete(@Body() { id }: { id: number }) {
     return this.service.delete(id);
+  }
+
+  @Patch("/change-payment-method")
+  @Permissions([
+    {
+      resource: Resource.ExpensesPlace,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  async changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
   }
 }

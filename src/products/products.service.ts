@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
@@ -17,6 +18,7 @@ export class ProductService
     @InjectRepository(Product)
     repository: Repository<Product>,
     protected readonly apiFeaturesService: APIFeaturesService,
+    private readonly generalSettingsService: GeneralSettingsService,
   ) {
     super(repository, apiFeaturesService);
   }
@@ -41,11 +43,43 @@ export class ProductService
     return this.findOne(record.id, selectOptions, relations);
   }
 
-  override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
+  override async queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
       .leftJoin("e.categories", "categories")
       .addSelect(["categories.id", "categories.name"]);
+
+    // Handle stock filtering based on filteredRecord.is_store
+    if (filteredRecord?.is_store) {
+      switch (filteredRecord.is_store) {
+        case "stock":
+          queryBuilder.andWhere("e.store > 0");
+          break;
+        case "out_of_stock":
+          queryBuilder.andWhere("e.store = 0");
+          break;
+        case "alert_of_stock":
+          const settings = await this.generalSettingsService.findAll({});
+          const alertStoreThreshold = settings[0]?.alert_store || 0;
+          queryBuilder.andWhere("e.store < :alertStoreThreshold", { alertStoreThreshold });
+          break;
+      }
+    }
+  }
+
+  protected override async response(data: Product[], totalRecords: number = 0): Promise<any> {
+    const settings = await this.generalSettingsService.findAll({});
+
+    const productsWithAlert = data.map(product => ({
+      ...product,
+      is_alert_store: product.store < (+settings[0]?.alert_store || 0),
+    }));
+
+    return {
+      data: productsWithAlert,
+      recordsFiltered: productsWithAlert.length,
+      totalRecords: +totalRecords,
+    };
   }
 
   async getProductsByCategory(

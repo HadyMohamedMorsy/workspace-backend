@@ -1,4 +1,5 @@
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ExpensePlace } from "../expense-place.entity";
@@ -13,6 +14,14 @@ export class ExpensePlaceChild extends BaseMemberEntity {
 
   @Column({ nullable: true })
   note: string;
+
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
+  payment_method: PaymentMethod;
 
   @Column({ nullable: true })
   featured_image: string;

@@ -28,5 +28,10 @@ export class CreateGeneralSettingsDto {
   @IsNotEmpty()
   full_day_hours: number;
 
+  @IsNumber()
+  @Type(() => Number)
+  @IsNotEmpty()
+  alert_store: number;
+
   createdBy: User;
 }

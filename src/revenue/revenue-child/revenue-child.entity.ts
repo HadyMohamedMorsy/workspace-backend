@@ -1,4 +1,6 @@
+import { IsEnum, IsOptional } from "class-validator";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
+import { PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Revenue } from "../revenue.entity";
@@ -10,6 +12,10 @@ export class RevenueChild extends BaseMemberEntity {
 
   @Column()
   amount: number;
+
+  @IsEnum(PaymentMethod)
+  @IsOptional()
+  payment_method: PaymentMethod;
 
   @Column({ nullable: true })
   note: string;

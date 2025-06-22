@@ -17,8 +17,10 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
       id: true,
       price_shared: true,
       price_deskarea: true,
+      alert_store: true,
       full_day_price_deskarea: true,
       full_day_price_shared: true,
+      full_day_hours: true,
       created_at: true,
       updated_at: true,
     };
@@ -64,6 +66,7 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
       {
         price_shared: create.price_shared,
         price_deskarea: create.price_deskarea,
+        alert_store: create.alert_store,
         full_day_price_deskarea: create.full_day_price_deskarea,
         full_day_price_shared: create.full_day_price_shared,
         full_day_hours: create.full_day_hours,
@@ -87,6 +90,7 @@ export class GeneralSettingsController implements SelectOptions, RelationOptions
         id: update.id,
         price_shared: update.price_shared,
         price_deskarea: update.price_deskarea,
+        alert_store: update.alert_store,
         full_day_price_deskarea: update.full_day_price_deskarea,
         full_day_price_shared: update.full_day_price_shared,
         full_day_hours: update.full_day_hours,

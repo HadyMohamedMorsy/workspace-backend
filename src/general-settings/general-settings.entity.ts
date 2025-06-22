@@ -24,6 +24,9 @@ export class GeneralSettings extends BaseMemberEntity {
   @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   full_day_hours: number;
 
+  @Column({ nullable: true })
+  alert_store: number;
+
   @OneToMany(() => Deskarea, deskarea => deskarea.settings)
   deskarea: Deskarea;
 

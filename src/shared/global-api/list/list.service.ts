@@ -13,6 +13,7 @@ import { PAYMENT_METHODS_EN } from "./lists/payment-methods/payment-methods";
 import { LISTS_REVENUE_AR, LISTS_REVENUE_EN } from "./lists/revenue/revenue";
 import { LISTS_ROLES_AR, LISTS_ROLES_EN } from "./lists/roles/roles";
 import { Sort_CUSTOMERS_EN } from "./lists/sort-customers/sort-customers";
+import { LISTS_STORE_AR, LISTS_STORE_EN } from "./lists/store/store";
 import { LISTS_TYPE_COMPANY_AR, LISTS_TYPE_COMPANY_EN } from "./lists/type-company/type-company";
 import { LIST_TYPE_DISCOUNT_AR, LIST_TYPE_DISCOUNT_EN } from "./lists/type-discount/type-discount";
 import { LIST_TYPE_ORDER_AR, LIST_TYPE_ORDER_EN } from "./lists/type-order/type-order";
@@ -82,6 +83,10 @@ export class ListService {
     invoice_filter: {
       en: INVOICE_FILTER_EN,
       ar: INVOICE_FILTER_AR,
+    },
+    store: {
+      en: LISTS_STORE_EN,
+      ar: LISTS_STORE_AR,
     },
   };
 

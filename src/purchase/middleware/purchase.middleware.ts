@@ -34,12 +34,11 @@ export class PurchaseMiddleware implements NestMiddleware {
       }
 
       product.store = newStore;
-      product.purshase_price = +purshase_price;
 
       await this.productService.update({
         id: product.id,
         store: +newStore,
-        purshase_price: +purshase_price,
+        purshase_price: +purshase_price || +product.purshase_price,
       } as UpdateProductDto);
 
       const price = type_store === "item" ? +purshase_price : +total;
