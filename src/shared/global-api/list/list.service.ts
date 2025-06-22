@@ -9,6 +9,7 @@ import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
 import { LISTS_EXPENSES_AR, LISTS_EXPENSES_EN } from "./lists/expenses/expenses";
 import { INVOICE_FILTER_AR, INVOICE_FILTER_EN } from "./lists/invoices/invoice";
+import { PACKAGES_AR, PACKAGES_EN } from "./lists/packages/packages";
 import { PAYMENT_METHODS_EN } from "./lists/payment-methods/payment-methods";
 import { LISTS_REVENUE_AR, LISTS_REVENUE_EN } from "./lists/revenue/revenue";
 import { LISTS_ROLES_AR, LISTS_ROLES_EN } from "./lists/roles/roles";
@@ -87,6 +88,10 @@ export class ListService {
     store: {
       en: LISTS_STORE_EN,
       ar: LISTS_STORE_AR,
+    },
+    packages: {
+      en: PACKAGES_EN,
+      ar: PACKAGES_AR,
     },
   };
 

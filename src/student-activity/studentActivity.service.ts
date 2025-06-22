@@ -131,6 +131,27 @@ export class StudentActivityService
       }
     }
 
+    if (filterData?.package) {
+      switch (filterData.package) {
+        case "package_room":
+          queryBuilder.andWhere("pa.id IS NOT NULL AND pr.id IS NOT NULL");
+          break;
+        case "membership_deskarea":
+          queryBuilder.andWhere("ep.id IS NOT NULL AND ms.type = :membershipType", {
+            membershipType: "deskarea",
+          });
+          break;
+        case "membership_shared":
+          queryBuilder.andWhere("ep.id IS NOT NULL AND ms.type = :membershipType", {
+            membershipType: "shared",
+          });
+          break;
+        case "deal_room":
+          queryBuilder.andWhere("d.id IS NOT NULL AND pr.id IS NOT NULL");
+          break;
+      }
+    }
+
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();
 

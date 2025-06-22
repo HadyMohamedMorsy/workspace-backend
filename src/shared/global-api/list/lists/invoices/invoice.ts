@@ -1,4 +1,5 @@
 export const INVOICE_FILTER_EN = [
+  { value: null, label: "All" },
   {
     value: "invoice",
     label: "invoice",
@@ -10,6 +11,7 @@ export const INVOICE_FILTER_EN = [
 ];
 
 export const INVOICE_FILTER_AR = [
+  { value: null, label: "الكل" },
   {
     value: "invoice",
     label: "فاتورة",

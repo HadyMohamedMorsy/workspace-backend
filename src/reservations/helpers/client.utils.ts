@@ -106,6 +106,7 @@ export const formatOrderData = (order: any) => {
     order_number: order.order_number,
     order_price: order.order_price,
     total_order: order.total_order,
+    payment_method: order.payment_method,
   };
 };
 
@@ -239,6 +240,7 @@ export const selectingInvoice = [
   "eo.order_number",
   "eo.order_price",
   "eo.total_order",
+  "eo.payment_method",
   "r.id",
   "r.start_time",
   "r.start_hour",

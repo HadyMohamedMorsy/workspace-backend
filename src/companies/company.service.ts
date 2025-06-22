@@ -95,6 +95,8 @@ export class CompanyService
       old: { operator: "<", date: moment().startOf("day").toDate() },
     };
 
+    this.queryRelationIndex(queryBuilder);
+
     // Filter by invoice status
     if (filterData?.invoice_filter) {
       if (filterData.invoice_filter === "invoice") {
@@ -122,7 +124,26 @@ export class CompanyService
       }
     }
 
-    this.queryRelationIndex(queryBuilder);
+    if (filterData?.package) {
+      switch (filterData.package) {
+        case "package_room":
+          queryBuilder.andWhere("pa.id IS NOT NULL AND pr.id IS NOT NULL");
+          break;
+        case "membership_deskarea":
+          queryBuilder.andWhere("ep.id IS NOT NULL AND ms.type = :membershipType", {
+            membershipType: "deskarea",
+          });
+          break;
+        case "membership_shared":
+          queryBuilder.andWhere("ep.id IS NOT NULL AND ms.type = :membershipType", {
+            membershipType: "shared",
+          });
+          break;
+        case "deal_room":
+          queryBuilder.andWhere("d.id IS NOT NULL AND pr.id IS NOT NULL");
+          break;
+      }
+    }
 
     if (dateFilter[filterData?.sort_customers]) {
       const { operator, date } = dateFilter[filterData?.sort_customers];
