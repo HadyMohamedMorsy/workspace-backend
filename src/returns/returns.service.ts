@@ -40,6 +40,9 @@ export class ReturnsService
         .leftJoin("e.product", "ep")
         .addSelect(["ep.id", "ep.name"])
         .andWhere("ep.id = :product_id", { product_id: filteredRecord.product_id });
+    } else {
+      queryBuilder.leftJoin("e.product", "ep");
+      queryBuilder.addSelect(["ep.id", "ep.name"]);
     }
 
     if (filteredRecord?.start_date && filteredRecord?.end_date) {
