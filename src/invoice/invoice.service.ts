@@ -1,4 +1,6 @@
 import { Injectable } from "@nestjs/common";
+import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
+import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { OrdersService } from "src/orders/orders.service";
 import { DeskareaService } from "src/reservations/deskarea/deskarea.service";
@@ -26,9 +28,37 @@ export class InvoiceService {
     private readonly roomService: ReservationRoomService,
     private readonly deskareaService: DeskareaService,
     private readonly generalSettingsService: GeneralSettingsService,
+    private readonly assignGeneralOfferService: AssignGeneralOfferservice,
+    private readonly generalOfferService: GeneralOfferService,
   ) {}
 
-  async sendInvoice(invoice: Invoice) {
+  private async processOfferIfExists(
+    offer_id: number | undefined,
+    customerInfo?: { customer_id: number; customer_type: string; customer: any; createdBy: any },
+  ) {
+    if (!offer_id || !customerInfo) return;
+
+    // Find the general offer
+    const generalOffer = await this.generalOfferService.findOne(offer_id);
+    if (generalOffer) {
+      // Determine customer type and create AssignGeneralOffer
+      const assignGeneralOfferData: any = {
+        generalOffer: generalOffer,
+        createdBy: customerInfo.createdBy,
+      };
+
+      // Add the appropriate customer based on customer_type
+      assignGeneralOfferData[customerInfo.customer_type] = customerInfo.customer;
+
+      // Create AssignGeneralOffer
+      await this.assignGeneralOfferService.create(assignGeneralOfferData);
+    }
+  }
+
+  async sendInvoice(
+    invoice: Invoice,
+    customerInfo?: { customer_id: number; customer_type: string; customer: any; createdBy: any },
+  ) {
     const settings = await this.generalSettingsService.findAll({});
     // Handle orders
     if (invoice.order?.length) {
@@ -47,6 +77,9 @@ export class InvoiceService {
     if (invoice.shared?.length) {
       await Promise.all(
         invoice.shared.map(async shared => {
+          // Process offer if exists
+          await this.processOfferIfExists(shared.offer_id, customerInfo);
+
           const total_time =
             shared.is_membership === "no"
               ? getTotalTime(shared.total_time, shared.is_full_day, +settings.full_day_hours)
@@ -93,6 +126,9 @@ export class InvoiceService {
     if (invoice.deskarea?.length) {
       await Promise.all(
         invoice.deskarea.map(async deskarea => {
+          // Process offer if exists
+          await this.processOfferIfExists(deskarea.offer_id, customerInfo);
+
           const total_time =
             deskarea.is_membership === "no"
               ? getTotalTime(deskarea.total_time, deskarea.is_full_day, +settings.full_day_hours)
@@ -137,6 +173,9 @@ export class InvoiceService {
     if (invoice.room?.length) {
       await Promise.all(
         invoice.room.map(async room => {
+          // Process offer if exists
+          await this.processOfferIfExists(room.offer_id, customerInfo);
+
           const basePrice =
             room.is_deal === "no" || room.is_package === "no"
               ? +room.original_price * room.total_time

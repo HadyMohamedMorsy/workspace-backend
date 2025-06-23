@@ -9,6 +9,9 @@ export interface Invoice {
     id: number;
     type_order: TypeOrder;
   }[];
+  customer_id?: number;
+  customer_type?: string;
+  total_price?: number;
 }
 
 export interface Deskarea {
@@ -27,6 +30,7 @@ export interface Deskarea {
   is_membership: "yes" | "no";
   payment_method: PaymentMethod;
   status: string;
+  offer_id?: number;
 }
 
 export interface Shared {
@@ -45,6 +49,7 @@ export interface Shared {
   is_membership: "yes" | "no";
   payment_method: PaymentMethod;
   status: string;
+  offer_id?: number;
 }
 
 export interface Room {
@@ -63,4 +68,5 @@ export interface Room {
   is_package: "yes" | "no";
   payment_method: PaymentMethod;
   status: string;
+  offer_id?: number;
 }
