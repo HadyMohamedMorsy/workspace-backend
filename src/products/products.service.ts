@@ -60,7 +60,7 @@ export class ProductService
           break;
         case "alert_of_stock":
           const settings = await this.generalSettingsService.findAll({});
-          const alertStoreThreshold = settings[0]?.alert_store || 0;
+          const alertStoreThreshold = settings?.alert_store || 0;
           queryBuilder.andWhere("e.store < :alertStoreThreshold", { alertStoreThreshold });
           break;
       }
@@ -72,7 +72,7 @@ export class ProductService
 
     const productsWithAlert = data.map(product => ({
       ...product,
-      is_alert_store: product.store < (+settings[0]?.alert_store || 0),
+      is_alert_store: product.store < (+settings?.alert_store || 0),
     }));
 
     return {
