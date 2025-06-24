@@ -16,6 +16,22 @@ export const PACKAGES_EN = [
     value: "deal_room",
     label: "deal room",
   },
+  {
+    value: "expired_membership_deskarea",
+    label: "expired membership deskarea",
+  },
+  {
+    value: "expired_membership_shared",
+    label: "expired membership shared",
+  },
+  {
+    value: "expired_deal_room",
+    label: "expired deal room",
+  },
+  {
+    value: "expired_package_room",
+    label: "expired package room",
+  },
 ];
 
 export const PACKAGES_AR = [
@@ -35,5 +51,21 @@ export const PACKAGES_AR = [
   {
     value: "deal_room",
     label: "صفقة غرفة",
+  },
+  {
+    value: "expired_membership_deskarea",
+    label: "عضوية مكتب منتهية",
+  },
+  {
+    value: "expired_membership_shared",
+    label: "عضوية مشترك منتهية",
+  },
+  {
+    value: "expired_deal_room",
+    label: "صفقة غرفة منتهية",
+  },
+  {
+    value: "expired_package_room",
+    label: "حزمة غرفة منتهية",
   },
 ];

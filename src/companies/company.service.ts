@@ -126,22 +126,98 @@ export class CompanyService
 
     if (filterData?.package) {
       switch (filterData.package) {
-        case "package_room":
-          queryBuilder.andWhere("pa.id IS NOT NULL AND pr.id IS NOT NULL");
+        case "package_room": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "pa.id IS NOT NULL AND pr.id IS NOT NULL AND es.end_date >= :currentDate",
+            {
+              currentDate: today,
+            },
+          );
           break;
-        case "membership_deskarea":
-          queryBuilder.andWhere("ep.id IS NOT NULL AND ms.type = :membershipType", {
-            membershipType: "deskarea",
-          });
+        }
+        case "membership_deskarea": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "ep.id IS NOT NULL AND ms.type = :membershipType AND ep.end_date >= :currentDate",
+            {
+              membershipType: "deskarea",
+              currentDate: today,
+            },
+          );
           break;
-        case "membership_shared":
-          queryBuilder.andWhere("ep.id IS NOT NULL AND ms.type = :membershipType", {
-            membershipType: "shared",
-          });
+        }
+        case "membership_shared": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "ep.id IS NOT NULL AND ms.type = :membershipType AND ep.end_date >= :currentDate",
+            {
+              membershipType: "shared",
+              currentDate: today,
+            },
+          );
           break;
-        case "deal_room":
-          queryBuilder.andWhere("d.id IS NOT NULL AND pr.id IS NOT NULL");
+        }
+        case "deal_room": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "d.id IS NOT NULL AND pr.id IS NOT NULL AND d.end_date >= :currentDate",
+            {
+              currentDate: today,
+            },
+          );
           break;
+        }
+        case "expired_membership_deskarea": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "ep.id IS NOT NULL AND ms.type = :membershipType AND ep.end_date < :currentDate",
+            {
+              membershipType: "deskarea",
+              currentDate: today,
+            },
+          );
+          break;
+        }
+        case "expired_membership_shared": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "ep.id IS NOT NULL AND ms.type = :membershipType AND ep.end_date < :currentDate",
+            {
+              membershipType: "shared",
+              currentDate: today,
+            },
+          );
+          break;
+        }
+        case "expired_deal_room": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "d.id IS NOT NULL AND pr.id IS NOT NULL AND d.end_date < :currentDate",
+            {
+              currentDate: today,
+            },
+          );
+          break;
+        }
+        case "expired_package_room": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere(
+            "pa.id IS NOT NULL AND pr.id IS NOT NULL AND es.end_date < :currentDate",
+            {
+              currentDate: today,
+            },
+          );
+          break;
+        }
       }
     }
 

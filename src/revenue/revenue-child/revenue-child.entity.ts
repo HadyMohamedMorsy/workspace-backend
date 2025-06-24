@@ -1,4 +1,3 @@
-import { IsEnum, IsOptional } from "class-validator";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
@@ -13,8 +12,12 @@ export class RevenueChild extends BaseMemberEntity {
   @Column()
   amount: number;
 
-  @IsEnum(PaymentMethod)
-  @IsOptional()
+  @Column({
+    nullable: true,
+    type: "enum",
+    enum: PaymentMethod,
+    default: PaymentMethod.Cach,
+  })
   payment_method: PaymentMethod;
 
   @Column({ nullable: true })
