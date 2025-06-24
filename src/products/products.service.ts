@@ -50,8 +50,8 @@ export class ProductService
       .addSelect(["categories.id", "categories.name"]);
 
     // Handle stock filtering based on filteredRecord.is_store
-    if (filteredRecord?.is_store) {
-      switch (filteredRecord.is_store) {
+    if (filteredRecord?.store) {
+      switch (filteredRecord.store) {
         case "stock":
           queryBuilder.andWhere("e.store > 0");
           break;
@@ -60,7 +60,7 @@ export class ProductService
           break;
         case "alert_of_stock":
           const settings = await this.generalSettingsService.findAll({});
-          const alertStoreThreshold = settings?.alert_store || 0;
+          const alertStoreThreshold = +settings?.alert_store || 0;
           queryBuilder.andWhere("e.store < :alertStoreThreshold", { alertStoreThreshold });
           break;
       }
