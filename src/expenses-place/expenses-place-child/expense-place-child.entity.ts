@@ -15,6 +15,9 @@ export class ExpensePlaceChild extends BaseMemberEntity {
   @Column({ nullable: true })
   note: string;
 
+  @Column({ nullable: true })
+  name: string;
+
   @Column({
     nullable: true,
     type: "enum",

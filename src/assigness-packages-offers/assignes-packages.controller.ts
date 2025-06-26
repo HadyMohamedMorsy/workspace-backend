@@ -57,6 +57,18 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
     };
   }
 
+  @Post("/index")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findAll(@Body() filterQueryDto: any) {
+    return this.service.findAll(filterQueryDto);
+  }
+
   @Post("/individual")
   @HttpCode(200)
   @Permissions([

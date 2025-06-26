@@ -115,7 +115,6 @@ export class UserController implements SelectOptions, RelationOptions {
       annual_start: updateProductDto.annual_start,
       status: updateProductDto.status,
       annual_increase: updateProductDto.annual_increase,
-      permission: updateProductDto.permission,
       createdBy: req["createdBy"],
     };
     if (req["password"]) updateData.password = req["password"];

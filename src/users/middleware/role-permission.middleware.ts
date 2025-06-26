@@ -24,8 +24,10 @@ export class RolePermissionMiddleware implements NestMiddleware {
   };
 
   async use(req: Request, res: Response, next: NextFunction) {
-    if (!req.body.permission && req.body?.role) {
+    if (!req.body.permission && req.body?.role && req.method === "POST") {
       req["permission"] = this.rolePermissionsMap[req.body.role] || null;
+    } else if (req.body.permission && req.method === "PUT") {
+      req["permission"] = req.body.permission;
     }
     next();
   }

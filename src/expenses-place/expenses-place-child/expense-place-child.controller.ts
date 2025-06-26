@@ -28,6 +28,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
       cost: true,
       payment_method: true,
       featured_image: true,
+      name: true,
       note: true,
       created_at: true,
       updated_at: true,
@@ -72,6 +73,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
       {
         cost: create.cost,
         note: create.note,
+        name: create.name,
         payment_method: create.payment_method,
         featured_image: create.featured_image,
         expensePlace: req["expensePlace"],
@@ -95,6 +97,7 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
         id: update.id,
         cost: update.cost,
         note: update.note,
+        name: update.name,
         payment_method: update.payment_method,
         featured_image: update.featured_image,
         expensePlace: req["expensePlace"],

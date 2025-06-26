@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString, MaxLength, ValidateIf } from "class-validator";
+import { Lookup } from "src/lookups/lookup.entity";
 import { User } from "src/users/user.entity";
 
 export class CreateIndividualDto {
@@ -30,18 +31,12 @@ export class CreateIndividualDto {
   freelancer_job: string;
 
   @ValidateIf(obj => obj.individual_type === "student")
-  @IsString()
-  @IsOptional()
-  unviresty: string;
+  unviresty: Lookup;
 
   @ValidateIf(obj => obj.individual_type === "student")
-  @IsString()
-  @IsOptional()
-  college: string;
+  college: Lookup;
 
-  @IsString()
-  @IsNotEmpty()
-  nationality: string;
+  nationality: Lookup;
 
   @IsString()
   @IsOptional()

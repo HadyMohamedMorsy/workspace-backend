@@ -17,7 +17,6 @@ export class RevenueController implements SelectOptions, RelationOptions {
       id: true,
       name: true,
       total: true,
-      type: true,
       created_at: true,
       updated_at: true,
     };
@@ -56,7 +55,6 @@ export class RevenueController implements SelectOptions, RelationOptions {
     return await this.service.create({
       name: createRevenueDto.name,
       total: createRevenueDto.total,
-      type: createRevenueDto.type,
       createdBy: req["createdBy"],
     });
   }
@@ -73,7 +71,6 @@ export class RevenueController implements SelectOptions, RelationOptions {
       id: updateRevenueDto.id,
       name: updateRevenueDto.name,
       total: updateRevenueDto.total,
-      type: updateRevenueDto.type,
       createdBy: req["createdBy"],
     });
   }

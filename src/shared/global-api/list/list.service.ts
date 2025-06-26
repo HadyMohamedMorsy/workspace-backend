@@ -1,14 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { CategoryService } from "src/categories/category.service";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
+import { LookupService } from "src/lookups/lookup.service";
 import { OfferCoWorkingSpaceService } from "src/offer-co-working-space/offer-co-working-space.service";
 import { OfferPackagesService } from "src/offer-packages/offerpackages.service";
 import { RoomsService } from "src/rooms/rooms.service";
-import { TypeMember } from "src/shared/enum/global-enum";
+import { Module, TypeMember } from "src/shared/enum/global-enum";
 import { UserService } from "src/users/user.service";
 import { LIST_CITY_AR, LIST_CITY_EN } from "./lists/city/city";
 import { LISTS_EXPENSES_AR, LISTS_EXPENSES_EN } from "./lists/expenses/expenses";
 import { INVOICE_FILTER_AR, INVOICE_FILTER_EN } from "./lists/invoices/invoice";
+import { MODULE_AR, MODULE_EN } from "./lists/module/module";
 import { PACKAGES_AR, PACKAGES_EN } from "./lists/packages/packages";
 import { PAYMENT_METHODS_EN } from "./lists/payment-methods/payment-methods";
 import { LISTS_REVENUE_AR, LISTS_REVENUE_EN } from "./lists/revenue/revenue";
@@ -31,6 +33,7 @@ export class ListService {
     private readonly categoryService: CategoryService,
     private readonly offerPackagesService: OfferPackagesService,
     private readonly offerCoWorkingSpaceService: OfferCoWorkingSpaceService,
+    private readonly lookupService: LookupService,
   ) {}
   #lists = {
     roles: {
@@ -93,6 +96,10 @@ export class ListService {
       en: PACKAGES_EN,
       ar: PACKAGES_AR,
     },
+    module: {
+      en: MODULE_EN,
+      ar: MODULE_AR,
+    },
   };
 
   async getLists(keys: string[], lang: string): Promise<Record<string, any>> {
@@ -113,6 +120,13 @@ export class ListService {
       "global-offer-deskarea": () => this.generalOfferService.findDeskArea(),
       "global-offer-membership": () => this.generalOfferService.findMembership(),
       "global-offer-deals": () => this.generalOfferService.findDeals(),
+      "lookups-parents-expenses": () => this.lookupService.getParents(Module.Expenses),
+      "lookups-parents-revenue": () => this.lookupService.getParents(Module.Revenue),
+      "lookups-parents-nationality": () => this.lookupService.getParents(Module.Nationality),
+      "lookups-parents-college": () => this.lookupService.getParents(Module.College),
+      "lookups-parents-city": () => this.lookupService.getParents(Module.City),
+      "lookups-parents-unviresty": () => this.lookupService.getParents(Module.Unviresty),
+      "lookups-parents-company": () => this.lookupService.getParents(Module.Company),
       "global-offer-packages": () => this.generalOfferService.findPackages(),
       "global-offer-rooms": () => this.generalOfferService.findRooms(),
       "membership-offer-shared": () =>

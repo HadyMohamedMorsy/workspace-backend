@@ -36,7 +36,61 @@ export class AssignesMembershipService
       .leftJoin("ess.generalOffer", "eg")
       .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
       .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"]);
+      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"])
+      .leftJoin("e.individual", "ei")
+      .addSelect(["ei.id", "ei.name", "ei.whatsApp", "ei.number"])
+      .leftJoin("e.company", "eco")
+      .addSelect(["eco.id", "eco.name"])
+      .leftJoin("e.studentActivity", "esa")
+      .addSelect(["esa.id", "esa.name"]);
+
+    // Filter by membership type if provided
+    if (filteredRecord?.type) {
+      queryBuilder.andWhere("em.type = :membershipType", {
+        membershipType: filteredRecord.type,
+      });
+    }
+
+    if (filteredRecord?.package) {
+      switch (filteredRecord.package) {
+        case "membership_deskarea": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere("em.type = :membershipType AND e.end_date >= :currentDate", {
+            membershipType: "deskarea",
+            currentDate: today,
+          });
+          break;
+        }
+        case "membership_shared": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere("em.type = :membershipType AND e.end_date >= :currentDate", {
+            membershipType: "shared",
+            currentDate: today,
+          });
+          break;
+        }
+        case "expired_membership_deskarea": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere("em.type = :membershipType AND e.end_date < :currentDate", {
+            membershipType: "deskarea",
+            currentDate: today,
+          });
+          break;
+        }
+        case "expired_membership_shared": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere("em.type = :membershipType AND e.end_date < :currentDate", {
+            membershipType: "shared",
+            currentDate: today,
+          });
+          break;
+        }
+      }
+    }
   }
 
   async findAssignesByUser(filterData: any) {

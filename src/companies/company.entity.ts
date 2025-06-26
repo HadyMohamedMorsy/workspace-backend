@@ -2,12 +2,12 @@ import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
+import { Lookup } from "src/lookups/lookup.entity";
 import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
-import { CompanyType } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -22,21 +22,17 @@ export class Company extends BaseMemberEntity {
   @Column({ unique: true, length: 11 })
   phone: string;
 
-  @Column({ length: 256 })
-  city: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  city: Lookup;
 
-  @Column({
-    type: "enum",
-    enum: CompanyType,
-    default: CompanyType.GENERAL,
-  })
-  company_type: CompanyType;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  company_type: Lookup;
 
   @Column({ type: "text", nullable: true })
   address: string;
 
-  @Column({ nullable: true })
-  nationality: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  nationality: Lookup;
 
   @Column({ nullable: true })
   email: string;

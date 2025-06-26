@@ -38,6 +38,17 @@ export enum Resource {
   AssignGeneralOffer = "assign-general-offer",
   AssignesMembership = "assign-memeber-ship",
   AssignesPackage = "assign-package-room",
+  Lookup = "settings-lookups",
+}
+
+export enum Module {
+  Revenue = "revenue",
+  Expenses = "expenses",
+  City = "city",
+  Nationality = "nationality",
+  College = "college",
+  Unviresty = "unviresty",
+  Company = "company",
 }
 
 export enum CompanyType {

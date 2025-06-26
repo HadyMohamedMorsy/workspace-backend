@@ -12,6 +12,10 @@ export class CreateExpensePlaceChildDto {
 
   @IsString()
   @IsOptional()
+  name: string;
+
+  @IsString()
+  @IsOptional()
   featured_image: string;
 
   @IsEnum(PaymentMethod)

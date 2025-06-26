@@ -168,4 +168,8 @@ export const PERMISSIONS_TREE: PermissionsUser[] = [
       Permission.INDEX,
     ],
   },
+  {
+    resource: Resource.Lookup,
+    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
+  },
 ];

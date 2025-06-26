@@ -1,14 +1,13 @@
 import { Type } from "class-transformer";
 import {
   IsArray,
-  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
   ValidateNested,
 } from "class-validator";
-import { CompanyType } from "src/shared/enum/global-enum";
+import { Lookup } from "src/lookups/lookup.entity";
 import { User } from "src/users/user.entity";
 
 export class CreateCompanyDto {
@@ -21,20 +20,15 @@ export class CreateCompanyDto {
   @IsNotEmpty()
   phone: string;
 
-  @IsString()
-  @IsNotEmpty()
-  city: string;
+  city: Lookup;
 
-  @IsEnum(CompanyType, { message: 'company_type must be either "General" or "NGOs"' })
-  company_type: CompanyType;
+  company_type: Lookup;
 
   @IsString()
   @IsOptional()
   address: string;
 
-  @IsString()
-  @IsNotEmpty()
-  nationality: string;
+  nationality: Lookup;
 
   @IsString()
   @IsOptional()

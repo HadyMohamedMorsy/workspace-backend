@@ -7,6 +7,7 @@ import {
   MaxLength,
   ValidateNested,
 } from "class-validator";
+import { Lookup } from "src/lookups/lookup.entity";
 import { User } from "src/users/user.entity";
 
 export class CreateStudentActivityDto {
@@ -14,13 +15,9 @@ export class CreateStudentActivityDto {
   @MaxLength(256)
   name: string;
 
-  @IsString()
-  @MaxLength(256)
-  unviresty: string;
+  unviresty: Lookup;
 
-  @IsString()
-  @MaxLength(256)
-  college: string;
+  college: Lookup;
 
   @IsArray()
   @IsOptional()

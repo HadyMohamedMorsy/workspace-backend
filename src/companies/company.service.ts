@@ -42,6 +42,9 @@ export class CompanyService
         status_package: ReservationStatus.ACTIVE,
       })
       .leftJoin("es.packages", "pa")
+      .leftJoin("e.city", "c")
+      .leftJoin("e.nationality", "n")
+      .leftJoin("e.company_type", "ct")
       .leftJoin("pa.room", "pr")
       .leftJoin("e.deals", "d", "d.status = :status_deal", {
         status_deal: ReservationStatus.ACTIVE,
@@ -84,6 +87,15 @@ export class CompanyService
         "rr.id",
         "da.id",
         "s.id",
+        "c.name",
+        "n.name",
+        "ct.name",
+        "c.id",
+        "n.id",
+        "ct.id",
+        "c.name",
+        "n.name",
+        "ct.name",
       ]);
   }
 
@@ -122,6 +134,18 @@ export class CompanyService
           },
         );
       }
+    }
+
+    if (filterData?.city_id) {
+      queryBuilder.andWhere("c.id = :city", { city: filterData.city_id });
+    }
+
+    if (filterData?.nationality_id) {
+      queryBuilder.andWhere("n.id = :nationality", { nationality: filterData.nationality_id });
+    }
+
+    if (filterData?.company_id) {
+      queryBuilder.andWhere("ct.id = :company_type", { company_type: filterData.company_id });
     }
 
     if (filterData?.package) {

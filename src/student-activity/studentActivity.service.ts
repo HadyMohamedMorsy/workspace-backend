@@ -41,6 +41,8 @@ export class StudentActivityService
       .leftJoin("e.assignesPackages", "es", "es.status = :status_package", {
         status_package: ReservationStatus.ACTIVE,
       })
+      .leftJoin("e.unviresty", "u")
+      .leftJoin("e.college", "c")
       .leftJoin("es.packages", "pa")
       .leftJoin("pa.room", "pr")
       .leftJoin("e.deals", "d", "d.status = :status_deal", {
@@ -84,6 +86,10 @@ export class StudentActivityService
         "rr.id",
         "da.id",
         "s.id",
+        "u.id",
+        "c.id",
+        "u.name",
+        "c.name",
       ]);
   }
 
@@ -102,6 +108,13 @@ export class StudentActivityService
     if (dateFilter[filterData?.sort_customers]) {
       const { operator, date } = dateFilter[filterData?.sort_customers];
       queryBuilder.andWhere(`e.created_at ${operator} :date`, { date });
+    }
+
+    if (filterData?.unviresty_id) {
+      queryBuilder.andWhere("u.id = :unviresty", { unviresty: filterData.unviresty_id });
+    }
+    if (filterData?.college_id) {
+      queryBuilder.andWhere("c.id = :college", { college: filterData.college_id });
     }
 
     // Filter by invoice status

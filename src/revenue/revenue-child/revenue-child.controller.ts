@@ -17,6 +17,7 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
       id: true,
       amount: true,
       note: true,
+      name: true,
       payment_method: true,
       created_at: true,
       updated_at: true,
@@ -60,6 +61,7 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
     return await this.service.create({
       amount: createRevenueChildDto.amount,
       note: createRevenueChildDto.note,
+      name: createRevenueChildDto.name,
       payment_method: createRevenueChildDto.payment_method,
       revenue: req["revenue"],
       createdBy: req["createdBy"],
@@ -78,6 +80,7 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
       id: updateRevenueChildDto.id,
       amount: updateRevenueChildDto.amount,
       note: updateRevenueChildDto.note,
+      name: updateRevenueChildDto.name,
       payment_method: updateRevenueChildDto.payment_method,
       revenue: updateRevenueChildDto.revenue,
       createdBy: req["createdBy"],

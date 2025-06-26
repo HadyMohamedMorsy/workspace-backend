@@ -2,6 +2,7 @@ import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
+import { Lookup } from "src/lookups/lookup.entity";
 import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
@@ -34,14 +35,14 @@ export class Individual extends BaseMemberEntity {
   @Column({ nullable: true })
   freelancer_job: string;
 
-  @Column({ nullable: true })
-  unviresty: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  unviresty: Lookup;
 
-  @Column({ nullable: true })
-  college: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  college: Lookup;
 
-  @Column({ nullable: true })
-  nationality: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  nationality: Lookup;
 
   @OneToMany(() => Deals, deals => deals.individual)
   deals: Deals[];

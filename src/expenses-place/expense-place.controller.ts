@@ -16,7 +16,7 @@ export class ExpensesPlaceController implements SelectOptions, RelationOptions {
     return {
       id: true,
       name: true,
-      type: true,
+      total: true,
       created_at: true,
       updated_at: true,
     };
@@ -56,7 +56,6 @@ export class ExpensesPlaceController implements SelectOptions, RelationOptions {
       {
         name: create.name,
         total: create.total,
-        type: create.type,
         createdBy: req["createdBy"],
       } as CreateExpensePlaceDto,
       this.selectOptions(),
@@ -76,7 +75,6 @@ export class ExpensesPlaceController implements SelectOptions, RelationOptions {
       {
         id: updateExpensePlaceDto.id,
         name: updateExpensePlaceDto.name,
-        type: updateExpensePlaceDto.type,
         total: updateExpensePlaceDto.total,
         createdBy: req["createdBy"],
       } as UpdateExpensePlaceDto,

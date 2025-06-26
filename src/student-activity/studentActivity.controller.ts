@@ -49,6 +49,14 @@ export class StudentActivityController implements SelectOptions, RelationOptions
         id: true,
         status: true,
       },
+      unviresty: {
+        id: true,
+        name: true,
+      },
+      college: {
+        id: true,
+        name: true,
+      },
       assignesPackages: {
         id: true,
         status: true,
@@ -204,8 +212,8 @@ export class StudentActivityController implements SelectOptions, RelationOptions
   async create(@Body() create: CreateStudentActivityDto, @Req() req: Request) {
     return this.service.create({
       name: create.name,
-      unviresty: create.unviresty,
-      college: create.college,
+      unviresty: req["unviresty"],
+      college: req["college"],
       subjects: create.subjects,
       holders: create.holders,
       createdBy: req["createdBy"],
@@ -223,8 +231,8 @@ export class StudentActivityController implements SelectOptions, RelationOptions
     return this.service.update({
       id: update.id,
       name: update.name,
-      unviresty: update.unviresty,
-      college: update.college,
+      unviresty: req["unviresty"],
+      college: req["college"],
       subjects: update.subjects,
       holders: update.holders,
       createdBy: req["createdBy"],

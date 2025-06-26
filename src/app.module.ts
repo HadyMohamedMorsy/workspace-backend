@@ -28,6 +28,7 @@ import { GeneralOfferModule } from "./general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "./general-settings/settings.module";
 import { IndividualModule } from "./individual/individual.module";
 import { InvoiceModule } from "./invoice/invoice.module";
+import { LookupModule } from "./lookups/lookup.module";
 import { OfferCoWorkingSpaceModule } from "./offer-co-working-space/offer-co-working-space.module";
 import { OfferPackageModule } from "./offer-packages/offerpackages.module";
 import { OrdersModule } from "./orders/orders.module";
@@ -68,6 +69,7 @@ const ENV = process.env.NODE_ENV;
     CompanyModule,
     DashboredModule,
     InvoiceModule,
+    LookupModule,
     OfferPackageModule,
     RoomsModule,
     listModule,

@@ -2,6 +2,7 @@ import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
+import { Lookup } from "src/lookups/lookup.entity";
 import { Order } from "src/orders/order.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
@@ -18,11 +19,11 @@ export class StudentActivity extends BaseMemberEntity {
   @Column({ length: 256 })
   name: string;
 
-  @Column({ length: 256 })
-  unviresty: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  unviresty: Lookup;
 
-  @Column({ length: 256 })
-  college: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  college: Lookup;
 
   @OneToMany(() => Deals, deals => deals.studentActivity)
   deals: Deals[];

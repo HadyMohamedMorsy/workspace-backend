@@ -33,7 +33,34 @@ export class AssignesPackagesService
       .leftJoin("ess.generalOffer", "eg")
       .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
       .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"]);
+      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"])
+      .leftJoin("e.individual", "ei")
+      .addSelect(["ei.id", "ei.name", "ei.whatsApp", "ei.number"])
+      .leftJoin("e.company", "eco")
+      .addSelect(["eco.id", "eco.name"])
+      .leftJoin("e.studentActivity", "esa")
+      .addSelect(["esa.id", "esa.name"]);
+
+    if (filteredRecord?.package) {
+      switch (filteredRecord.package) {
+        case "packages_active": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere("e.end_date >= :currentDate", {
+            currentDate: today,
+          });
+          break;
+        }
+        case "packages_expired": {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          queryBuilder.andWhere("e.end_date < :currentDate", {
+            currentDate: today,
+          });
+          break;
+        }
+      }
+    }
   }
 
   async findAssignesByUser(filterData: any) {

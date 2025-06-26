@@ -12,6 +12,9 @@ export class RevenueChild extends BaseMemberEntity {
   @Column()
   amount: number;
 
+  @Column({ nullable: true })
+  name: string;
+
   @Column({
     nullable: true,
     type: "enum",

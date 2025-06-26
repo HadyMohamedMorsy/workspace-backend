@@ -9,6 +9,10 @@ export class CreateRevenueChildDto {
   @Type(() => Number)
   amount: number;
 
+  @IsString()
+  @IsOptional()
+  name: string;
+
   @IsNumber()
   @Type(() => Number)
   revenueChild_id: number;
