@@ -177,20 +177,24 @@ export class DahboredService {
       // Orders (keep original PAID/COST handling)
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.Cach,
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.Cach,
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
       // Other financials (keep original)
       this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.Cach,
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
       this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.Cach,
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
@@ -237,6 +241,418 @@ export class DahboredService {
       },
     };
   }
+
+  async getAllRevenueTodayVisa(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      depositeRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select("SUM(deal.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Visa,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select("SUM(reservation.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Visa,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages with deposit subtraction
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select("SUM(package.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Visa,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership with deposit subtraction
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select("SUM(membership.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Visa,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Rest of the queries (Shared, Desk Area, Deposites, Orders, etc.)
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.depositeRepository.sum("total_price", {
+        status: DepositeStatus.COMPLETE,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders (keep original PAID/COST handling)
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Other financials
+      this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    // Calculate net revenue with proper null handling
+    const totalRevenue =
+      (+dealsNet?.net || 0) +
+      (+reservationRoomNet?.net || 0) +
+      (+packagesNet?.net || 0) +
+      (+membershipNet?.net || 0) +
+      (sharedRevenue || 0) +
+      (deskAreaRevenue || 0) +
+      (depositeRevenue || 0) +
+      (orderPaid || 0) -
+      (orderCost || 0) +
+      (revenueChildSum || 0) -
+      (expenseSum || 0);
+    return {
+      total: totalRevenue,
+      details: {
+        dealsRevenue: +dealsNet?.net || 0,
+        reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        packagesRevenue: +packagesNet?.net || 0,
+        membershipRevenue: +membershipNet?.net || 0,
+        sharedRevenue,
+        deskAreaRevenue,
+        depositeRevenue,
+        orderPaid,
+        orderCost,
+        revenueChildSum,
+        expenseSum,
+      },
+    };
+  }
+
+  async getAllRevenueTodayVodafoneCash(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      depositeRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select("SUM(deal.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.VodafoneCach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select("SUM(reservation.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.VodafoneCach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages with deposit subtraction
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select("SUM(package.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.VodafoneCach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership with deposit subtraction
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select("SUM(membership.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.VodafoneCach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Rest of the queries (Shared, Desk Area, Deposites, Orders, etc.)
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.depositeRepository.sum("total_price", {
+        status: DepositeStatus.COMPLETE,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders (keep original PAID/COST handling)
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Other financials
+      this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    // Calculate net revenue with proper null handling
+    const totalRevenue =
+      (+dealsNet?.net || 0) +
+      (+reservationRoomNet?.net || 0) +
+      (+packagesNet?.net || 0) +
+      (+membershipNet?.net || 0) +
+      (sharedRevenue || 0) +
+      (deskAreaRevenue || 0) +
+      (depositeRevenue || 0) +
+      (orderPaid || 0) -
+      (orderCost || 0) +
+      (revenueChildSum || 0) -
+      (expenseSum || 0);
+    return {
+      total: totalRevenue,
+      details: {
+        dealsRevenue: +dealsNet?.net || 0,
+        reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        packagesRevenue: +packagesNet?.net || 0,
+        membershipRevenue: +membershipNet?.net || 0,
+        sharedRevenue,
+        deskAreaRevenue,
+        depositeRevenue,
+        orderPaid,
+        orderCost,
+        revenueChildSum,
+        expenseSum,
+      },
+    };
+  }
+
+  async getAllRevenueTodayInstapay(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      depositeRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select("SUM(deal.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Instapay,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select("SUM(reservation.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Instapay,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages with deposit subtraction
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select("SUM(package.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Instapay,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership with deposit subtraction
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select("SUM(membership.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          payment_method: PaymentMethod.Instapay,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Rest of the queries (Shared, Desk Area, Deposites, Orders, etc.)
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.depositeRepository.sum("total_price", {
+        status: DepositeStatus.COMPLETE,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders (keep original PAID/COST handling)
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Other financials
+      this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    // Calculate net revenue with proper null handling
+    const totalRevenue =
+      (+dealsNet?.net || 0) +
+      (+reservationRoomNet?.net || 0) +
+      (+packagesNet?.net || 0) +
+      (+membershipNet?.net || 0) +
+      (sharedRevenue || 0) +
+      (deskAreaRevenue || 0) +
+      (depositeRevenue || 0) +
+      (orderPaid || 0) -
+      (orderCost || 0) +
+      (revenueChildSum || 0) -
+      (expenseSum || 0);
+    return {
+      total: totalRevenue,
+      details: {
+        dealsRevenue: +dealsNet?.net || 0,
+        reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        packagesRevenue: +packagesNet?.net || 0,
+        membershipRevenue: +membershipNet?.net || 0,
+        sharedRevenue,
+        deskAreaRevenue,
+        depositeRevenue,
+        orderPaid,
+        orderCost,
+        revenueChildSum,
+        expenseSum,
+      },
+    };
+  }
+
   async getAllExistClient(filter: FiltersDashboredDto) {
     const [sharedActive, deskActive, roomActive] = await Promise.all([
       this.sharedRepository.count({

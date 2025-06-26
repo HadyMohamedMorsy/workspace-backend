@@ -161,6 +161,7 @@ export class InvoiceService {
             total_time: deskarea.total_time,
             end_hour: deskarea.end_hour,
             end_minute: deskarea.end_minute,
+            payment_method: deskarea.payment_method as PaymentMethod,
             total_price:
               deskarea.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
             is_full_day: deskarea.is_full_day || deskarea.total_time > +settings.full_day_hours,

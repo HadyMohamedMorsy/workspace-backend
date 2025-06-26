@@ -33,6 +33,12 @@ export class DashboredController {
     switch (slug) {
       case "cash-today":
         return this.handleAllRevenueMetrics(filterQueryDto);
+      case "cash-today-visa":
+        return this.handleAllRevenueMetricsVisa(filterQueryDto);
+      case "cash-today-instapay":
+        return this.handleAllRevenueMetricsInstapay(filterQueryDto);
+      case "cash-today-vodafone":
+        return this.handleAllRevenueMetricsVodafone(filterQueryDto);
       case "clients":
         return this.handleClientsMetrics(filterQueryDto);
       case "salaries":
@@ -108,6 +114,72 @@ export class DashboredController {
         ["Purchases Cash", revenueData?.details.purchasesSum || 0],
       ],
       "pi pi-money-bill",
+    );
+  }
+
+  private async handleAllRevenueMetricsVisa(filterQueryDto: FiltersDashboredDto) {
+    const revenueData = await this.dashboredService.getAllRevenueTodayVisa(filterQueryDto);
+
+    return this.createMetrics(
+      [
+        ["Total Visa", revenueData?.total || 0],
+        ["Deals Visa", revenueData?.details.dealsRevenue || 0],
+        ["Shared Visa", revenueData?.details.sharedRevenue || 0],
+        ["Desk Area Visa", revenueData?.details.deskAreaRevenue || 0],
+        ["Reservation Room Visa", revenueData?.details.reservationRoomRevenue || 0],
+        ["Deposit Visa", revenueData?.details.depositeRevenue || 0],
+        ["Packages Visa", revenueData?.details.packagesRevenue || 0],
+        ["Membership Visa", revenueData?.details.membershipRevenue || 0],
+        ["Orders Paid Visa", revenueData?.details.orderPaid || 0],
+        ["Orders Cost Visa", revenueData?.details.orderCost || 0],
+        ["Revenue Visa", revenueData?.details.revenueChildSum || 0],
+        ["Expenses Visa", revenueData?.details.expenseSum || 0],
+      ],
+      "pi pi-credit-card",
+    );
+  }
+
+  private async handleAllRevenueMetricsInstapay(filterQueryDto: FiltersDashboredDto) {
+    const revenueData = await this.dashboredService.getAllRevenueTodayInstapay(filterQueryDto);
+
+    return this.createMetrics(
+      [
+        ["Total Instapay", revenueData?.total || 0],
+        ["Deals Instapay", revenueData?.details.dealsRevenue || 0],
+        ["Shared Instapay", revenueData?.details.sharedRevenue || 0],
+        ["Desk Area Instapay", revenueData?.details.deskAreaRevenue || 0],
+        ["Reservation Room Instapay", revenueData?.details.reservationRoomRevenue || 0],
+        ["Deposit Instapay", revenueData?.details.depositeRevenue || 0],
+        ["Packages Instapay", revenueData?.details.packagesRevenue || 0],
+        ["Membership Instapay", revenueData?.details.membershipRevenue || 0],
+        ["Orders Paid Instapay", revenueData?.details.orderPaid || 0],
+        ["Orders Cost Instapay", revenueData?.details.orderCost || 0],
+        ["Revenue Instapay", revenueData?.details.revenueChildSum || 0],
+        ["Expenses Instapay", revenueData?.details.expenseSum || 0],
+      ],
+      "pi pi-mobile",
+    );
+  }
+
+  private async handleAllRevenueMetricsVodafone(filterQueryDto: FiltersDashboredDto) {
+    const revenueData = await this.dashboredService.getAllRevenueTodayVodafoneCash(filterQueryDto);
+
+    return this.createMetrics(
+      [
+        ["Total Vodafone Cash", revenueData?.total || 0],
+        ["Deals Vodafone Cash", revenueData?.details.dealsRevenue || 0],
+        ["Shared Vodafone Cash", revenueData?.details.sharedRevenue || 0],
+        ["Desk Area Vodafone Cash", revenueData?.details.deskAreaRevenue || 0],
+        ["Reservation Room Vodafone Cash", revenueData?.details.reservationRoomRevenue || 0],
+        ["Deposit Vodafone Cash", revenueData?.details.depositeRevenue || 0],
+        ["Packages Vodafone Cash", revenueData?.details.packagesRevenue || 0],
+        ["Membership Vodafone Cash", revenueData?.details.membershipRevenue || 0],
+        ["Orders Paid Vodafone Cash", revenueData?.details.orderPaid || 0],
+        ["Orders Cost Vodafone Cash", revenueData?.details.orderCost || 0],
+        ["Revenue Vodafone Cash", revenueData?.details.revenueChildSum || 0],
+        ["Expenses Vodafone Cash", revenueData?.details.expenseSum || 0],
+      ],
+      "pi pi-wallet",
     );
   }
 
@@ -306,23 +378,27 @@ export class DashboredController {
   private async handleTotalOrderMetrics(filterQueryDto: FiltersDashboredDto) {
     const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
 
-    const orderTotals = await Promise.all([
-      this.dashboredService.getTotalPaidOrders(filterQueryDto),
-      this.dashboredService.getTotalCostOrders(filterQueryDto),
-      this.dashboredService.getTotalHoldOrders(filterQueryDto),
-      this.dashboredService.getTotalOrderPriceOrders(filterQueryDto),
+    const [cash, instapay, visa, vodafone] = await Promise.all([
+      this.dashboredService.getOrderCachRevenue(filterQueryDto),
+      this.dashboredService.getOrderInstaRevenue(filterQueryDto),
+      this.dashboredService.getOrderVisaRevenue(filterQueryDto),
+      this.dashboredService.getOrderVodafoneRevenue(filterQueryDto),
     ]);
+
+    const cashTotal = getValue(cash, "totalRevenue");
+    const instapayTotal = getValue(instapay, "totalRevenue");
+    const visaTotal = getValue(visa, "totalRevenue");
+    const vodafoneTotal = getValue(vodafone, "totalRevenue");
+    const totalAllPaymentMethods = cashTotal + instapayTotal + visaTotal + vodafoneTotal;
 
     return this.createMetrics(
       [
-        ["All Orders Paid", getValue(orderTotals[0], "total")],
-        ["All Orders Cost", getValue(orderTotals[1], "total")],
-        ["All Orders Hold", getValue(orderTotals[2], "total")],
-        ["All Amount Orders Kitchen", getValue(orderTotals[3], "total")],
-        [
-          "All Orders Kitchen",
-          getValue(orderTotals[0], "total") + getValue(orderTotals[1], "total"),
-        ],
+        ["Cash Order Revenue", cashTotal],
+        ["Vodafone Order Revenue", vodafoneTotal],
+        ["Visa Order Revenue", visaTotal],
+        ["Instapay Order Revenue", instapayTotal],
+        ["Total Cash Only", cashTotal],
+        ["Total All Payment Methods", totalAllPaymentMethods],
       ],
       "pi pi-inbox",
     );
