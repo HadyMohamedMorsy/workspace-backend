@@ -1,11 +1,10 @@
 import { Type } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNumber, IsOptional } from "class-validator";
+import { Lookup } from "src/lookups/lookup.entity";
 import { User } from "src/users/user.entity";
 
 export class CreateExpensePlaceDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
+  expensePlace: Lookup;
 
   @IsNumber()
   @IsOptional()

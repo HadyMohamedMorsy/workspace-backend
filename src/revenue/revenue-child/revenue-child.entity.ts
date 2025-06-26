@@ -1,3 +1,4 @@
+import { Lookup } from "src/lookups/lookup.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
@@ -12,8 +13,8 @@ export class RevenueChild extends BaseMemberEntity {
   @Column()
   amount: number;
 
-  @Column({ nullable: true })
-  name: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  revenue_child: Lookup;
 
   @Column({
     nullable: true,

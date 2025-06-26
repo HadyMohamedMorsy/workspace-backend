@@ -1,3 +1,4 @@
+import { Lookup } from "src/lookups/lookup.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
@@ -15,8 +16,8 @@ export class ExpensePlaceChild extends BaseMemberEntity {
   @Column({ nullable: true })
   note: string;
 
-  @Column({ nullable: true })
-  name: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  expensePlaceChild: Lookup;
 
   @Column({
     nullable: true,

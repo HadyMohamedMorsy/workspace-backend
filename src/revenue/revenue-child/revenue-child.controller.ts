@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, HttpCode, Post, Put, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  Patch,
+  Post,
+  Put,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -17,7 +27,6 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
       id: true,
       amount: true,
       note: true,
-      name: true,
       payment_method: true,
       created_at: true,
       updated_at: true,
@@ -31,7 +40,7 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
         firstName: true,
         lastName: true,
       },
-      revenue: {
+      revenue_child: {
         id: true,
         name: true,
       },
@@ -58,14 +67,18 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
     },
   ])
   async create(@Body() createRevenueChildDto: CreateRevenueChildDto, @Req() req: Request) {
-    return await this.service.create({
-      amount: createRevenueChildDto.amount,
-      note: createRevenueChildDto.note,
-      name: createRevenueChildDto.name,
-      payment_method: createRevenueChildDto.payment_method,
-      revenue: req["revenue"],
-      createdBy: req["createdBy"],
-    } as CreateRevenueChildDto);
+    return await this.service.create(
+      {
+        amount: createRevenueChildDto.amount,
+        note: createRevenueChildDto.note,
+        revenue_child: req["revenueChild"],
+        payment_method: createRevenueChildDto.payment_method,
+        revenue: req["revenue"],
+        createdBy: req["createdBy"],
+      } as CreateRevenueChildDto,
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Put("/update")
@@ -76,15 +89,19 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
     },
   ])
   async update(@Body() updateRevenueChildDto: UpdateRevenueChildDto, @Req() req: Request) {
-    return await this.service.update({
-      id: updateRevenueChildDto.id,
-      amount: updateRevenueChildDto.amount,
-      note: updateRevenueChildDto.note,
-      name: updateRevenueChildDto.name,
-      payment_method: updateRevenueChildDto.payment_method,
-      revenue: updateRevenueChildDto.revenue,
-      createdBy: req["createdBy"],
-    });
+    return await this.service.update(
+      {
+        id: updateRevenueChildDto.id,
+        amount: updateRevenueChildDto.amount,
+        note: updateRevenueChildDto.note,
+        revenue_child: req["revenueChild"],
+        payment_method: updateRevenueChildDto.payment_method,
+        revenue: updateRevenueChildDto.revenue,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")
@@ -96,5 +113,19 @@ export class RevenueChildController implements SelectOptions, RelationOptions {
   ])
   public delete(@Body() { id }: { id: number }) {
     return this.service.delete(id);
+  }
+
+  @Patch("/change-payment-method")
+  @Permissions([
+    {
+      resource: Resource.Revenue,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changePaymentMethod(@Body() update: { id: number; payment_method: string }) {
+    return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
+      id: true,
+      payment_method: true,
+    });
   }
 }

@@ -28,11 +28,10 @@ export class ExpensesPlaceChildService
     filteredRecord?: any,
   ) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
-    if (filteredRecord.expensePlace_id) {
-      queryBuilder.leftJoin("e.expensePlace", "ep").andWhere("ep.id = :expenseplace_id", {
-        expenseplace_id: filteredRecord.expensePlace_id,
-      });
-    }
+    queryBuilder
+      .leftJoin("e.expensePlaceChild", "expensePlaceChild")
+      .addSelect(["expensePlaceChild.id", "expensePlaceChild.name"]);
+
     if (filteredRecord?.start_date && filteredRecord?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
         start_date: filteredRecord.start_date,

@@ -15,7 +15,6 @@ export class RevenueController implements SelectOptions, RelationOptions {
   public selectOptions(): Record<string, boolean> {
     return {
       id: true,
-      name: true,
       total: true,
       created_at: true,
       updated_at: true,
@@ -28,6 +27,10 @@ export class RevenueController implements SelectOptions, RelationOptions {
         id: true,
         firstName: true,
         lastName: true,
+      },
+      revenue: {
+        id: true,
+        name: true,
       },
     };
   }
@@ -52,11 +55,15 @@ export class RevenueController implements SelectOptions, RelationOptions {
     },
   ])
   async create(@Body() createRevenueDto: CreateRevenueDto, @Req() req: Request) {
-    return await this.service.create({
-      name: createRevenueDto.name,
-      total: createRevenueDto.total,
-      createdBy: req["createdBy"],
-    });
+    return await this.service.create(
+      {
+        revenue: req["revenue"],
+        total: createRevenueDto.total,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Put("/update")
@@ -67,12 +74,16 @@ export class RevenueController implements SelectOptions, RelationOptions {
     },
   ])
   async update(@Body() updateRevenueDto: UpdateRevenueDto, @Req() req: Request) {
-    return await this.service.update({
-      id: updateRevenueDto.id,
-      name: updateRevenueDto.name,
-      total: updateRevenueDto.total,
-      createdBy: req["createdBy"],
-    });
+    return await this.service.update(
+      {
+        id: updateRevenueDto.id,
+        revenue: req["revenue"],
+        total: updateRevenueDto.total,
+        createdBy: req["createdBy"],
+      },
+      this.selectOptions(),
+      this.getRelationOptions(),
+    );
   }
 
   @Delete("/delete")

@@ -78,14 +78,10 @@ export class LookupService
       order: { name: "ASC" },
     });
 
-    return {
-      data: {
-        children: children.map(child => ({
-          id: child.id,
-          label: child.name,
-          value: child.name,
-        })),
-      },
-    };
+    return children.map(child => ({
+      id: child.id,
+      label: child.name,
+      value: child.id,
+    }));
   }
 }

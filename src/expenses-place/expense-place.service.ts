@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
-import { Repository } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateExpensePlaceDto } from "./dto/create-expense-place.dto";
 import { UpdateExpensePlaceDto } from "./dto/update-expense-place.dto";
 import { ExpensePlace } from "./expense-place.entity";
@@ -19,5 +19,15 @@ export class ExpensesPlaceService
     protected readonly apiFeaturesService: APIFeaturesService,
   ) {
     super(repository, apiFeaturesService);
+  }
+
+  override queryRelationIndex(
+    queryBuilder: SelectQueryBuilder<ExpensePlace>,
+    filteredRecord?: any,
+  ) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder
+      .leftJoin("e.expensePlace", "expensePlace")
+      .addSelect(["expensePlace.id", "expensePlace.name"]);
   }
 }

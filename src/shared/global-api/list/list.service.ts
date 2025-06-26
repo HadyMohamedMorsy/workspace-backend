@@ -165,4 +165,8 @@ export class ListService {
       })),
     }));
   }
+
+  async getLookupsChildList(parentId: number) {
+    return await this.lookupService.getChildrenByParentId(parentId);
+  }
 }

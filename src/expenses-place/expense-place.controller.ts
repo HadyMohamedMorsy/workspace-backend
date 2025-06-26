@@ -15,7 +15,6 @@ export class ExpensesPlaceController implements SelectOptions, RelationOptions {
   public selectOptions(): Record<string, boolean> {
     return {
       id: true,
-      name: true,
       total: true,
       created_at: true,
       updated_at: true,
@@ -28,6 +27,10 @@ export class ExpensesPlaceController implements SelectOptions, RelationOptions {
         id: true,
         firstName: true,
         lastName: true,
+      },
+      expensePlace: {
+        id: true,
+        name: true,
       },
     };
   }
@@ -54,7 +57,7 @@ export class ExpensesPlaceController implements SelectOptions, RelationOptions {
   async create(@Body() create: CreateExpensePlaceDto, @Req() req: Request) {
     return await this.service.create(
       {
-        name: create.name,
+        expensePlace: req["expensePlace"],
         total: create.total,
         createdBy: req["createdBy"],
       } as CreateExpensePlaceDto,
@@ -74,7 +77,7 @@ export class ExpensesPlaceController implements SelectOptions, RelationOptions {
     return await this.service.update(
       {
         id: updateExpensePlaceDto.id,
-        name: updateExpensePlaceDto.name,
+        expensePlace: req["expensePlace"],
         total: updateExpensePlaceDto.total,
         createdBy: req["createdBy"],
       } as UpdateExpensePlaceDto,

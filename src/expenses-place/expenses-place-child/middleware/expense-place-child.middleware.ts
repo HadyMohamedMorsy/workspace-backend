@@ -15,7 +15,7 @@ export class ExpensePlaceChildMiddleware implements NestMiddleware {
 
       await this.service.update({
         id: place.id,
-        total: place.total + (operator === 1 ? +parseFloat(body.cost) : -parseFloat(body.cost)),
+        total: +place.total + (operator === 1 ? +parseFloat(body.cost) : -parseFloat(body.cost)),
       });
 
       if (method !== "DELETE") req["expensePlace"] = place;

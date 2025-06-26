@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, Req } from "@nestjs/common";
 import { ListService } from "./list.service";
 import { PERMISSIONS_TREE } from "./tree/permission";
 
@@ -29,6 +29,14 @@ export class ListController {
   @Get("/rooms-filters-calender")
   async roomsCalender() {
     const result = await this.listsService.filterRoomsCalender();
+    return {
+      data: result,
+    };
+  }
+
+  @Get("/lookups-child-list")
+  async getLookupsChildList(@Query("parentId") parentId: string) {
+    const result = await this.listsService.getLookupsChildList(+parentId);
     return {
       data: result,
     };

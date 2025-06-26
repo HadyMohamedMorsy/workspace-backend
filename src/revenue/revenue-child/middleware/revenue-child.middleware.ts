@@ -15,7 +15,7 @@ export class RevenueChildMiddleware implements NestMiddleware {
       await this.service.update({
         id: revenue.id,
         total:
-          revenue.total + (operator === 1 ? +parseFloat(body.amount) : -parseFloat(body.amount)),
+          +revenue.total + (operator === 1 ? +parseFloat(body.amount) : -parseFloat(body.amount)),
       });
       if (method !== "DELETE") req["revenue"] = revenue;
     }

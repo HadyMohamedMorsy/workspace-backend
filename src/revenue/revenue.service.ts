@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, SelectQueryBuilder } from "typeorm";
 
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
@@ -20,6 +20,11 @@ export class RevenueService
     repository: Repository<Revenue>,
   ) {
     super(repository, apiFeaturesService);
+  }
+
+  override queryRelationIndex(queryBuilder: SelectQueryBuilder<Revenue>, filteredRecord?: any) {
+    super.queryRelationIndex(queryBuilder, filteredRecord);
+    queryBuilder.leftJoin("e.revenue", "revenue").addSelect(["revenue.id", "revenue.name"]);
   }
 
   async findUserAll(userId: number) {

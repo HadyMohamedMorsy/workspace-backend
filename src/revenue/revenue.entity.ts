@@ -1,15 +1,17 @@
+import { Lookup } from "src/lookups/lookup.entity";
 import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { User } from "src/users/user.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { RevenueChild } from "./revenue-child/revenue-child.entity";
 
 @Entity()
+@Index(["revenue"], { unique: true })
 export class Revenue extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  name: string;
+  @ManyToOne(() => Lookup, { nullable: true, onDelete: "SET NULL" })
+  revenue: Lookup;
 
   @Column({ nullable: true })
   total: number;

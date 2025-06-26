@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import { IsEnum, IsNumber, IsOptional, IsString } from "class-validator";
+import { Lookup } from "src/lookups/lookup.entity";
 import { Revenue } from "src/revenue/revenue.entity";
 import { PaymentMethod } from "src/shared/enum/global-enum";
 import { User } from "src/users/user.entity";
@@ -9,13 +10,7 @@ export class CreateRevenueChildDto {
   @Type(() => Number)
   amount: number;
 
-  @IsString()
-  @IsOptional()
-  name: string;
-
-  @IsNumber()
-  @Type(() => Number)
-  revenueChild_id: number;
+  revenue_child: Lookup;
 
   @IsEnum(PaymentMethod)
   @IsOptional()
