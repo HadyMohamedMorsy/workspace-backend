@@ -33,6 +33,8 @@ export class DashboredController {
     switch (slug) {
       case "cash-today":
         return this.handleAllRevenueMetrics(filterQueryDto);
+      case "total-today-all":
+        return this.handleAllRevenueMetricsAllPaymentMethods(filterQueryDto);
       case "cash-today-visa":
         return this.handleAllRevenueMetricsVisa(filterQueryDto);
       case "cash-today-instapay":
@@ -114,6 +116,31 @@ export class DashboredController {
         ["Purchases Cash", revenueData?.details.purchasesSum || 0],
       ],
       "pi pi-money-bill",
+    );
+  }
+
+  private async handleAllRevenueMetricsAllPaymentMethods(filterQueryDto: FiltersDashboredDto) {
+    const revenueData =
+      await this.dashboredService.getAllRevenueTodayAllPaymentMethods(filterQueryDto);
+    console.log(revenueData?.total);
+    return this.createMetrics(
+      [
+        ["Total All Payment Methods", revenueData?.total || 0],
+        ["Deals All Payment Methods", revenueData?.details.dealsRevenue || 0],
+        ["Shared All Payment Methods", revenueData?.details.sharedRevenue || 0],
+        ["Desk Area All Payment Methods", revenueData?.details.deskAreaRevenue || 0],
+        ["Reservation Room All Payment Methods", revenueData?.details.reservationRoomRevenue || 0],
+        ["Deposit All Payment Methods", revenueData?.details.depositeRevenue || 0],
+        ["Packages All Payment Methods", revenueData?.details.packagesRevenue || 0],
+        ["Membership All Payment Methods", revenueData?.details.membershipRevenue || 0],
+        ["Orders Paid All Payment Methods", revenueData?.details.orderPaid || 0],
+        ["Orders Cost All Payment Methods", revenueData?.details.orderCost || 0],
+        ["Revenue All Payment Methods", revenueData?.details.revenueChildSum || 0],
+        ["Expenses All Payment Methods", revenueData?.details.expenseSum || 0],
+        ["Purchases All Payment Methods", revenueData?.details.purchasesSum || 0],
+        ["Returns All Payment Methods", revenueData?.details.returnsSum || 0],
+      ],
+      "pi pi-credit-card",
     );
   }
 
@@ -389,16 +416,16 @@ export class DashboredController {
     const instapayTotal = getValue(instapay, "totalRevenue");
     const visaTotal = getValue(visa, "totalRevenue");
     const vodafoneTotal = getValue(vodafone, "totalRevenue");
-    const totalAllPaymentMethods = cashTotal + instapayTotal + visaTotal + vodafoneTotal;
+    const totalAllPaymentMethods = +cashTotal + +instapayTotal + +visaTotal + +vodafoneTotal;
 
     return this.createMetrics(
       [
+        ["Total All Payment Methods", totalAllPaymentMethods],
         ["Cash Order Revenue", cashTotal],
         ["Vodafone Order Revenue", vodafoneTotal],
         ["Visa Order Revenue", visaTotal],
         ["Instapay Order Revenue", instapayTotal],
         ["Total Cash Only", cashTotal],
-        ["Total All Payment Methods", totalAllPaymentMethods],
       ],
       "pi pi-inbox",
     );

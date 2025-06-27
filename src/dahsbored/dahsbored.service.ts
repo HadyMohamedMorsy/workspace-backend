@@ -198,10 +198,12 @@ export class DahboredService {
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
+      // Purchases - all payment methods
       this.purchasesRepository.sum("total", {
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
+      // Returns - all payment methods
       this.returnsRepository.sum("total", {
         created_at: Between(filter.start_date, filter.end_date),
       }),
@@ -1732,5 +1734,165 @@ export class DahboredService {
         endDate: filter.end_date,
       })
       .getRawOne();
+  }
+
+  async getAllRevenueTodayAllPaymentMethods(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      depositeRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+      purchasesSum,
+      returnsSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction - all payment methods
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select("SUM(deal.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction - all payment methods
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select("SUM(reservation.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages with deposit subtraction - all payment methods
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select("SUM(package.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership with deposit subtraction - all payment methods
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select("SUM(membership.total_price - COALESCE(deposite.total_price, 0))", "net")
+        .where({
+          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Shared - all payment methods
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Desk Area - all payment methods
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Deposites - all payment methods
+      this.depositeRepository.sum("total_price", {
+        status: DepositeStatus.COMPLETE,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders PAID - all payment methods
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders COST - all payment methods
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.COST,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Revenue Child - all payment methods
+      this.revenueChildRepository.sum("amount", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Expense Place Child - all payment methods
+      this.expensePlaceChildRepository.sum("cost", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Purchases - all payment methods
+      this.purchasesRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Returns - all payment methods
+      this.returnsRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const sharedRevenueValue = sharedRevenue || 0;
+    const deskAreaRevenueValue = deskAreaRevenue || 0;
+    const depositeRevenueValue = depositeRevenue || 0;
+    const orderPaidValue = orderPaid || 0;
+    const orderCostValue = orderCost || 0;
+    const revenueChildSumValue = revenueChildSum || 0;
+    const expenseSumValue = expenseSum || 0;
+    const purchasesSumValue = purchasesSum || 0;
+    const returnsSumValue = returnsSum || 0;
+
+    const total =
+      dealsRevenue +
+      reservationRoomRevenue +
+      packagesRevenue +
+      membershipRevenue +
+      sharedRevenueValue +
+      deskAreaRevenueValue +
+      depositeRevenueValue +
+      revenueChildSumValue +
+      orderPaidValue +
+      orderCostValue +
+      returnsSumValue -
+      expenseSumValue -
+      purchasesSumValue;
+
+    return {
+      total,
+      details: {
+        dealsRevenue,
+        reservationRoomRevenue,
+        packagesRevenue,
+        membershipRevenue,
+        sharedRevenue: sharedRevenueValue,
+        deskAreaRevenue: deskAreaRevenueValue,
+        depositeRevenue: depositeRevenueValue,
+        orderPaid: orderPaidValue,
+        orderCost: orderCostValue,
+        revenueChildSum: revenueChildSumValue,
+        expenseSum: expenseSumValue,
+        purchasesSum: purchasesSumValue,
+        returnsSum: returnsSumValue,
+      },
+    };
   }
 }
