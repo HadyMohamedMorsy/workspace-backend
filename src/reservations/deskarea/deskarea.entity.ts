@@ -77,7 +77,7 @@ export class Deskarea extends BaseMemberEntity {
   @Column({ nullable: true })
   note: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
   @Column({

@@ -38,7 +38,7 @@ export class Deals extends BaseMemberEntity {
   @Column({ nullable: true })
   price_hour: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
   @Column({ nullable: true })

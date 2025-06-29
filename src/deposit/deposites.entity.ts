@@ -12,7 +12,7 @@ export class Deposite extends BaseMemberEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
   @Column({ type: "enum", enum: DepositeStatus, default: DepositeStatus.COMPLETE })

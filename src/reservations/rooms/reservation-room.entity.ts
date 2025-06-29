@@ -76,7 +76,7 @@ export class ReservationRoom extends BaseMemberEntity {
   @ManyToOne(() => Room, room => room.reservationRoom)
   room: Room;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
   @Column({ nullable: true })

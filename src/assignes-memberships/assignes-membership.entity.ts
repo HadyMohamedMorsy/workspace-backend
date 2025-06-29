@@ -77,7 +77,7 @@ export class AssignesMembership extends BaseMemberEntity {
   @Column({ nullable: true })
   remaining: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
   @OneToOne(() => Deposite, deposite => deposite.assignessMemebership, { onDelete: "SET NULL" })

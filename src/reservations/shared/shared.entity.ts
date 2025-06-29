@@ -74,7 +74,7 @@ export class Shared extends BaseMemberEntity {
   })
   assignGeneralOffer: AssignGeneralOffer;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
   @Column({

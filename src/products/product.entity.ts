@@ -24,7 +24,7 @@ export class Product extends BaseMemberEntity {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
   selling_price: number;
 
   @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
