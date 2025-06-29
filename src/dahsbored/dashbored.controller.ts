@@ -1,4 +1,5 @@
 import { Body, Controller, Post, Req } from "@nestjs/common";
+import { PaymentMethod, TypeOrder } from "src/shared/enum/global-enum";
 import { DahboredService } from "./dahsbored.service";
 import { FiltersDashboredDto } from "./dto/filter-dashbored.dto";
 
@@ -106,13 +107,13 @@ export class DashboredController {
         ["Shared Cash", revenueData?.details.sharedRevenue || 0],
         ["Desk Area Cash", revenueData?.details.deskAreaRevenue || 0],
         ["Reservation Room Cash", revenueData?.details.reservationRoomRevenue || 0],
-        ["Deposit Cash", revenueData?.details.depositeRevenue || 0],
         ["Packages Cash", revenueData?.details.packagesRevenue || 0],
         ["Membership Cash", revenueData?.details.membershipRevenue || 0],
         ["Orders Paid Cash", revenueData?.details.orderPaid || 0],
         ["Orders Cost Cash", revenueData?.details.orderCost || 0],
         ["Revenue  Cash", revenueData?.details.revenueChildSum || 0],
         ["Expenses Cash", revenueData?.details.expenseSum || 0],
+        ["Returns Cash", revenueData?.details.returnsSum || 0],
         ["Purchases Cash", revenueData?.details.purchasesSum || 0],
       ],
       "pi pi-money-bill",
@@ -122,7 +123,6 @@ export class DashboredController {
   private async handleAllRevenueMetricsAllPaymentMethods(filterQueryDto: FiltersDashboredDto) {
     const revenueData =
       await this.dashboredService.getAllRevenueTodayAllPaymentMethods(filterQueryDto);
-    console.log(revenueData?.total);
     return this.createMetrics(
       [
         ["Total All Payment Methods", revenueData?.total || 0],
@@ -130,7 +130,6 @@ export class DashboredController {
         ["Shared All Payment Methods", revenueData?.details.sharedRevenue || 0],
         ["Desk Area All Payment Methods", revenueData?.details.deskAreaRevenue || 0],
         ["Reservation Room All Payment Methods", revenueData?.details.reservationRoomRevenue || 0],
-        ["Deposit All Payment Methods", revenueData?.details.depositeRevenue || 0],
         ["Packages All Payment Methods", revenueData?.details.packagesRevenue || 0],
         ["Membership All Payment Methods", revenueData?.details.membershipRevenue || 0],
         ["Orders Paid All Payment Methods", revenueData?.details.orderPaid || 0],
@@ -154,7 +153,6 @@ export class DashboredController {
         ["Shared Visa", revenueData?.details.sharedRevenue || 0],
         ["Desk Area Visa", revenueData?.details.deskAreaRevenue || 0],
         ["Reservation Room Visa", revenueData?.details.reservationRoomRevenue || 0],
-        ["Deposit Visa", revenueData?.details.depositeRevenue || 0],
         ["Packages Visa", revenueData?.details.packagesRevenue || 0],
         ["Membership Visa", revenueData?.details.membershipRevenue || 0],
         ["Orders Paid Visa", revenueData?.details.orderPaid || 0],
@@ -176,7 +174,6 @@ export class DashboredController {
         ["Shared Instapay", revenueData?.details.sharedRevenue || 0],
         ["Desk Area Instapay", revenueData?.details.deskAreaRevenue || 0],
         ["Reservation Room Instapay", revenueData?.details.reservationRoomRevenue || 0],
-        ["Deposit Instapay", revenueData?.details.depositeRevenue || 0],
         ["Packages Instapay", revenueData?.details.packagesRevenue || 0],
         ["Membership Instapay", revenueData?.details.membershipRevenue || 0],
         ["Orders Paid Instapay", revenueData?.details.orderPaid || 0],
@@ -198,7 +195,6 @@ export class DashboredController {
         ["Shared Vodafone Cash", revenueData?.details.sharedRevenue || 0],
         ["Desk Area Vodafone Cash", revenueData?.details.deskAreaRevenue || 0],
         ["Reservation Room Vodafone Cash", revenueData?.details.reservationRoomRevenue || 0],
-        ["Deposit Vodafone Cash", revenueData?.details.depositeRevenue || 0],
         ["Packages Vodafone Cash", revenueData?.details.packagesRevenue || 0],
         ["Membership Vodafone Cash", revenueData?.details.membershipRevenue || 0],
         ["Orders Paid Vodafone Cash", revenueData?.details.orderPaid || 0],
@@ -405,27 +401,202 @@ export class DashboredController {
   private async handleTotalOrderMetrics(filterQueryDto: FiltersDashboredDto) {
     const getValue = (obj: any, prop: string) => obj?.[prop] ?? 0;
 
-    const [cash, instapay, visa, vodafone] = await Promise.all([
-      this.dashboredService.getOrderCachRevenue(filterQueryDto),
-      this.dashboredService.getOrderInstaRevenue(filterQueryDto),
-      this.dashboredService.getOrderVisaRevenue(filterQueryDto),
-      this.dashboredService.getOrderVodafoneRevenue(filterQueryDto),
+    // Get revenue by payment method and order type
+    const [
+      // Cash orders by type
+      cashPaid,
+      cashCost,
+      cashHold,
+      cashFree,
+      // Instapay orders by type
+      instapayPaid,
+      instapayCost,
+      instapayHold,
+      instapayFree,
+      // Visa orders by type
+      visaPaid,
+      visaCost,
+      visaHold,
+      visaFree,
+      // Vodafone orders by type
+      vodafonePaid,
+      vodafoneCost,
+      vodafoneHold,
+      vodafoneFree,
+    ] = await Promise.all([
+      // Cash orders
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Cach,
+        TypeOrder.PAID,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Cach,
+        TypeOrder.COST,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Cach,
+        TypeOrder.HOLD,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Cach,
+        TypeOrder.FREE,
+      ),
+
+      // Instapay orders
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Instapay,
+        TypeOrder.PAID,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Instapay,
+        TypeOrder.COST,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Instapay,
+        TypeOrder.HOLD,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Instapay,
+        TypeOrder.FREE,
+      ),
+
+      // Visa orders
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Visa,
+        TypeOrder.PAID,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Visa,
+        TypeOrder.COST,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Visa,
+        TypeOrder.HOLD,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.Visa,
+        TypeOrder.FREE,
+      ),
+
+      // Vodafone orders
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.VodafoneCach,
+        TypeOrder.PAID,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.VodafoneCach,
+        TypeOrder.COST,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.VodafoneCach,
+        TypeOrder.HOLD,
+      ),
+      this.dashboredService.getOrderRevenueByType(
+        filterQueryDto,
+        PaymentMethod.VodafoneCach,
+        TypeOrder.FREE,
+      ),
     ]);
 
-    const cashTotal = getValue(cash, "totalRevenue");
-    const instapayTotal = getValue(instapay, "totalRevenue");
-    const visaTotal = getValue(visa, "totalRevenue");
-    const vodafoneTotal = getValue(vodafone, "totalRevenue");
+    // Calculate totals by payment method
+    const cashTotal =
+      +getValue(cashPaid, "totalRevenue") +
+      +getValue(cashCost, "totalRevenue") +
+      +getValue(cashHold, "totalRevenue") +
+      +getValue(cashFree, "totalRevenue");
+    const instapayTotal =
+      +getValue(instapayPaid, "totalRevenue") +
+      +getValue(instapayCost, "totalRevenue") +
+      +getValue(instapayHold, "totalRevenue") +
+      +getValue(instapayFree, "totalRevenue");
+    const visaTotal =
+      +getValue(visaPaid, "totalRevenue") +
+      +getValue(visaCost, "totalRevenue") +
+      +getValue(visaHold, "totalRevenue") +
+      +getValue(visaFree, "totalRevenue");
+    const vodafoneTotal =
+      +getValue(vodafonePaid, "totalRevenue") +
+      +getValue(vodafoneCost, "totalRevenue") +
+      +getValue(vodafoneHold, "totalRevenue") +
+      +getValue(vodafoneFree, "totalRevenue");
+
+    // Calculate totals by order type
+    const paidTotal =
+      +getValue(cashPaid, "totalRevenue") +
+      +getValue(instapayPaid, "totalRevenue") +
+      +getValue(visaPaid, "totalRevenue") +
+      +getValue(vodafonePaid, "totalRevenue");
+    const costTotal =
+      +getValue(cashCost, "totalRevenue") +
+      +getValue(instapayCost, "totalRevenue") +
+      +getValue(visaCost, "totalRevenue") +
+      +getValue(vodafoneCost, "totalRevenue");
+    const holdTotal =
+      +getValue(cashHold, "totalRevenue") +
+      +getValue(instapayHold, "totalRevenue") +
+      +getValue(visaHold, "totalRevenue") +
+      +getValue(vodafoneHold, "totalRevenue");
+    const freeTotal =
+      +getValue(cashFree, "totalRevenue") +
+      +getValue(instapayFree, "totalRevenue") +
+      +getValue(visaFree, "totalRevenue") +
+      +getValue(vodafoneFree, "totalRevenue");
+
     const totalAllPaymentMethods = +cashTotal + +instapayTotal + +visaTotal + +vodafoneTotal;
 
     return this.createMetrics(
       [
+        // Overall totals
         ["Total All Payment Methods", totalAllPaymentMethods],
-        ["Cash Order Revenue", cashTotal],
-        ["Vodafone Order Revenue", vodafoneTotal],
-        ["Visa Order Revenue", visaTotal],
-        ["Instapay Order Revenue", instapayTotal],
-        ["Total Cash Only", cashTotal],
+        ["Total All Order Types", +paidTotal + +costTotal + +holdTotal + +freeTotal],
+
+        // Payment method breakdowns
+        ["Cash Total Revenue", cashTotal],
+        ["Vodafone Total Revenue", vodafoneTotal],
+        ["Visa Total Revenue", visaTotal],
+        ["Instapay Total Revenue", instapayTotal],
+
+        // Order type breakdowns
+        ["PAID Orders Total", paidTotal],
+        ["COST Orders Total", costTotal],
+        ["HOLD Orders Total", holdTotal],
+        ["FREE Orders Total", freeTotal],
+
+        // Detailed breakdown by payment method and order type
+        ["Cash PAID Orders", getValue(cashPaid, "totalRevenue")],
+        ["Cash COST Orders", getValue(cashCost, "totalRevenue")],
+        ["Cash HOLD Orders", getValue(cashHold, "totalRevenue")],
+        ["Cash FREE Orders", getValue(cashFree, "totalRevenue")],
+
+        ["Vodafone PAID Orders", getValue(vodafonePaid, "totalRevenue")],
+        ["Vodafone COST Orders", getValue(vodafoneCost, "totalRevenue")],
+        ["Vodafone HOLD Orders", getValue(vodafoneHold, "totalRevenue")],
+        ["Vodafone FREE Orders", getValue(vodafoneFree, "totalRevenue")],
+
+        ["Visa PAID Orders", getValue(visaPaid, "totalRevenue")],
+        ["Visa COST Orders", getValue(visaCost, "totalRevenue")],
+        ["Visa HOLD Orders", getValue(visaHold, "totalRevenue")],
+        ["Visa FREE Orders", getValue(visaFree, "totalRevenue")],
+
+        ["Instapay PAID Orders", getValue(instapayPaid, "totalRevenue")],
+        ["Instapay COST Orders", getValue(instapayCost, "totalRevenue")],
+        ["Instapay HOLD Orders", getValue(instapayHold, "totalRevenue")],
+        ["Instapay FREE Orders", getValue(instapayFree, "totalRevenue")],
       ],
       "pi pi-inbox",
     );

@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
-import { Repository, SelectQueryBuilder } from "typeorm";
+import { Brackets, Repository, SelectQueryBuilder } from "typeorm";
 import { Deals } from "./deals.entity";
 import { CreateDealsDto } from "./dto/create-deals.dto";
 import { UpdateDealsDto } from "./dto/update-deals.dto";
@@ -35,9 +35,23 @@ export class DealsService
       .leftJoin("e.individual", "ei")
       .addSelect(["ei.id", "ei.name", "ei.whatsApp", "ei.number"])
       .leftJoin("e.company", "eco")
-      .addSelect(["eco.id", "eco.name"])
+      .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "esa")
-      .addSelect(["esa.id", "esa.name"]);
+      .addSelect(["esa.id", "esa.name", "esa.unviresty"]);
+
+    if (filteredRecord?.search?.value) {
+      const searchTerm = `%${filteredRecord.search?.value}%`;
+      queryBuilder.andWhere(
+        new Brackets(qb => {
+          qb.where("ei.name LIKE :search", { search: searchTerm })
+            .orWhere("eco.name LIKE :search", { search: searchTerm })
+            .orWhere("esa.name LIKE :search", { search: searchTerm })
+            .orWhere("CONCAT(ec.firstName, ' ', ec.lastName) LIKE :search", {
+              search: searchTerm,
+            });
+        }),
+      );
+    }
 
     if (filteredRecord?.package) {
       switch (filteredRecord.package) {
@@ -95,5 +109,30 @@ export class DealsService
       selectFields: ["id", "firstName", "lastName"],
       filterField: "user_id",
     });
+  }
+
+  protected override response(data: Deals[], totalRecords: number = 0) {
+    const getCustomerInfo = (deals: Deals) => {
+      if (!deals) return { customer_name: null, customer_id: null };
+      const customer = deals.individual || deals.company || deals.studentActivity;
+      const phone = deals.individual?.number || deals.company?.phone || null;
+
+      return {
+        customer_name: customer?.name || null,
+        customer_id: customer?.id || null,
+        customer_phone: phone,
+      };
+    };
+
+    const transformedData = data.map(deals => ({
+      ...deals,
+      ...getCustomerInfo(deals),
+    }));
+
+    return {
+      data: transformedData,
+      recordsFiltered: data.length,
+      totalRecords: +totalRecords,
+    };
   }
 }

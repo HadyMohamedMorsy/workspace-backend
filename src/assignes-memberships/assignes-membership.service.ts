@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
-import { Repository, SelectQueryBuilder } from "typeorm";
+import { Brackets, Repository, SelectQueryBuilder } from "typeorm";
 import { AssignesMembership } from "./assignes-membership.entity";
 import { CreateAssignesMembershipDto } from "./dto/create-assignes-membership.dto";
 import { UpdateAssignesMembershipDto } from "./dto/update-assignes-membership.dto";
@@ -40,15 +40,29 @@ export class AssignesMembershipService
       .leftJoin("e.individual", "ei")
       .addSelect(["ei.id", "ei.name", "ei.whatsApp", "ei.number"])
       .leftJoin("e.company", "eco")
-      .addSelect(["eco.id", "eco.name"])
+      .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "esa")
-      .addSelect(["esa.id", "esa.name"]);
+      .addSelect(["esa.id", "esa.name", "esa.unviresty"]);
 
     // Filter by membership type if provided
     if (filteredRecord?.type) {
       queryBuilder.andWhere("em.type = :membershipType", {
         membershipType: filteredRecord.type,
       });
+    }
+
+    if (filteredRecord?.search?.value) {
+      const searchTerm = `%${filteredRecord.search?.value}%`;
+      queryBuilder.andWhere(
+        new Brackets(qb => {
+          qb.where("ei.name LIKE :search", { search: searchTerm })
+            .orWhere("eco.name LIKE :search", { search: searchTerm })
+            .orWhere("esa.name LIKE :search", { search: searchTerm })
+            .orWhere("CONCAT(ec.firstName, ' ', ec.lastName) LIKE :search", {
+              search: searchTerm,
+            });
+        }),
+      );
     }
 
     if (filteredRecord?.package) {
@@ -127,5 +141,30 @@ export class AssignesMembershipService
       selectFields: ["id", "name"],
       filterField: "studentActivity_id",
     });
+  }
+
+  protected override response(data: AssignesMembership[], totalRecords: number = 0) {
+    const getCustomerInfo = (shared: AssignesMembership) => {
+      if (!shared) return { customer_name: null, customer_id: null };
+      const customer = shared.individual || shared.company || shared.studentActivity;
+      const phone = shared.individual?.number || shared.company?.phone || null;
+
+      return {
+        customer_name: customer?.name || null,
+        customer_id: customer?.id || null,
+        customer_phone: phone,
+      };
+    };
+
+    const transformedData = data.map(assignesMembership => ({
+      ...assignesMembership,
+      ...getCustomerInfo(assignesMembership),
+    }));
+
+    return {
+      data: transformedData,
+      recordsFiltered: data.length,
+      totalRecords: +totalRecords,
+    };
   }
 }

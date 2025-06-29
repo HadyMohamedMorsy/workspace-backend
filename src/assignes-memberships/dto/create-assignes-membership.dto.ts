@@ -5,7 +5,7 @@ import { Company } from "src/companies/company.entity";
 import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity";
-import { ReservationStatus } from "src/shared/enum/global-enum";
+import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { IsAfter } from "src/shared/validations/validate-time-reservation.validation";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
@@ -56,6 +56,10 @@ export class CreateAssignesMembershipDto {
   @IsOptional()
   @Type(() => Number)
   remaining: number;
+
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  payment_method: PaymentMethod;
 
   @IsNumber()
   @Type(() => Number)
