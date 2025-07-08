@@ -29,5 +29,12 @@ export class ExpensesPlaceService
     queryBuilder
       .leftJoin("e.expensePlace", "expensePlace")
       .addSelect(["expensePlace.id", "expensePlace.name"]);
+
+    // Add search functionality for expensePlace.name
+    if (filteredRecord?.search?.value) {
+      queryBuilder.orWhere("LOWER(expensePlace.name) LIKE LOWER(:search)", {
+        search: `%${filteredRecord.search.value}%`,
+      });
+    }
   }
 }

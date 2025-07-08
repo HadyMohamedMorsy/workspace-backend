@@ -214,7 +214,7 @@ export class DahboredService {
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
-      this.orderRepository.sum("total_order", {
+      this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Cach,
         created_at: Between(filter.start_date, filter.end_date),
@@ -397,7 +397,7 @@ export class DahboredService {
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
-      this.orderRepository.sum("total_order", {
+      this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Visa,
         created_at: Between(filter.start_date, filter.end_date),
@@ -531,7 +531,7 @@ export class DahboredService {
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
-      this.orderRepository.sum("total_order", {
+      this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.VodafoneCach,
         created_at: Between(filter.start_date, filter.end_date),
@@ -699,7 +699,7 @@ export class DahboredService {
         created_at: Between(filter.start_date, filter.end_date),
       }),
 
-      this.orderRepository.sum("total_order", {
+      this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Instapay,
         created_at: Between(filter.start_date, filter.end_date),
@@ -1817,7 +1817,7 @@ export class DahboredService {
       paymentMethod,
       "type_order",
       orderType,
-      "total_order",
+      "order_price",
     );
   }
 
@@ -1961,7 +1961,7 @@ export class DahboredService {
       }),
 
       // Orders COST - all payment methods
-      this.orderRepository.sum("total_order", {
+      this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         created_at: Between(filter.start_date, filter.end_date),
       }),

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BaseService } from "src/shared/base/base";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
 import { Brackets, Repository, SelectQueryBuilder } from "typeorm";
@@ -88,19 +89,29 @@ export class AssignesMembershipService
         case "expired_membership_deskarea": {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          queryBuilder.andWhere("em.type = :membershipType AND e.end_date < :currentDate", {
-            membershipType: "deskarea",
-            currentDate: today,
-          });
+          queryBuilder.andWhere(
+            "em.type = :membershipType AND e.end_date < :currentDate AND (e.status = :status_active OR e.status = :status_complete)",
+            {
+              membershipType: "deskarea",
+              currentDate: today,
+              status_active: ReservationStatus.ACTIVE,
+              status_complete: ReservationStatus.COMPLETE,
+            },
+          );
           break;
         }
         case "expired_membership_shared": {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          queryBuilder.andWhere("em.type = :membershipType AND e.end_date < :currentDate", {
-            membershipType: "shared",
-            currentDate: today,
-          });
+          queryBuilder.andWhere(
+            "em.type = :membershipType AND e.end_date < :currentDate AND (e.status = :status_active OR e.status = :status_complete)",
+            {
+              membershipType: "shared",
+              currentDate: today,
+              status_active: ReservationStatus.ACTIVE,
+              status_complete: ReservationStatus.COMPLETE,
+            },
+          );
           break;
         }
       }

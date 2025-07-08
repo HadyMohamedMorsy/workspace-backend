@@ -38,5 +38,12 @@ export class ExpensesPlaceChildService
         end_date: filteredRecord.end_date,
       });
     }
+
+    // Add search functionality for expensePlace.name
+    if (filteredRecord?.search?.value) {
+      queryBuilder.orWhere("LOWER(expensePlaceChild.name) LIKE LOWER(:search)", {
+        search: `%${filteredRecord.search.value}%`,
+      });
+    }
   }
 }

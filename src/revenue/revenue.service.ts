@@ -25,6 +25,13 @@ export class RevenueService
   override queryRelationIndex(queryBuilder: SelectQueryBuilder<Revenue>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder.leftJoin("e.revenue", "revenue").addSelect(["revenue.id", "revenue.name"]);
+
+    // Add search functionality for expensePlace.name
+    if (filteredRecord?.search?.value) {
+      queryBuilder.orWhere("LOWER(revenue.name) LIKE LOWER(:search)", {
+        search: `%${filteredRecord.search.value}%`,
+      });
+    }
   }
 
   async findUserAll(userId: number) {
