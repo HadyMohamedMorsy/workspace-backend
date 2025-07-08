@@ -38,6 +38,10 @@ export class LookupService
         .addSelect(["parent.id", "parent.name"])
         .andWhere("e.parent IS NULL");
     }
+
+    if (filteredRecord?.module) {
+      queryBuilder.andWhere("e.module = :module", { module: filteredRecord.module });
+    }
   }
 
   findByName(name: string) {

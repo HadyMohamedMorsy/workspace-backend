@@ -26,6 +26,8 @@ export class DepositeService
     queryBuilder
       .leftJoin("e.assignesPackages", "ea_assignespackages")
       .addSelect(["ea_assignespackages.id", "ea_assignespackages.total_price"])
+      .leftJoin("ea_assignespackages.packages", "ea_pkg_package")
+      .addSelect(["ea_pkg_package.id", "ea_pkg_package.name"])
       .leftJoin("ea_assignespackages.individual", "ea_pkg_individual")
       .addSelect(["ea_pkg_individual.id", "ea_pkg_individual.name"])
       .leftJoin("ea_assignespackages.company", "ea_pkg_company")
@@ -35,6 +37,8 @@ export class DepositeService
 
       .leftJoin("e.assignessMemebership", "ea_assignessmemebership")
       .addSelect(["ea_assignessmemebership.id", "ea_assignessmemebership.total_price"])
+      .leftJoin("ea_assignessmemebership.memeberShip", "ea_mem_membership")
+      .addSelect(["ea_mem_membership.id", "ea_mem_membership.name", "ea_mem_membership.type"])
       .leftJoin("ea_assignessmemebership.individual", "ea_mem_individual")
       .addSelect(["ea_mem_individual.id", "ea_mem_individual.name"])
       .leftJoin("ea_assignessmemebership.company", "ea_mem_company")
@@ -101,9 +105,26 @@ export class DepositeService
     const transformedData = data.map(deposit => {
       const assignment =
         deposit.assignesPackages || deposit.assignessMemebership || deposit.reservationRooms;
+      // Get package info if assignesPackages exists
+      const packageInfo = deposit.assignesPackages?.packages
+        ? {
+            package_id: deposit.assignesPackages.packages.id || null,
+            package_name: deposit.assignesPackages.packages.name || null,
+          }
+        : { package_id: null, package_name: null };
+      // Get membership info if assignessMemebership exists
+      const membershipInfo = deposit.assignessMemebership?.memeberShip
+        ? {
+            membership_id: deposit.assignessMemebership.memeberShip.id || null,
+            membership_name: deposit.assignessMemebership.memeberShip.name || null,
+            membership_type: deposit.assignessMemebership.memeberShip.type || null,
+          }
+        : { membership_id: null, membership_name: null, membership_type: null };
       return {
         ...deposit,
         ...getCustomerInfo(assignment),
+        ...packageInfo,
+        ...membershipInfo,
       };
     });
 
