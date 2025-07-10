@@ -58,9 +58,9 @@ export class CompanyService
       .leftJoin(
         "e.reservationRooms",
         "rr",
-        "rr.status = :status_room AND rr.selected_day = :today",
+        "rr.status IN (:...room_statuses) AND rr.selected_day = :today",
         {
-          status_room: ReservationStatus.ACTIVE,
+          room_statuses: [ReservationStatus.PENDING, ReservationStatus.ACTIVE],
           today: moment().format("DD/MM/YYYY"),
         },
       )
@@ -85,6 +85,8 @@ export class CompanyService
         "eo.id",
         "d.id",
         "rr.id",
+        "rr.status",
+        "rr.selected_day",
         "da.id",
         "s.id",
         "c.name",
@@ -114,22 +116,20 @@ export class CompanyService
       if (filterData.invoice_filter === "invoice") {
         // Get individuals who have current active services that would generate an invoice
         queryBuilder.andWhere(
-          `(s.status = :status_shared OR da.status = :status_deskarea OR rr.status = :status_room OR eo.type_order = :typeOrder)`,
+          `(s.status = :status_shared OR da.status = :status_deskarea OR rr.id IS NOT NULL OR eo.type_order = :typeOrder)`,
           {
             status_shared: ReservationStatus.ACTIVE,
             status_deskarea: ReservationStatus.ACTIVE,
-            status_room: ReservationStatus.ACTIVE,
             typeOrder: "HOLD",
           },
         );
       } else if (filterData.invoice_filter === "not_invoice") {
         // Get individuals who don't have any current active services
         queryBuilder.andWhere(
-          `(s.id IS NULL OR s.status != :status_shared) AND (da.id IS NULL OR da.status != :status_deskarea) AND (rr.id IS NULL OR rr.status != :status_room) AND (eo.id IS NULL OR eo.type_order != :typeOrder)`,
+          `(s.id IS NULL OR s.status != :status_shared) AND (da.id IS NULL OR da.status != :status_deskarea) AND rr.id IS NULL AND (eo.id IS NULL OR eo.type_order != :typeOrder)`,
           {
             status_shared: ReservationStatus.ACTIVE,
             status_deskarea: ReservationStatus.ACTIVE,
-            status_room: ReservationStatus.ACTIVE,
             typeOrder: "HOLD",
           },
         );
@@ -275,7 +275,11 @@ export class CompanyService
         is_deal: deals?.length > 0,
         is_shared: shared?.length > 0,
         is_deskarea: deskarea?.length > 0,
-        is_reservation_room: reservationRooms?.length > 0,
+        is_pending_room:
+          reservationRooms?.some(room => room.status === ReservationStatus.PENDING) || false,
+        is_active_room:
+          reservationRooms?.some(room => room.status === ReservationStatus.ACTIVE) || false,
+        reservation_room_id: reservationRooms?.[0]?.id || null,
       };
     });
 
@@ -332,20 +336,20 @@ export class CompanyService
         .where("e.id = :id", { id })
         .addSelect(selectingInvoice);
 
-      const [individual, settings] = await Promise.all([
+      const [company, settings] = await Promise.all([
         queryBuilder.getOne(),
         this.generalSettingsService.findAll({}),
       ]);
 
-      if (!individual) {
-        return { status: false, message: "Individual not found" };
+      if (!company) {
+        return { status: false, message: "Company not found" };
       }
 
-      const { shared, deskarea, orders, reservationRooms, assign_memberships } = individual;
+      const { shared, deskarea, orders, reservationRooms, assign_memberships } = company;
       const membershipType = assign_memberships?.[0]?.memeberShip?.type || "";
       const hasMembership = Boolean(assign_memberships?.length);
-      const hasPackage = Boolean(individual.assignesPackages?.length);
-      const hasDeal = Boolean(individual.deals?.length);
+      const hasPackage = Boolean(company.assignesPackages?.length);
+      const hasDeal = Boolean(company.deals?.length);
 
       return {
         data: {

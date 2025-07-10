@@ -43,7 +43,22 @@ export class AssignesMembershipService
       .leftJoin("e.company", "eco")
       .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "esa")
-      .addSelect(["esa.id", "esa.name", "esa.unviresty"]);
+      .addSelect(["esa.id", "esa.name", "esa.unviresty"])
+      // Left join to check if individual has active membership
+      .leftJoin("ei.assign_memberships", "ei_am", "ei_am.status = :activeStatus", {
+        activeStatus: ReservationStatus.ACTIVE,
+      })
+      .addSelect(["ei_am.id"])
+      // Left join to check if company has active membership
+      .leftJoin("eco.assign_memberships", "eco_am", "eco_am.status = :activeStatus", {
+        activeStatus: ReservationStatus.ACTIVE,
+      })
+      .addSelect(["eco_am.id"])
+      // Left join to check if studentActivity has active membership
+      .leftJoin("esa.assign_memberships", "esa_am", "esa_am.status = :activeStatus", {
+        activeStatus: ReservationStatus.ACTIVE,
+      })
+      .addSelect(["esa_am.id"]);
 
     // Filter by membership type if provided
     if (filteredRecord?.type) {
@@ -160,10 +175,18 @@ export class AssignesMembershipService
       const customer = shared.individual || shared.company || shared.studentActivity;
       const phone = shared.individual?.number || shared.company?.phone || null;
 
+      // Check if the client has any active membership
+      const hasActiveMembership = !!(
+        shared.individual?.assign_memberships?.length ||
+        shared.company?.assign_memberships?.length ||
+        shared.studentActivity?.assign_memberships?.length
+      );
+
       return {
         customer_name: customer?.name || null,
         customer_id: customer?.id || null,
         customer_phone: phone,
+        has_active_membership: hasActiveMembership,
       };
     };
 

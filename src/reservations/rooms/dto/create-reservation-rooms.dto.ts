@@ -116,4 +116,36 @@ export class CreateReservationRoomDto {
   company: Company;
   studentActivity: StudentActivity;
   room: Room;
+
+  // Reservation start time fields
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  reservation_start_hour?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  reservation_start_minute?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(TimeOfDay)
+  reservation_start_time?: TimeOfDay;
+
+  // Reservation end time fields
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  reservation_end_hour?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  reservation_end_minute?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(TimeOfDay)
+  reservation_end_time?: TimeOfDay;
 }

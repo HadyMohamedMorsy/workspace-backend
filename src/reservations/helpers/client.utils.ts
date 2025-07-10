@@ -15,6 +15,15 @@ export interface TimeFields {
   end_minute: number;
 }
 
+export interface ReservationTimeFields {
+  reservation_start_time: string;
+  reservation_start_hour: number;
+  reservation_start_minute: number;
+  reservation_end_time: string;
+  reservation_end_hour: number;
+  reservation_end_minute: number;
+}
+
 export interface Offer {
   id: string;
   type: "PERCENTAGE" | "AMOUNT";
@@ -51,20 +60,23 @@ export const calculateDiscount = (price: number, offer?: Offer): number => {
   return offer.value;
 };
 
-export const formatTimeFields = (data: any, createTime: TimeData): TimeFields => {
+export const formatTimeFields = (data: any, createTime: TimeData, additionalPrefix = ""): any => {
+  const prefix = additionalPrefix ? `${additionalPrefix}_` : "";
+
   return {
-    start_time: data.start_time,
-    start_hour: data.start_hour,
-    start_minute: data.start_minute,
-    end_time: data.end_time || createTime.timeOfDay,
-    end_hour: data.end_hour || createTime.hours,
-    end_minute: data.end_minute || createTime.minutes,
+    start_time: data[`${prefix}start_time`] || data.start_time,
+    start_hour: data[`${prefix}start_hour`] || data.start_hour,
+    start_minute: data[`${prefix}start_minute`] || data.start_minute,
+    end_time: data[`${prefix}end_time`] || data.end_time || createTime.timeOfDay,
+    end_hour: data[`${prefix}end_hour`] || data.end_hour || createTime.hours,
+    end_minute: data[`${prefix}end_minute`] || data.end_minute || createTime.minutes,
   };
 };
 
-export const formatTimeData = (data: any, price?: any) => {
+export const formatTimeData = (data: any, price?: any, additionalPrefix = "") => {
   const createTime = getCurrentTime();
-  const timeFields = formatTimeFields(data, createTime);
+  const timeFields = formatTimeFields(data, createTime, additionalPrefix);
+
   const totalTime = calculateTotalTime(
     timeFields.start_hour,
     timeFields.start_minute,
@@ -112,7 +124,7 @@ export const formatOrderData = (order: any) => {
 
 export const formatRoomData = (room: any, price: number) => {
   return {
-    ...formatTimeData(room, price),
+    ...formatTimeData(room, price, "reservation"),
     is_full_day: false,
   };
 };
@@ -242,14 +254,14 @@ export const selectingInvoice = [
   "eo.total_order",
   "eo.payment_method",
   "r.id",
-  "r.start_time",
-  "r.start_hour",
-  "r.start_minute",
-  "r.end_time",
+  "r.reservation_start_time",
+  "r.reservation_start_hour",
+  "r.reservation_start_minute",
+  "r.reservation_end_time",
+  "r.reservation_end_hour",
+  "r.reservation_end_minute",
   "r.status",
   "r.payment_method",
-  "r.end_hour",
-  "r.end_minute",
   "r.total_price",
   "r.total_time",
   "r.selected_day",

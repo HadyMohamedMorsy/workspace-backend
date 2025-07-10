@@ -198,11 +198,11 @@ export class InvoiceService {
                 : ReservationStatus.CANCELLED,
             payment_method: room.payment_method,
             total_time: room.total_time,
-            end_hour: room.end_hour,
-            end_minute: room.end_minute,
+            reservation_end_hour: room.end_hour,
+            reservation_end_minute: room.end_minute,
+            reservation_end_time: room.end_time as TimeOfDay,
             total_price:
               room.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
-            end_time: room.end_time as TimeOfDay,
           });
         }),
       );

@@ -296,6 +296,12 @@ export class CompanyController implements SelectOptions, RelationOptions {
     return this.service.delete(id);
   }
 
+  @Get("/check-invoice/:id")
+  @HttpCode(200)
+  async checkInvoice(@Param("id") id: string) {
+    return this.service.checkInvoice(id);
+  }
+
   @Post("/import")
   @HttpCode(200)
   @UseInterceptors(FileInterceptor("file"))

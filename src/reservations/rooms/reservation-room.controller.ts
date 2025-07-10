@@ -16,7 +16,7 @@ import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.g
 import { DealsService } from "src/deals/deals.service";
 import { DepositeService } from "src/deposit/deposites.service";
 import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
-import { formatDate } from "src/reservations/helpers/utitlties";
+import { formatDate, getCurrentTime } from "src/reservations/helpers/utitlties";
 import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
@@ -51,6 +51,12 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       end_hour: true,
       end_minute: true,
       end_time: true,
+      reservation_start_hour: true,
+      reservation_start_minute: true,
+      reservation_start_time: true,
+      reservation_end_hour: true,
+      reservation_end_minute: true,
+      reservation_end_time: true,
       total_price: true,
       total_time: true,
       note: true,
@@ -178,7 +184,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
   async create(@Body() createDto: CreateReservationRoomDto, @Req() req: Request) {
     const reservationRoom = await this.service.create(
       {
-        status: ReservationStatus.ACTIVE,
+        status: ReservationStatus.PENDING,
         individual: req["individual"],
         company: req["company"],
         studentActivity: req["studentActivity"],
@@ -302,6 +308,34 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       id: true,
       status: true,
     });
+  }
+
+  @Patch("/start-time")
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public startTime(@Body() update: { reservation_room_id: number }) {
+    const currentTime = getCurrentTime();
+
+    return this.service.update(
+      {
+        id: update.reservation_room_id,
+        status: ReservationStatus.ACTIVE,
+        reservation_start_hour: currentTime.hours,
+        reservation_start_minute: currentTime.minutes,
+        reservation_start_time: currentTime.timeOfDay,
+      },
+      {
+        id: true,
+        status: true,
+        reservation_start_hour: true,
+        reservation_start_minute: true,
+        reservation_start_time: true,
+      },
+    );
   }
 
   @Post("/package")

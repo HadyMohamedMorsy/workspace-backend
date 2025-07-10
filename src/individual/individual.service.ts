@@ -58,9 +58,9 @@ export class IndividualService
       .leftJoin(
         "e.reservationRooms",
         "rr",
-        "rr.status = :status_room AND rr.selected_day = :today",
+        "rr.status IN (:...room_statuses) AND rr.selected_day = :today",
         {
-          status_room: ReservationStatus.ACTIVE,
+          room_statuses: [ReservationStatus.PENDING, ReservationStatus.ACTIVE],
           today: moment().format("DD/MM/YYYY"),
         },
       )
@@ -85,6 +85,8 @@ export class IndividualService
         "eo.id",
         "d.id",
         "rr.id",
+        "rr.status",
+        "rr.selected_day",
         "da.id",
         "s.id",
         "n.name",
@@ -128,22 +130,20 @@ export class IndividualService
       if (filterData.invoice_filter === "invoice") {
         // Get individuals who have current active services that would generate an invoice
         queryBuilder.andWhere(
-          `(s.status = :status_shared OR da.status = :status_deskarea OR rr.status = :status_room OR eo.type_order = :typeOrder)`,
+          `(s.status = :status_shared OR da.status = :status_deskarea OR rr.id IS NOT NULL OR eo.type_order = :typeOrder)`,
           {
             status_shared: ReservationStatus.ACTIVE,
             status_deskarea: ReservationStatus.ACTIVE,
-            status_room: ReservationStatus.ACTIVE,
             typeOrder: "HOLD",
           },
         );
       } else if (filterData.invoice_filter === "not_invoice") {
         // Get individuals who don't have any current active services
         queryBuilder.andWhere(
-          `(s.id IS NULL OR s.status != :status_shared) AND (da.id IS NULL OR da.status != :status_deskarea) AND (rr.id IS NULL OR rr.status != :status_room) AND (eo.id IS NULL OR eo.type_order != :typeOrder)`,
+          `(s.id IS NULL OR s.status != :status_shared) AND (da.id IS NULL OR da.status != :status_deskarea) AND rr.id IS NULL AND (eo.id IS NULL OR eo.type_order != :typeOrder)`,
           {
             status_shared: ReservationStatus.ACTIVE,
             status_deskarea: ReservationStatus.ACTIVE,
-            status_room: ReservationStatus.ACTIVE,
             typeOrder: "HOLD",
           },
         );
@@ -271,7 +271,11 @@ export class IndividualService
         is_deal: deals?.length > 0,
         is_shared: shared?.length > 0,
         is_deskarea: deskarea?.length > 0,
-        is_reservation_room: reservationRooms?.length > 0,
+        is_pending_room:
+          reservationRooms?.some(room => room.status === ReservationStatus.PENDING) || false,
+        is_active_room:
+          reservationRooms?.some(room => room.status === ReservationStatus.ACTIVE) || false,
+        reservation_room_id: reservationRooms?.[0]?.id || null,
       };
     });
 

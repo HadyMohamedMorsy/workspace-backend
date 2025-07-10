@@ -20,8 +20,28 @@ export class ReservationRoom extends BaseMemberEntity {
   @Column()
   selected_day: string;
 
-  @Column({ type: "enum", enum: ReservationStatus, default: ReservationStatus.ACTIVE })
+  @Column({ type: "enum", enum: ReservationStatus, default: ReservationStatus.PENDING })
   status: ReservationStatus;
+
+  @Column({ nullable: true })
+  reservation_start_hour: number;
+
+  @Column({ nullable: true })
+  reservation_start_minute: number;
+
+  @Column({ type: "enum", enum: TimeOfDay, nullable: true })
+  @IsEnum(TimeOfDay)
+  reservation_start_time: TimeOfDay;
+
+  @Column({ nullable: true })
+  reservation_end_hour: number;
+
+  @Column({ nullable: true })
+  reservation_end_minute: number;
+
+  @Column({ type: "enum", enum: TimeOfDay, nullable: true })
+  @IsEnum(TimeOfDay)
+  reservation_end_time: TimeOfDay;
 
   @Column()
   start_hour: number;
