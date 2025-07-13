@@ -29,7 +29,9 @@ export class ReservationRoomQueryService {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
       })
       .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"]);
+      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"])
+      .leftJoin("e.room", "esroom")
+      .addSelect(["esroom.id", "esroom.name", "esroom.price"]);
 
     const [filteredRecord, totalRecords] = await Promise.all([
       queryBuilder.getMany(),
