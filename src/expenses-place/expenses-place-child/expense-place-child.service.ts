@@ -32,6 +32,15 @@ export class ExpensesPlaceChildService
       .leftJoin("e.expensePlaceChild", "expensePlaceChild")
       .addSelect(["expensePlaceChild.id", "expensePlaceChild.name"]);
 
+    if (filteredRecord?.expensePlace_id) {
+      queryBuilder
+        .leftJoin("e.expensePlace", "ep")
+        .andWhere("ep.id = :expensePlace_id", {
+          expensePlace_id: filteredRecord.expensePlace_id,
+        })
+        .addSelect(["ep.id"]);
+    }
+
     if (filteredRecord?.start_date && filteredRecord?.end_date) {
       queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
         start_date: filteredRecord.start_date,

@@ -32,6 +32,8 @@ export class ReservationRoomService
       .addSelect(["eco.id", "eco.phone", "eco.name"])
       .leftJoin("e.studentActivity", "es")
       .addSelect(["es.id", "es.name", "es.unviresty"])
+      .leftJoin("e.room", "er")
+      .addSelect(["er.id", "er.name", "er.price"])
       .leftJoin("e.deposites", "esdep")
       .addSelect(["esdep.id", "esdep.status", "esdep.total_price"])
       .leftJoin("e.assignGeneralOffer", "ego")
@@ -64,9 +66,12 @@ export class ReservationRoomService
 
       const customer =
         reservationRoom.individual || reservationRoom.company || reservationRoom.studentActivity;
+      const phone = reservationRoom.individual?.whatsApp || reservationRoom.company?.phone || null;
+
       return {
         customer_name: customer?.name || null,
         customer_id: customer?.id || null,
+        customer_phone: phone,
       };
     };
 

@@ -127,28 +127,66 @@ export class IndividualService
 
     // Filter by invoice status
     if (filterData?.invoice_filter) {
-      if (filterData.invoice_filter === "invoice") {
-        // Get individuals who have current active services that would generate an invoice
-        queryBuilder.andWhere(
-          `(s.status = :status_shared OR da.status = :status_deskarea OR rr.id IS NOT NULL OR eo.type_order = :typeOrder)`,
-          {
+      switch (filterData.invoice_filter) {
+        case "invoice":
+          // Get individuals who have current active services that would generate an invoice
+          queryBuilder.andWhere(
+            `(s.status = :status_shared OR da.status = :status_deskarea OR rr.id IS NOT NULL OR eo.type_order = :typeOrder)`,
+            {
+              status_shared: ReservationStatus.ACTIVE,
+              status_deskarea: ReservationStatus.ACTIVE,
+              room_statuses: [ReservationStatus.ACTIVE, ReservationStatus.PENDING],
+              typeOrder: "HOLD",
+            },
+          );
+          break;
+
+        case "not_invoice":
+          // Get individuals who don't have any current active services
+          queryBuilder.andWhere(
+            `(s.id IS NULL OR s.status != :status_shared) AND (da.id IS NULL OR da.status != :status_deskarea) AND rr.id IS NULL AND (eo.id IS NULL OR eo.type_order != :typeOrder)`,
+            {
+              status_shared: ReservationStatus.ACTIVE,
+              status_deskarea: ReservationStatus.ACTIVE,
+              room_statuses: [ReservationStatus.ACTIVE, ReservationStatus.PENDING],
+              typeOrder: "HOLD",
+            },
+          );
+          break;
+
+        case "invoice_shared":
+          // Get individuals who have active shared spaces
+          queryBuilder.andWhere(`s.status = :status_shared`, {
             status_shared: ReservationStatus.ACTIVE,
+          });
+          break;
+
+        case "invoice_deskarea":
+          // Get individuals who have active deskarea
+          queryBuilder.andWhere(`da.status = :status_deskarea`, {
             status_deskarea: ReservationStatus.ACTIVE,
+          });
+          break;
+
+        case "invoice_reservation_room":
+          // Get individuals who have active or pending reservation rooms
+          queryBuilder.andWhere(`rr.id IS NOT NULL AND rr.status IN (:...room_statuses)`, {
+            room_statuses: [ReservationStatus.ACTIVE, ReservationStatus.PENDING],
+          });
+          break;
+
+        case "invoice_order":
+          queryBuilder.andWhere(`eo.id IS NOT NULL AND eo.type_order = :typeOrder`, {
             typeOrder: "HOLD",
-          },
-        );
-      } else if (filterData.invoice_filter === "not_invoice") {
-        // Get individuals who don't have any current active services
-        queryBuilder.andWhere(
-          `(s.id IS NULL OR s.status != :status_shared) AND (da.id IS NULL OR da.status != :status_deskarea) AND rr.id IS NULL AND (eo.id IS NULL OR eo.type_order != :typeOrder)`,
-          {
-            status_shared: ReservationStatus.ACTIVE,
-            status_deskarea: ReservationStatus.ACTIVE,
-            typeOrder: "HOLD",
-          },
-        );
+          });
+          break;
+
+        default:
+          // No additional filtering for unknown invoice_filter values
+          break;
       }
     }
+
     if (filterData?.package) {
       switch (filterData.package) {
         case "package_room": {

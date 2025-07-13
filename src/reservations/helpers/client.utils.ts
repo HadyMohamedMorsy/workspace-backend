@@ -125,6 +125,10 @@ export const formatOrderData = (order: any) => {
 export const formatRoomData = (room: any, price: number) => {
   return {
     ...formatTimeData(room, price, "reservation"),
+    room_id: room.room.id,
+    room_name: room.room.name,
+    room_price: room.room.price,
+    room_featured_image: room.room.featured_image,
     is_full_day: false,
   };
 };
@@ -268,6 +272,7 @@ export const selectingInvoice = [
   "room.id",
   "room.name",
   "room.price",
+  "room.featured_image",
   "rgo.id",
   "rgo_offer.id",
   "rgo_offer.type_discount",

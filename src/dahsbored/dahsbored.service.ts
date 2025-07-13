@@ -137,7 +137,7 @@ export class DahboredService {
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -320,7 +320,7 @@ export class DahboredService {
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -622,7 +622,7 @@ export class DahboredService {
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -778,7 +778,7 @@ export class DahboredService {
   async getAllClientsRoomsActive(filter: FiltersDashboredDto) {
     const roomsActive = await this.reservationRoomRepository.count({
       where: {
-        status: ReservationStatus.ACTIVE,
+        status: In([ReservationStatus.ACTIVE, ReservationStatus.PENDING]),
         created_at: Between(filter.start_date, filter.end_date),
       },
     });
@@ -1888,7 +1888,7 @@ export class DahboredService {
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          status: In([ReservationStatus.COMPLETE]),
           created_at: Between(filter.start_date, filter.end_date),
         })
         .andWhere(
