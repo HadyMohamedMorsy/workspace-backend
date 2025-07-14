@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as moment from "moment";
+import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
 import { ReservationRoom } from "./reservation-room.entity";
@@ -101,5 +103,63 @@ export class ReservationRoomQueryService {
       selectFields: ["id", "status"],
       filterField: "deal_id",
     });
+  }
+
+  async findPendingReservationsByCustomer(customerType: string, customerId: number) {
+    const queryBuilder = this.reservationRoomRepository.createQueryBuilder("reservation");
+
+    const today = moment().format("DD/MM/YYYY");
+
+    queryBuilder
+      .andWhere("reservation.status = :status", { status: ReservationStatus.PENDING })
+      .andWhere("reservation.selected_day = :today", { today });
+
+    switch (customerType) {
+      case "individual":
+        queryBuilder
+          .leftJoin("reservation.individual", "individual")
+          .addSelect(["individual.id", "individual.name"])
+          .andWhere("individual.id = :customerId", { customerId });
+        break;
+
+      case "company":
+        queryBuilder
+          .leftJoin("reservation.company", "company")
+          .addSelect(["company.id", "company.name", "company.phone"])
+          .andWhere("company.id = :customerId", { customerId });
+        break;
+
+      case "studentActivity":
+        queryBuilder
+          .leftJoin("reservation.studentActivity", "studentActivity")
+          .addSelect(["studentActivity.id", "studentActivity.name", "studentActivity.unviresty"])
+          .andWhere("studentActivity.id = :customerId", { customerId });
+        break;
+
+      default:
+        throw new Error(
+          `Invalid customer_type: ${customerType}. Supported types: individual, company, studentActivity`,
+        );
+    }
+
+    // Add room and deposit information
+    queryBuilder
+      .leftJoin("reservation.room", "room")
+      .addSelect(["room.id", "room.name", "room.price"])
+      .leftJoin("reservation.deposites", "deposites")
+      .addSelect(["deposites.id", "deposites.total_price", "deposites.status"])
+      .leftJoin("reservation.createdBy", "createdBy")
+      .addSelect(["createdBy.id", "createdBy.firstName", "createdBy.lastName"]);
+
+    const [data, totalRecords] = await Promise.all([
+      queryBuilder.getMany(),
+      queryBuilder.getCount(),
+    ]);
+
+    return {
+      data,
+      recordsFiltered: data.length,
+      totalRecords: +totalRecords,
+    };
   }
 }

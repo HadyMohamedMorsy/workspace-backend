@@ -473,12 +473,22 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .leftJoin("reservation.deposites", "deposite")
-        .select("SUM( COALESCE(deposite.total_price, 0))", "net")
+        .select(
+          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE reservation.total_price END)",
+          "net",
+        )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
+          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .getRawOne(),
 
       // Packages with deposit subtraction
@@ -561,6 +571,7 @@ export class DahboredService {
       (orderCost || 0) +
       (revenueChildSum || 0) -
       (expenseSum || 0);
+
     return {
       total: totalRevenue,
       details: {

@@ -315,6 +315,8 @@ export class CompanyService
         is_deskarea: deskarea?.length > 0,
         is_pending_room:
           reservationRooms?.some(room => room.status === ReservationStatus.PENDING) || false,
+        has_multiple_room_pending:
+          reservationRooms?.filter(room => room.status === ReservationStatus.PENDING).length > 1,
         is_active_room:
           reservationRooms?.some(room => room.status === ReservationStatus.ACTIVE) || false,
         reservation_room_id: reservationRooms?.[0]?.id || null,

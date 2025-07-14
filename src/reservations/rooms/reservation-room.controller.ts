@@ -361,4 +361,18 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
   async findDealRoomAll(@Body() filterQueryDto: any) {
     return this.queryService.findByDealRoomAll(filterQueryDto);
   }
+
+  @Post("/pending-reservations")
+  @HttpCode(200)
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.INDEX],
+    },
+  ])
+  async findPendingReservations(@Body() filterQueryDto: { customer_type: string; id: number }) {
+    const { customer_type, id } = filterQueryDto;
+
+    return this.queryService.findPendingReservationsByCustomer(customer_type, id);
+  }
 }
