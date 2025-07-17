@@ -21,17 +21,15 @@ export class UpdateMembershipUsageMiddleware implements NestMiddleware {
         if (operator === "add-used") {
           payload.remaining = +membership.remaining - +used;
           payload.used = +membership.used + +used;
-          payload.status =
-            payload.used === membership.total_used
-              ? ReservationStatus.COMPLETE
-              : ReservationStatus.ACTIVE;
         }
 
         if (operator === "min-used") {
           payload.remaining = +membership.remaining + +used;
           payload.used = +membership.used - +used;
           payload.status =
-            payload.used === 0 ? ReservationStatus.COMPLETE : ReservationStatus.ACTIVE;
+            payload.used < membership.total_used
+              ? ReservationStatus.ACTIVE
+              : ReservationStatus.COMPLETE;
         }
         // Update the remaining usage
         await this.assignesMembershipService.update(payload);

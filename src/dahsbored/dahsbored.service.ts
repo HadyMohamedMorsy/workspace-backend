@@ -139,8 +139,14 @@ export class DahboredService {
         .where({
           status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .andWhere(
           "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
@@ -322,8 +328,14 @@ export class DahboredService {
         .where({
           status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .andWhere(
           "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
@@ -480,8 +492,14 @@ export class DahboredService {
         .where({
           status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .andWhere(
           "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
@@ -635,8 +653,14 @@ export class DahboredService {
         .where({
           status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .andWhere(
           "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
@@ -1900,8 +1924,14 @@ export class DahboredService {
         )
         .where({
           status: In([ReservationStatus.COMPLETE]),
-          created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .andWhere(
           "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {

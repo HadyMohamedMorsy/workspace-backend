@@ -360,6 +360,17 @@ export class StudentActivityService
         .leftJoin("dgo.generalOffer", "dgo_offer")
         .leftJoin("r.assignGeneralOffer", "rgo")
         .leftJoin("rgo.generalOffer", "rgo_offer")
+        .leftJoin(
+          "e.assignesPackages",
+          "assignesPackages",
+          "assignesPackages.status = :status_package",
+          {
+            status_package: ReservationStatus.ACTIVE,
+          },
+        )
+        .leftJoin("e.deals", "deals", "deals.status = :status_deal", {
+          status_deal: ReservationStatus.ACTIVE,
+        })
         .leftJoin("e.assign_memberships", "am", "am.status = :status_member", {
           status_member: ReservationStatus.ACTIVE,
         })
@@ -376,23 +387,60 @@ export class StudentActivityService
         return { status: false, message: "Student Activity not found" };
       }
 
-      const { shared, deskarea, orders, reservationRooms, assign_memberships } = studentActivity;
+      const {
+        shared,
+        deskarea,
+        orders,
+        reservationRooms,
+        assign_memberships,
+        assignesPackages,
+        deals,
+      } = studentActivity;
       const membershipType = assign_memberships?.[0]?.memeberShip?.type || "";
       const hasMembership = Boolean(assign_memberships?.length);
       const hasPackage = Boolean(studentActivity.assignesPackages?.length);
       const hasDeal = Boolean(studentActivity.deals?.length);
+      const lastTimeMembership =
+        hasMembership && assign_memberships?.[0]?.used === assign_memberships?.[0]?.total_used;
+      const lastTimePackage =
+        hasPackage && assignesPackages?.[0]?.used === assignesPackages?.[0]?.total_used;
+      const lastTimeDeal = hasDeal && deals?.[0]?.used === deals?.[0]?.total_used;
 
       return {
         data: {
           shared: (shared || []).map(item =>
-            formatItem(item, "shared", settings, hasMembership, membershipType),
+            formatItem(
+              { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
+              "shared",
+              settings,
+              hasMembership,
+              membershipType,
+            ),
           ),
           deskarea: (deskarea || []).map(item =>
-            formatItem(item, "deskarea", settings, hasMembership, membershipType),
+            formatItem(
+              { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
+              "deskarea",
+              settings,
+              hasMembership,
+              membershipType,
+            ),
           ),
           order: Array.isArray(orders) ? orders.map(formatOrderData) : [],
           room: (reservationRooms || [])
-            .map(room => formatRoom(room, hasPackage, hasDeal))
+            .map(room =>
+              formatRoom(
+                {
+                  ...room,
+                  lastTimeDeal,
+                  lastTimePackage,
+                  assign_deal_id: deals?.[0]?.id,
+                  assign_package_id: assignesPackages?.[0]?.id,
+                },
+                hasPackage,
+                hasDeal,
+              ),
+            )
             .filter(Boolean),
         },
       };

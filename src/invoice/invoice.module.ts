@@ -1,6 +1,9 @@
 import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
+import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
+import { AssignesPackagesModule } from "src/assigness-packages-offers/assignes-packages.module";
 import { CompanyModule } from "src/companies/company.module";
+import { DealsModule } from "src/deals/deals.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
 import { IndividualModule } from "src/individual/individual.module";
@@ -26,6 +29,9 @@ import { InvoiceService } from "./invoice.service";
     ReservationRoomModule,
     GeneralSettingsModule,
     AssignGeneralOfferModule,
+    AssignesPackagesModule,
+    DealsModule,
+    AssignesMembershipModule,
     GeneralOfferModule,
   ],
   controllers: [InvoiceController],

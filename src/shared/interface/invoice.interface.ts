@@ -31,6 +31,8 @@ export interface Deskarea {
   payment_method: PaymentMethod;
   status: string;
   offer_id?: number;
+  last_time_membership?: boolean;
+  assign_membership_id?: number;
 }
 
 export interface Shared {
@@ -50,6 +52,8 @@ export interface Shared {
   payment_method: PaymentMethod;
   status: string;
   offer_id?: number;
+  last_time_membership?: boolean;
+  assign_membership_id?: number;
 }
 
 export interface Room {
@@ -69,4 +73,8 @@ export interface Room {
   payment_method: PaymentMethod;
   status: string;
   offer_id?: number;
+  last_time_package?: boolean;
+  assign_package_id?: number;
+  last_time_deal?: boolean;
+  assign_deal_id?: number;
 }

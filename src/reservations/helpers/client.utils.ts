@@ -191,6 +191,8 @@ export function formatItem(
           settings,
         ) * totalTime,
     is_membership: isMembership ? "yes" : "no",
+    assign_membership_id: item.assign_membership_id,
+    last_time_membership: item.lastTimeMembership,
     is_full_day: data.is_full_day || data.total_time > +settings.full_day_hours,
   };
 }
@@ -202,10 +204,14 @@ export function formatRoom(room: any, hasPackage: boolean, hasDeal: boolean) {
   );
   return {
     ...data,
+    last_time_package: data.lastTimePackage,
+    last_time_deal: data.lastTimeDeal,
     total_price: hasPackage || hasDeal ? 0 : +data.total_price,
     original_price: hasPackage || hasDeal ? 0 : +data.original_price,
     is_package: hasPackage ? "yes" : "no",
     is_deal: hasDeal ? "yes" : "no",
+    assign_deal_id: room.assign_deal_id,
+    assign_package_id: room.assign_package_id,
   };
 }
 
@@ -278,6 +284,17 @@ export const selectingInvoice = [
   "rgo_offer.type_discount",
   "rgo_offer.discount",
   "am.id",
+  "am.used",
+  "am.total_used",
+  "am.status",
   "ms.id",
   "ms.type",
+  "assignesPackages.id",
+  "assignesPackages.used",
+  "assignesPackages.total_used",
+  "assignesPackages.status",
+  "deals.id",
+  "deals.used",
+  "deals.total_used",
+  "deals.status",
 ];

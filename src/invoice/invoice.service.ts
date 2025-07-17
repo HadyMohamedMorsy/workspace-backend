@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { AssignGeneralOfferservice } from "src/assignes-global-offers/assignes-general-offer.service";
+import { AssignesMembershipService } from "src/assignes-memberships/assignes-membership.service";
+import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
+import { DealsService } from "src/deals/deals.service";
 import { GeneralOfferService } from "src/general-offer/generalOffer.service";
 import { GeneralSettingsService } from "src/general-settings/settings.service";
 import { OrdersService } from "src/orders/orders.service";
@@ -30,6 +33,9 @@ export class InvoiceService {
     private readonly generalSettingsService: GeneralSettingsService,
     private readonly assignGeneralOfferService: AssignGeneralOfferservice,
     private readonly generalOfferService: GeneralOfferService,
+    private readonly assignesMembershipService: AssignesMembershipService,
+    private readonly assignesPackagesService: AssignesPackagesService,
+    private readonly dealsService: DealsService,
   ) {}
 
   private async processOfferIfExists(
@@ -80,6 +86,12 @@ export class InvoiceService {
           // Process offer if exists
           await this.processOfferIfExists(shared.offer_id, customerInfo);
 
+          if (shared.last_time_membership) {
+            await this.assignesMembershipService.update({
+              id: shared.assign_membership_id,
+              status: ReservationStatus.COMPLETE,
+            });
+          }
           const total_time =
             shared.is_membership === "no"
               ? getTotalTime(shared.total_time, shared.is_full_day, +settings.full_day_hours)
@@ -129,6 +141,12 @@ export class InvoiceService {
           // Process offer if exists
           await this.processOfferIfExists(deskarea.offer_id, customerInfo);
 
+          if (deskarea.last_time_membership) {
+            await this.assignesMembershipService.update({
+              id: deskarea.assign_membership_id,
+              status: ReservationStatus.COMPLETE,
+            });
+          }
           const total_time =
             deskarea.is_membership === "no"
               ? getTotalTime(deskarea.total_time, deskarea.is_full_day, +settings.full_day_hours)
@@ -177,6 +195,18 @@ export class InvoiceService {
           // Process offer if exists
           await this.processOfferIfExists(room.offer_id, customerInfo);
 
+          if (room.last_time_package) {
+            await this.assignesPackagesService.update({
+              id: room.assign_package_id,
+              status: ReservationStatus.COMPLETE,
+            });
+          }
+          if (room.last_time_deal) {
+            await this.dealsService.update({
+              id: room.assign_deal_id,
+              status: ReservationStatus.COMPLETE,
+            });
+          }
           const basePrice =
             room.is_deal === "no" || room.is_package === "no"
               ? +room.original_price * room.total_time

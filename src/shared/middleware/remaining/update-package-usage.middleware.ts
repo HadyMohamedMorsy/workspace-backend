@@ -22,18 +22,14 @@ export class UpdatePackageUsageMiddleware implements NestMiddleware {
           payload.remaining = +package_.remaining + used;
           payload.used = +package_.used - +used;
           payload.status =
-            payload.used === package_.total_used
-              ? ReservationStatus.COMPLETE
-              : ReservationStatus.ACTIVE;
+            payload.used < package_.total_used
+              ? ReservationStatus.ACTIVE
+              : ReservationStatus.COMPLETE;
         }
 
         if (operator === "add-used") {
           payload.remaining = +package_.remaining - used;
           payload.used = +package_.used + +used;
-          payload.status =
-            payload.used === package_.total_used
-              ? ReservationStatus.COMPLETE
-              : ReservationStatus.ACTIVE;
         }
 
         // Update the remaining usage
