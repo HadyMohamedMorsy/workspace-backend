@@ -19,6 +19,10 @@ export const TECHNICALSUPPORT: PermissionsUser[] = [
     actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
   },
   {
+    resource: Resource.CustomSettings,
+    actions: [Permission.CREATE, Permission.UPDATE],
+  },
+  {
     resource: Resource.Lookup,
     actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
@@ -362,6 +366,10 @@ export const GENERALMANGER: PermissionsUser[] = [
   {
     resource: Resource.GeneralSettings,
     actions: [Permission.CREATE, Permission.UPDATE, Permission.INDEX],
+  },
+  {
+    resource: Resource.CustomSettings,
+    actions: [Permission.CREATE, Permission.UPDATE],
   },
   {
     resource: Resource.Returns,

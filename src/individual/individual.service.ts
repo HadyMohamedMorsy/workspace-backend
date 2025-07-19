@@ -380,6 +380,9 @@ export class IndividualService
           status_member: ReservationStatus.ACTIVE,
         })
         .leftJoin("am.memeberShip", "ms")
+        .leftJoin("e.customSettings", "cs", "cs.is_active = :is_active", {
+          is_active: true,
+        })
         .where("e.id = :id", { id })
         .addSelect(selectingInvoice);
 
@@ -387,10 +390,6 @@ export class IndividualService
         queryBuilder.getOne(),
         this.generalSettingsService.findAll({}),
       ]);
-
-      if (!individual) {
-        return { status: false, message: "Individual not found" };
-      }
 
       const {
         shared,
@@ -400,7 +399,11 @@ export class IndividualService
         assign_memberships,
         assignesPackages,
         deals,
+        customSettings,
       } = individual;
+
+      // Get active custom settings if available
+      const activeCustomSettings = customSettings?.find(cs => cs.is_active);
       const membershipType = assign_memberships?.[0]?.memeberShip?.type || "";
       const hasMembership = Boolean(assign_memberships?.length);
       const hasPackage = Boolean(individual.assignesPackages?.length);
@@ -417,7 +420,9 @@ export class IndividualService
             formatItem(
               { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
               "shared",
-              settings,
+              activeCustomSettings && activeCustomSettings.is_active
+                ? activeCustomSettings
+                : settings,
               hasMembership,
               membershipType,
             ),
@@ -426,7 +431,9 @@ export class IndividualService
             formatItem(
               { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
               "deskarea",
-              settings,
+              activeCustomSettings && activeCustomSettings.is_active
+                ? activeCustomSettings
+                : settings,
               hasMembership,
               membershipType,
             ),

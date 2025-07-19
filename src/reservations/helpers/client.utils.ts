@@ -41,10 +41,10 @@ export const calculateTotalTime = (
   return (
     calculateHours({
       start_hour: startHour,
-      start_minute: startMinute,
+      start_minute: startMinute || 0,
       start_time: startTime,
       end_hour: endHour,
-      end_minute: endMinute,
+      end_minute: endMinute || 0,
       end_time: endTime,
     }) || 1
   );
@@ -76,7 +76,6 @@ export const formatTimeFields = (data: any, createTime: TimeData, additionalPref
 export const formatTimeData = (data: any, price?: any, additionalPrefix = "") => {
   const createTime = getCurrentTime();
   const timeFields = formatTimeFields(data, createTime, additionalPrefix);
-
   const totalTime = calculateTotalTime(
     timeFields.start_hour,
     timeFields.start_minute,
@@ -297,4 +296,11 @@ export const selectingInvoice = [
   "deals.used",
   "deals.total_used",
   "deals.status",
+  "cs.id",
+  "cs.price_shared",
+  "cs.price_deskarea",
+  "cs.full_day_price_shared",
+  "cs.full_day_price_deskarea",
+  "cs.full_day_hours",
+  "cs.is_active",
 ];

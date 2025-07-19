@@ -384,6 +384,9 @@ export class CompanyService
           status_member: ReservationStatus.ACTIVE,
         })
         .leftJoin("am.memeberShip", "ms")
+        .leftJoin("e.customSettings", "cs", "cs.is_active = :is_active", {
+          is_active: true,
+        })
         .where("e.id = :id", { id })
         .addSelect(selectingInvoice);
 
@@ -391,10 +394,6 @@ export class CompanyService
         queryBuilder.getOne(),
         this.generalSettingsService.findAll({}),
       ]);
-
-      if (!company) {
-        return { status: false, message: "Company not found" };
-      }
 
       const {
         shared,
@@ -404,7 +403,11 @@ export class CompanyService
         assign_memberships,
         assignesPackages,
         deals,
+        customSettings,
       } = company;
+
+      // Get active custom settings if available
+      const activeCustomSettings = customSettings?.find(cs => cs.is_active);
       const membershipType = assign_memberships?.[0]?.memeberShip?.type || "";
       const hasMembership = Boolean(assign_memberships?.length);
       const hasPackage = Boolean(company.assignesPackages?.length);
@@ -421,7 +424,9 @@ export class CompanyService
             formatItem(
               { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
               "shared",
-              settings,
+              activeCustomSettings && activeCustomSettings.is_active
+                ? activeCustomSettings
+                : settings,
               hasMembership,
               membershipType,
             ),
@@ -430,7 +435,9 @@ export class CompanyService
             formatItem(
               { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
               "deskarea",
-              settings,
+              activeCustomSettings && activeCustomSettings.is_active
+                ? activeCustomSettings
+                : settings,
               hasMembership,
               membershipType,
             ),

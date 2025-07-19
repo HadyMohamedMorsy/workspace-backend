@@ -15,6 +15,7 @@ export enum Resource {
   StudentActivity = "customers-studentActivity",
   Company = "customers-company",
   GeneralSettings = "settings-general",
+  CustomSettings = "settings-client",
   User = "settings-user",
   Vacation = "settings-vacation",
   Revenue = "settings-revenue",

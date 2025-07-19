@@ -18,6 +18,7 @@ import { AccessTokenGuard } from "./auth/guards/access-token/access-token.guard"
 import { AuthenticationGuard } from "./auth/guards/authentication/authentication.guard";
 import { CategoryModule } from "./categories/category.module";
 import { CompanyModule } from "./companies/company.module";
+import { CustomSettingsModule } from "./custom-settings/custom-settings.module";
 import { DashboredModule } from "./dahsbored/dashbored.module";
 import { DealsModule } from "./deals/deals.module";
 import { DepositesModule } from "./deposit/deposites.module";
@@ -66,6 +67,7 @@ const ENV = process.env.NODE_ENV;
     DealsModule,
     UploadsModule,
     GeneralSettingsModule,
+    CustomSettingsModule,
     CompanyModule,
     DashboredModule,
     InvoiceModule,

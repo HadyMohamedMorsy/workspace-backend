@@ -1,6 +1,7 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
+import { CustomSettings } from "src/custom-settings/custom-settings.entity";
 import { Deals } from "src/deals/deals.entity";
 import { Lookup } from "src/lookups/lookup.entity";
 import { Order } from "src/orders/order.entity";
@@ -84,6 +85,9 @@ export class Company extends BaseMemberEntity {
 
   @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.company)
   reservationRooms: ReservationRoom[];
+
+  @OneToMany(() => CustomSettings, customSettings => customSettings.company)
+  customSettings: CustomSettings[];
 
   @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;
