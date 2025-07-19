@@ -28,6 +28,9 @@ export class CustomSettings extends BaseMemberEntity {
   @Column({ nullable: true, default: false })
   is_active: boolean;
 
+  @Column({ type: "json", nullable: true })
+  rooms: Array<{ id: number; value: number }>;
+
   // Relations to Individual, Company, and StudentActivity
   @ManyToOne(() => Individual, individual => individual.customSettings, {
     onDelete: "CASCADE",

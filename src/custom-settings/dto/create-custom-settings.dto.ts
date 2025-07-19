@@ -1,9 +1,20 @@
 import { Type } from "class-transformer";
-import { IsBoolean, IsNumber, IsOptional, Min } from "class-validator";
+import { IsArray, IsBoolean, IsNumber, IsOptional, Min, ValidateNested } from "class-validator";
 import { Company } from "src/companies/company.entity";
 import { Individual } from "src/individual/individual.entity";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
+
+class RoomSettingDto {
+  @IsNumber()
+  @Type(() => Number)
+  id: number;
+
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  value: number;
+}
 
 export class CreateCustomSettingsDto {
   @IsOptional()
@@ -40,6 +51,12 @@ export class CreateCustomSettingsDto {
   @IsBoolean()
   @Type(() => Boolean)
   is_active?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RoomSettingDto)
+  rooms?: Array<{ id: number; value: number }>;
 
   @IsOptional()
   @IsNumber()

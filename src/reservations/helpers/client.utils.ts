@@ -197,10 +197,7 @@ export function formatItem(
 }
 
 export function formatRoom(room: any, hasPackage: boolean, hasDeal: boolean) {
-  const data = formatRoomData(
-    { ...room, type: "room", offer: formatOfferData(room) },
-    +room.room.price,
-  );
+  const data = formatRoomData({ ...room, type: "room", offer: formatOfferData(room) }, +room.price);
   return {
     ...data,
     last_time_package: data.lastTimePackage,
@@ -303,4 +300,5 @@ export const selectingInvoice = [
   "cs.full_day_price_deskarea",
   "cs.full_day_hours",
   "cs.is_active",
+  "cs.rooms",
 ];

@@ -435,10 +435,12 @@ export class StudentActivityService
           ),
           order: Array.isArray(orders) ? orders.map(formatOrderData) : [],
           room: (reservationRooms || [])
-            .map(room =>
-              formatRoom(
+            .map(room => {
+              const customRoomPrice = activeCustomSettings?.rooms?.find(r => r.id === room.room.id);
+              return formatRoom(
                 {
                   ...room,
+                  price: customRoomPrice?.value || room.room.price || 0,
                   lastTimeDeal,
                   lastTimePackage,
                   assign_deal_id: deals?.[0]?.id,
@@ -446,8 +448,8 @@ export class StudentActivityService
                 },
                 hasPackage,
                 hasDeal,
-              ),
-            )
+              );
+            })
             .filter(Boolean),
         },
       };
