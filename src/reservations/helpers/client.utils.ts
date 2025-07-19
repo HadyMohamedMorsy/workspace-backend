@@ -188,7 +188,7 @@ export function formatItem(
           { ...item, is_full_day: data.is_full_day || data.total_time > +settings.full_day_hours },
           type,
           settings,
-        ) * totalTime,
+        ),
     is_membership: isMembership ? "yes" : "no",
     assign_membership_id: item.assign_membership_id,
     last_time_membership: item.lastTimeMembership,
