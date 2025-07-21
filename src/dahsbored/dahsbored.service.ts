@@ -113,8 +113,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -140,30 +143,20 @@ export class DahboredService {
           `SUM(
             CASE
               WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'complete'
-                THEN deposite.total_price
-              WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'active'
-                THEN deposite.total_price
+              THEN deposite.total_price
               WHEN deposite.id IS NULL
-              AND reservation.status = 'complete'
               THEN reservation.total_price
+              ELSE 0
             END
           )`,
           "net",
         )
         .where({
+          status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Cach,
         })
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
-          {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
-          },
-        )
-        .andWhere(
-          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
             start_date: filter.start_date,
             end_date: filter.end_date,
@@ -178,8 +171,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -204,8 +200,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -325,8 +324,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -352,30 +354,20 @@ export class DahboredService {
           `SUM(
             CASE
               WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'complete'
-                THEN deposite.total_price
-              WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'active'
-                THEN deposite.total_price
+              THEN deposite.total_price
               WHEN deposite.id IS NULL
-              AND reservation.status = 'complete'
               THEN reservation.total_price
+              ELSE 0
             END
           )`,
           "net",
         )
         .where({
+          status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Visa,
         })
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
-          {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
-          },
-        )
-        .andWhere(
-          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
             start_date: filter.start_date,
             end_date: filter.end_date,
@@ -390,8 +382,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -416,8 +411,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -522,8 +520,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -542,30 +543,20 @@ export class DahboredService {
           `SUM(
             CASE
               WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'complete'
-                THEN deposite.total_price
-              WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'active'
-                THEN deposite.total_price
+              THEN deposite.total_price
               WHEN deposite.id IS NULL
-              AND reservation.status = 'complete'
               THEN reservation.total_price
+              ELSE 0
             END
           )`,
           "net",
         )
         .where({
+          status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.VodafoneCach,
         })
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
-          {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
-          },
-        )
-        .andWhere(
-          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
             start_date: filter.start_date,
             end_date: filter.end_date,
@@ -580,8 +571,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -590,6 +584,13 @@ export class DahboredService {
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .getRawOne(),
 
       // Membership with deposit subtraction
@@ -599,8 +600,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -609,6 +613,13 @@ export class DahboredService {
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
         .getRawOne(),
 
       // Rest of the queries (Shared, Desk Area, Deposites, Orders, etc.)
@@ -705,8 +716,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -732,30 +746,20 @@ export class DahboredService {
           `SUM(
             CASE
               WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'complete'
-                THEN deposite.total_price
-              WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'active'
-                THEN deposite.total_price
+              THEN deposite.total_price
               WHEN deposite.id IS NULL
-              AND reservation.status = 'complete'
               THEN reservation.total_price
+              ELSE 0
             END
           )`,
           "net",
         )
         .where({
+          status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Instapay,
         })
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
-          {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
-          },
-        )
-        .andWhere(
-          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
             start_date: filter.start_date,
             end_date: filter.end_date,
@@ -770,8 +774,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -796,8 +803,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -2001,8 +2011,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -2027,27 +2040,19 @@ export class DahboredService {
           `SUM(
             CASE
               WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'complete'
-                THEN deposite.total_price
-              WHEN deposite.id IS NOT NULL
-                AND reservation.status = 'active'
-                THEN deposite.total_price
+              THEN deposite.total_price
               WHEN deposite.id IS NULL
-              AND reservation.status = 'complete'
               THEN reservation.total_price
+              ELSE 0
             END
           )`,
           "net",
         )
+        .where({
+          status: ReservationStatus.COMPLETE,
+        })
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
-          {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
-          },
-        )
-        .andWhere(
-          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
           {
             start_date: filter.start_date,
             end_date: filter.end_date,
@@ -2062,8 +2067,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -2087,8 +2095,11 @@ export class DahboredService {
         .select(
           `SUM(
             CASE
-              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
-              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
             END
           )`,
           "net",
@@ -2136,6 +2147,939 @@ export class DahboredService {
 
       // Expense Place Child - all payment methods
       this.expensePlaceChildRepository.sum("cost", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Purchases - all payment methods
+      this.purchasesRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Returns - all payment methods
+      this.returnsRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const sharedRevenueValue = sharedRevenue || 0;
+    const deskAreaRevenueValue = deskAreaRevenue || 0;
+    const orderPaidValue = orderPaid || 0;
+    const orderCostValue = orderCost || 0;
+    const revenueChildSumValue = revenueChildSum || 0;
+    const expenseSumValue = expenseSum || 0;
+    const purchasesSumValue = purchasesSum || 0;
+    const returnsSumValue = returnsSum || 0;
+
+    const total =
+      dealsRevenue +
+      reservationRoomRevenue +
+      packagesRevenue +
+      membershipRevenue +
+      sharedRevenueValue +
+      deskAreaRevenueValue +
+      revenueChildSumValue +
+      orderPaidValue +
+      orderCostValue +
+      returnsSumValue -
+      expenseSumValue -
+      purchasesSumValue;
+
+    return {
+      total,
+      details: {
+        dealsRevenue,
+        reservationRoomRevenue,
+        packagesRevenue,
+        membershipRevenue,
+        sharedRevenue: sharedRevenueValue,
+        deskAreaRevenue: deskAreaRevenueValue,
+        orderPaid: orderPaidValue,
+        orderCost: orderCostValue,
+        revenueChildSum: revenueChildSumValue,
+        expenseSum: expenseSumValue,
+        purchasesSum: purchasesSumValue,
+        returnsSum: returnsSumValue,
+      },
+    };
+  }
+
+  async getAllRevenueTodayAllPaymentMethodsCash(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+      purchasesSum,
+      returnsSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction using updated_at - Cash payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Cach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction using updated_at - Cash payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN reservation.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          status: ReservationStatus.COMPLETE,
+          payment_method: PaymentMethod.Cach,
+        })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Packages with deposit subtraction using updated_at - Cash payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Cach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Membership with deposit subtraction using updated_at - Cash payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Cach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Shared - Cash payment method
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Desk Area - Cash payment method
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders PAID - Cash payment method
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders COST - Cash payment method
+      this.orderRepository.sum("order_price", {
+        type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Revenue Child - Cash payment method
+      this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Expense Place Child - Cash payment method
+      this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.Cach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Purchases - all payment methods
+      this.purchasesRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Returns - all payment methods
+      this.returnsRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const sharedRevenueValue = sharedRevenue || 0;
+    const deskAreaRevenueValue = deskAreaRevenue || 0;
+    const orderPaidValue = orderPaid || 0;
+    const orderCostValue = orderCost || 0;
+    const revenueChildSumValue = revenueChildSum || 0;
+    const expenseSumValue = expenseSum || 0;
+    const purchasesSumValue = purchasesSum || 0;
+    const returnsSumValue = returnsSum || 0;
+
+    const total =
+      dealsRevenue +
+      reservationRoomRevenue +
+      packagesRevenue +
+      membershipRevenue +
+      sharedRevenueValue +
+      deskAreaRevenueValue +
+      revenueChildSumValue +
+      orderPaidValue +
+      orderCostValue +
+      returnsSumValue -
+      expenseSumValue -
+      purchasesSumValue;
+
+    return {
+      total,
+      details: {
+        dealsRevenue,
+        reservationRoomRevenue,
+        packagesRevenue,
+        membershipRevenue,
+        sharedRevenue: sharedRevenueValue,
+        deskAreaRevenue: deskAreaRevenueValue,
+        orderPaid: orderPaidValue,
+        orderCost: orderCostValue,
+        revenueChildSum: revenueChildSumValue,
+        expenseSum: expenseSumValue,
+        purchasesSum: purchasesSumValue,
+        returnsSum: returnsSumValue,
+      },
+    };
+  }
+
+  async getAllRevenueTodayAllPaymentMethodsInstapay(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+      purchasesSum,
+      returnsSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction using updated_at - Instapay payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Instapay,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction using updated_at - Instapay payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN reservation.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          status: ReservationStatus.COMPLETE,
+          payment_method: PaymentMethod.Instapay,
+        })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Packages with deposit subtraction using updated_at - Instapay payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Instapay,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Membership with deposit subtraction using updated_at - Instapay payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Instapay,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Shared - Instapay payment method
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Desk Area - Instapay payment method
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders PAID - Instapay payment method
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders COST - Instapay payment method
+      this.orderRepository.sum("order_price", {
+        type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Revenue Child - Instapay payment method
+      this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Expense Place Child - Instapay payment method
+      this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.Instapay,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Purchases - all payment methods
+      this.purchasesRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Returns - all payment methods
+      this.returnsRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const sharedRevenueValue = sharedRevenue || 0;
+    const deskAreaRevenueValue = deskAreaRevenue || 0;
+    const orderPaidValue = orderPaid || 0;
+    const orderCostValue = orderCost || 0;
+    const revenueChildSumValue = revenueChildSum || 0;
+    const expenseSumValue = expenseSum || 0;
+    const purchasesSumValue = purchasesSum || 0;
+    const returnsSumValue = returnsSum || 0;
+
+    const total =
+      dealsRevenue +
+      reservationRoomRevenue +
+      packagesRevenue +
+      membershipRevenue +
+      sharedRevenueValue +
+      deskAreaRevenueValue +
+      revenueChildSumValue +
+      orderPaidValue +
+      orderCostValue +
+      returnsSumValue -
+      expenseSumValue -
+      purchasesSumValue;
+
+    return {
+      total,
+      details: {
+        dealsRevenue,
+        reservationRoomRevenue,
+        packagesRevenue,
+        membershipRevenue,
+        sharedRevenue: sharedRevenueValue,
+        deskAreaRevenue: deskAreaRevenueValue,
+        orderPaid: orderPaidValue,
+        orderCost: orderCostValue,
+        revenueChildSum: revenueChildSumValue,
+        expenseSum: expenseSumValue,
+        purchasesSum: purchasesSumValue,
+        returnsSum: returnsSumValue,
+      },
+    };
+  }
+
+  async getAllRevenueTodayAllPaymentMethodsVodafoneCash(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+      purchasesSum,
+      returnsSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction using updated_at - Vodafone Cash payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.VodafoneCach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction using updated_at - Vodafone Cash payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN reservation.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          status: ReservationStatus.COMPLETE,
+          payment_method: PaymentMethod.VodafoneCach,
+        })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Packages with deposit subtraction using updated_at - Vodafone Cash payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.VodafoneCach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Membership with deposit subtraction using updated_at - Vodafone Cash payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.VodafoneCach,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Shared - Vodafone Cash payment method
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Desk Area - Vodafone Cash payment method
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders PAID - Vodafone Cash payment method
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders COST - Vodafone Cash payment method
+      this.orderRepository.sum("order_price", {
+        type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Revenue Child - Vodafone Cash payment method
+      this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Expense Place Child - Vodafone Cash payment method
+      this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.VodafoneCach,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Purchases - all payment methods
+      this.purchasesRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Returns - all payment methods
+      this.returnsRepository.sum("total", {
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+    ]);
+
+    const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const sharedRevenueValue = sharedRevenue || 0;
+    const deskAreaRevenueValue = deskAreaRevenue || 0;
+    const orderPaidValue = orderPaid || 0;
+    const orderCostValue = orderCost || 0;
+    const revenueChildSumValue = revenueChildSum || 0;
+    const expenseSumValue = expenseSum || 0;
+    const purchasesSumValue = purchasesSum || 0;
+    const returnsSumValue = returnsSum || 0;
+
+    const total =
+      dealsRevenue +
+      reservationRoomRevenue +
+      packagesRevenue +
+      membershipRevenue +
+      sharedRevenueValue +
+      deskAreaRevenueValue +
+      revenueChildSumValue +
+      orderPaidValue +
+      orderCostValue +
+      returnsSumValue -
+      expenseSumValue -
+      purchasesSumValue;
+
+    return {
+      total,
+      details: {
+        dealsRevenue,
+        reservationRoomRevenue,
+        packagesRevenue,
+        membershipRevenue,
+        sharedRevenue: sharedRevenueValue,
+        deskAreaRevenue: deskAreaRevenueValue,
+        orderPaid: orderPaidValue,
+        orderCost: orderCostValue,
+        revenueChildSum: revenueChildSumValue,
+        expenseSum: expenseSumValue,
+        purchasesSum: purchasesSumValue,
+        returnsSum: returnsSumValue,
+      },
+    };
+  }
+
+  async getAllRevenueTodayAllPaymentMethodsVisa(filter: FiltersDashboredDto) {
+    const [
+      dealsNet,
+      reservationRoomNet,
+      packagesNet,
+      membershipNet,
+      sharedRevenue,
+      deskAreaRevenue,
+      orderPaid,
+      orderCost,
+      revenueChildSum,
+      expenseSum,
+      purchasesSum,
+      returnsSum,
+    ] = await Promise.all([
+      // Deals with deposit subtraction using updated_at - Visa payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .leftJoin("deal.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN deal.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Visa,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Reservation Room with deposit subtraction using updated_at - Visa payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .leftJoin("reservation.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN reservation.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          status: ReservationStatus.COMPLETE,
+          payment_method: PaymentMethod.Visa,
+        })
+        .andWhere(
+          "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Packages with deposit subtraction using updated_at - Visa payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .leftJoin("package.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN package.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Visa,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Membership with deposit subtraction using updated_at - Visa payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .leftJoin("membership.deposites", "deposite")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+              THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              THEN membership.total_price
+              ELSE 0
+            END
+          )`,
+          "net",
+        )
+        .where({
+          payment_method: PaymentMethod.Visa,
+          created_at: Between(filter.start_date, filter.end_date),
+        })
+        .andWhere(
+          "(deposite.updated_at BETWEEN :start_date AND :end_date OR deposite.id IS NULL)",
+          {
+            start_date: filter.start_date,
+            end_date: filter.end_date,
+          },
+        )
+        .getRawOne(),
+
+      // Shared - Visa payment method
+      this.sharedRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Desk Area - Visa payment method
+      this.deskAreaRepository.sum("total_price", {
+        status: ReservationStatus.COMPLETE,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders PAID - Visa payment method
+      this.orderRepository.sum("total_order", {
+        type_order: TypeOrder.PAID,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Orders COST - Visa payment method
+      this.orderRepository.sum("order_price", {
+        type_order: TypeOrder.COST,
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Revenue Child - Visa payment method
+      this.revenueChildRepository.sum("amount", {
+        payment_method: PaymentMethod.Visa,
+        created_at: Between(filter.start_date, filter.end_date),
+      }),
+
+      // Expense Place Child - Visa payment method
+      this.expensePlaceChildRepository.sum("cost", {
+        payment_method: PaymentMethod.Visa,
         created_at: Between(filter.start_date, filter.end_date),
       }),
 

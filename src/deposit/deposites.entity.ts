@@ -15,7 +15,7 @@ export class Deposite extends BaseMemberEntity {
   @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
-  @Column({ type: "enum", enum: DepositeStatus, default: DepositeStatus.COMPLETE })
+  @Column({ type: "enum", enum: DepositeStatus, default: DepositeStatus.ACTIVE })
   status: DepositeStatus;
 
   @Column({

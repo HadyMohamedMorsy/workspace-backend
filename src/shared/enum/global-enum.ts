@@ -127,6 +127,7 @@ export enum ReservationStatus {
 
 export enum DepositeStatus {
   CANCELLED = "cancelled",
+  ACTIVE = "active",
   COMPLETE = "complete",
 }
 
