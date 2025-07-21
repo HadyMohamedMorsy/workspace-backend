@@ -111,11 +111,15 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .leftJoin("deal.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN deposite.total_price ELSE deal.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -133,11 +137,22 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .leftJoin("reservation.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE reservation.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'complete'
+                THEN deposite.total_price
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'active'
+                THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              AND reservation.status = 'complete'
+              THEN reservation.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Cach,
         })
         .andWhere(
@@ -161,11 +176,15 @@ export class DahboredService {
         .createQueryBuilder("package")
         .leftJoin("package.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE package.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -183,11 +202,15 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .leftJoin("membership.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE membership.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -300,11 +323,15 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .leftJoin("deal.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE deal.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -322,11 +349,22 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .leftJoin("reservation.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE reservation.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'complete'
+                THEN deposite.total_price
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'active'
+                THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              AND reservation.status = 'complete'
+              THEN reservation.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Visa,
         })
         .andWhere(
@@ -350,11 +388,15 @@ export class DahboredService {
         .createQueryBuilder("package")
         .leftJoin("package.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE package.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -372,11 +414,15 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .leftJoin("membership.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE membership.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -473,9 +519,16 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .leftJoin("deal.deposites", "deposite")
-        .select("SUM( COALESCE(deposite.total_price, 0))", "net")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+            END
+          )`,
+          "net",
+        )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -486,11 +539,22 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .leftJoin("reservation.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE reservation.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'complete'
+                THEN deposite.total_price
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'active'
+                THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              AND reservation.status = 'complete'
+              THEN reservation.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.VodafoneCach,
         })
         .andWhere(
@@ -513,9 +577,16 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .leftJoin("package.deposites", "deposite")
-        .select("SUM( COALESCE(deposite.total_price, 0))", "net")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+            END
+          )`,
+          "net",
+        )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -525,9 +596,16 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .leftJoin("membership.deposites", "deposite")
-        .select("SUM( COALESCE(deposite.total_price, 0))", "net")
+        .select(
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+            END
+          )`,
+          "net",
+        )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -625,11 +703,15 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .leftJoin("deal.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE deal.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -647,11 +729,22 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .leftJoin("reservation.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE reservation.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'complete'
+                THEN deposite.total_price
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'active'
+                THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              AND reservation.status = 'complete'
+              THEN reservation.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Instapay,
         })
         .andWhere(
@@ -675,11 +768,15 @@ export class DahboredService {
         .createQueryBuilder("package")
         .leftJoin("package.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE package.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -697,11 +794,15 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .leftJoin("membership.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE membership.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -1898,11 +1999,15 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .leftJoin("deal.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE deal.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (deal.status = 'complete' OR deal.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND deal.status = 'complete' THEN deal.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           created_at: Between(filter.start_date, filter.end_date),
         })
         .andWhere(
@@ -1919,12 +2024,21 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .leftJoin("reservation.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE reservation.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'complete'
+                THEN deposite.total_price
+              WHEN deposite.id IS NOT NULL
+                AND reservation.status = 'active'
+                THEN deposite.total_price
+              WHEN deposite.id IS NULL
+              AND reservation.status = 'complete'
+              THEN reservation.total_price
+            END
+          )`,
           "net",
         )
-        .where({
-          status: In([ReservationStatus.COMPLETE]),
-        })
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
@@ -1946,11 +2060,15 @@ export class DahboredService {
         .createQueryBuilder("package")
         .leftJoin("package.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE package.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (package.status = 'complete' OR package.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND package.status = 'complete' THEN package.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           created_at: Between(filter.start_date, filter.end_date),
         })
         .andWhere(
@@ -1967,11 +2085,15 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .leftJoin("membership.deposites", "deposite")
         .select(
-          "SUM(CASE WHEN deposite.id IS NOT NULL THEN  deposite.total_price ELSE membership.total_price END)",
+          `SUM(
+            CASE
+              WHEN deposite.id IS NOT NULL AND (membership.status = 'complete' OR membership.status = 'active') THEN deposite.total_price
+              WHEN deposite.id IS NULL AND membership.status = 'complete' THEN membership.total_price
+            END
+          )`,
           "net",
         )
         .where({
-          status: In([ReservationStatus.ACTIVE, ReservationStatus.COMPLETE]),
           created_at: Between(filter.start_date, filter.end_date),
         })
         .andWhere(

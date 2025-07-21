@@ -191,12 +191,9 @@ export class CompanyService
         case "package_room": {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          queryBuilder.andWhere(
-            "pa.id IS NOT NULL AND pr.id IS NOT NULL AND es.end_date >= :currentDate",
-            {
-              currentDate: today,
-            },
-          );
+          queryBuilder.andWhere("pa.id IS NOT NULL AND es.end_date >= :currentDate", {
+            currentDate: today,
+          });
           break;
         }
         case "membership_deskarea": {
@@ -226,12 +223,9 @@ export class CompanyService
         case "deal_room": {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          queryBuilder.andWhere(
-            "d.id IS NOT NULL AND pr.id IS NOT NULL AND d.end_date >= :currentDate",
-            {
-              currentDate: today,
-            },
-          );
+          queryBuilder.andWhere("d.id IS NOT NULL AND d.end_date >= :currentDate", {
+            currentDate: today,
+          });
           break;
         }
         case "expired_membership_deskarea": {
