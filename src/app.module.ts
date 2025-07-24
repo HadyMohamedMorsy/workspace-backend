@@ -21,7 +21,6 @@ import { CompanyModule } from "./companies/company.module";
 import { CustomSettingsModule } from "./custom-settings/custom-settings.module";
 import { DashboredModule } from "./dahsbored/dashbored.module";
 import { DealsModule } from "./deals/deals.module";
-import { DepositesModule } from "./deposit/deposites.module";
 import { ExpensesPlaceModule } from "./expenses-place/expense-place.module";
 import { ExpensesPlaceChildModule } from "./expenses-place/expenses-place-child/expense-place-child.module";
 import { ExpensesSalariesModule } from "./expenses-salary/expense-salaries.module";
@@ -77,7 +76,6 @@ const ENV = process.env.NODE_ENV;
     listModule,
     SearchModule,
     GeneralOfferModule,
-    DepositesModule,
     TaskModule,
     IndividualModule,
     AttendModule,

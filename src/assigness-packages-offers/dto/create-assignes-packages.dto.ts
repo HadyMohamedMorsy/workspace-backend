@@ -2,7 +2,6 @@ import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
-import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackages } from "src/offer-packages/offer-package.entity";
 import { ReservationStatus } from "src/shared/enum/global-enum";
@@ -64,9 +63,6 @@ export class CreateAssignesPackageDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
-
-  @IsOptional()
-  deposites?: Deposite;
 
   createdBy: User;
 

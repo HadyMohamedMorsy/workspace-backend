@@ -4,7 +4,6 @@ import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Company } from "src/companies/company.entity";
 import { Deals } from "src/deals/deals.entity";
-import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
 import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
@@ -92,8 +91,6 @@ export class CreateReservationRoomDto {
   @IsEnum(ReservationStatus)
   @IsOptional()
   status: ReservationStatus = ReservationStatus.ACTIVE;
-
-  deposites?: Deposite;
 
   deals?: Deals;
 

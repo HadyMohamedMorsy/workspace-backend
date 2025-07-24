@@ -4,7 +4,6 @@ import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-ge
 import { AssignesPackagesModule } from "src/assigness-packages-offers/assignes-packages.module";
 import { CompanyModule } from "src/companies/company.module";
 import { DealsModule } from "src/deals/deals.module";
-import { DepositesModule } from "src/deposit/deposites.module";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
@@ -15,7 +14,6 @@ import { DealsMiddleware } from "src/shared/middleware/assigness/deals.middlewar
 import { ReservationRoomMiddleware } from "src/shared/middleware/co-working-space-reservations/reservation-room.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DateFormatMiddleware } from "src/shared/middleware/date-format.middleware";
-import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { UpdateDealUsageMiddleware } from "src/shared/middleware/remaining/update-deal-usage.middleware";
 import { UpdatePackageUsageMiddleware } from "src/shared/middleware/remaining/update-package-usage.middleware";
 import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
@@ -38,14 +36,12 @@ import { ReservationRoomService } from "./reservation-room.service";
     forwardRef(() => IndividualModule),
     forwardRef(() => StudentActivityModule),
     RoomsModule,
-    DepositesModule,
     AssignGeneralOfferModule,
     GeneralOfferModule,
     UsersModule,
     forwardRef(() => AssignesPackagesModule),
     forwardRef(() => DealsModule),
     TypeOrmModule.forFeature([ReservationRoom]),
-    DepositesModule,
   ],
   controllers: [ReservationRoomController],
   providers: [ReservationRoomService, ReservationRoomQueryService, ReservationCalendarService],
@@ -69,10 +65,6 @@ export class ReservationRoomModule implements NestModule {
         PriceCalculationMiddleware,
       )
       .forRoutes("reservation-room/store");
-
-    consumer
-      .apply(ReservationRoomMiddleware, DepositMiddleware)
-      .forRoutes("reservation-room/deposit");
 
     consumer
       .apply(

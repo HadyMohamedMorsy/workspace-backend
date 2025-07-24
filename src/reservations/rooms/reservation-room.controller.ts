@@ -14,8 +14,6 @@ import {
 import { AssignesPackagesService } from "src/assigness-packages-offers/assignes-packages.service";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
 import { DealsService } from "src/deals/deals.service";
-import { DepositeService } from "src/deposit/deposites.service";
-import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { formatDate, getCurrentTime } from "src/reservations/helpers/utitlties";
 import { Permission, ReservationStatus, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
@@ -37,7 +35,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     private readonly packageRooms: AssignesPackagesService,
     private readonly queryService: ReservationRoomQueryService,
     private readonly calendarService: ReservationCalendarService,
-    private readonly depositeService: DepositeService,
   ) {}
 
   public selectOptions(): Record<string, boolean> {
@@ -190,7 +187,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
         studentActivity: req["studentActivity"],
         assignGeneralOffer: req["assignGeneralOffer"],
         room: req["room"],
-        deposites: req["deposite"],
         total_price: req["totalPrice"],
         deals: req["deal"],
         assignesPackages: req["assignPackage"],
@@ -206,18 +202,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       this.selectOptions(),
       this.getRelationOptions(),
     );
-
-    if (createDto.start_deposite) {
-      const deposite = await this.depositeService.create({
-        total_price: createDto.start_deposite,
-        reservationRoom: reservationRoom,
-      } as CreateDepositeDto);
-
-      await this.service.update({
-        id: reservationRoom.id,
-        deposites: deposite,
-      });
-    }
 
     return reservationRoom;
   }
@@ -240,7 +224,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
         assignGeneralOffer: req["assignGeneralOffer"],
         assignesPackages: req["assignPackage"],
         room: req["room"],
-        deposites: req["deposite"],
         note: updateDto.note,
         payment_method: updateDto.payment_method,
         selected_day: formatDate(updateDto.selected_day),
@@ -255,20 +238,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       this.selectOptions(),
       this.getRelationOptions(),
     );
-  }
-
-  @Post("/deposit")
-  @Permissions([
-    {
-      resource: Resource.Deposite,
-      actions: [Permission.CREATE],
-    },
-  ])
-  async createDeposite(@Body() create: { reservation_room_id: number }, @Req() req: Request) {
-    return await this.service.update({
-      id: create.reservation_room_id,
-      deposites: req["deposite"],
-    });
   }
 
   @Delete("/delete")

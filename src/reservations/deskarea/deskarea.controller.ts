@@ -10,7 +10,6 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { UpdateDepositeDto } from "src/deposit/dto/update-deposites.dto";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../../shared/decorators/permissions.decorator";
@@ -206,23 +205,6 @@ export class DeskareaController implements SelectOptions, RelationOptions {
       this.selectOptions(),
       this.getRelationOptions(),
     );
-  }
-
-  @Post("/deposit")
-  @Permissions([
-    {
-      resource: Resource.Deposite,
-      actions: [Permission.CREATE],
-    },
-  ])
-  async createDeposit(
-    @Body() create: UpdateDepositeDto & { deskarea_id: number },
-    @Req() req: Request,
-  ) {
-    return await this.service.update({
-      id: create.deskarea_id,
-      deposites: req["deposite"],
-    } as UpdateDeskAreaDto);
   }
 
   @Delete("/delete")

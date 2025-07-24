@@ -3,7 +3,6 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
 import { CompanyModule } from "src/companies/company.module";
-import { DepositesModule } from "src/deposit/deposites.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
 import { IndividualModule } from "src/individual/individual.module";
@@ -12,7 +11,6 @@ import { AssignesMembershipMiddleware } from "src/shared/middleware/assigness/as
 import { DeskareaMiddleware } from "src/shared/middleware/co-working-space-reservations/deskarea.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DateFormatMiddleware } from "src/shared/middleware/date-format.middleware";
-import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { UpdateMembershipUsageMiddleware } from "src/shared/middleware/remaining/update-membership-usage.middleware";
 import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
 import { ValidateOfferMiddleware } from "src/shared/middleware/validate-offer.middleware";
@@ -33,7 +31,6 @@ import { DeskareaReservationValidationMiddleware } from "./middleware/deskarea-r
     AssignGeneralOfferModule,
     GeneralOfferModule,
     UsersModule,
-    DepositesModule,
     TypeOrmModule.forFeature([Deskarea]),
   ],
   controllers: [DeskareaController],
@@ -54,7 +51,7 @@ export class DeskareaModule {
         UpdateMembershipUsageMiddleware,
       )
       .forRoutes("deskarea/store")
-      .apply(DeskareaMiddleware, DepositMiddleware)
+      .apply(DeskareaMiddleware)
       .forRoutes("deskarea/deposit");
 
     consumer

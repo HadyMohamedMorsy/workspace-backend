@@ -2,15 +2,12 @@ import { MiddlewareConsumer, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { CompanyModule } from "src/companies/company.module";
-import { DepositesModule } from "src/deposit/deposites.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { OfferPackageModule } from "src/offer-packages/offerpackages.module";
 import { ReservationRoomModule } from "src/reservations/rooms/reservation-room.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
-import { AssignesPackageMiddleware } from "src/shared/middleware/assigness/assignes-package.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
-import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { ValidateDateRangeMiddleware } from "src/shared/middleware/validate-date-range.middleware";
 import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
 import { ValidateOfferMiddleware } from "src/shared/middleware/validate-offer.middleware";
@@ -30,7 +27,6 @@ import { CheckActiveAssignessPackagesMiddleware } from "./middleware/check-activ
     IndividualModule,
     StudentActivityModule,
     AssignGeneralOfferModule,
-    DepositesModule,
     GeneralOfferModule,
     OfferPackageModule,
     UsersModule,
@@ -69,10 +65,5 @@ export class AssignesPackagesModule {
         CalculatePackagesPriceMiddleware,
       )
       .forRoutes("assignes-package/update");
-
-    // Apply middleware to store-deposite route
-    consumer
-      .apply(AssignesPackageMiddleware, DepositMiddleware)
-      .forRoutes("assignes-package/deposit");
   }
 }

@@ -1,7 +1,5 @@
 import { Body, Controller, Delete, HttpCode, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { AuthorizationGuard } from "src/auth/guards/access-token/authroization.guard";
-import { DepositeService } from "src/deposit/deposites.service";
-import { CreateDepositeDto } from "src/deposit/dto/create-deposites.dto";
 import { Permission, Resource } from "src/shared/enum/global-enum";
 import { RelationOptions, SelectOptions } from "src/shared/interfaces/query.interface";
 import { Permissions } from "../shared/decorators/permissions.decorator";
@@ -12,10 +10,7 @@ import { UpdateAssignesPackageDto } from "./dto/update-assignes-packages.dto";
 @UseGuards(AuthorizationGuard)
 @Controller("assignes-package")
 export class AssignesPackageController implements SelectOptions, RelationOptions {
-  constructor(
-    private readonly service: AssignesPackagesService,
-    private readonly depositeService: DepositeService,
-  ) {}
+  constructor(private readonly service: AssignesPackagesService) {}
 
   public selectOptions(): Record<string, boolean> {
     return {
@@ -144,33 +139,7 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
       this.getRelationOptions(),
     );
 
-    if (create.start_deposite) {
-      const deposite = await this.depositeService.create({
-        total_price: create.start_deposite,
-        assignPackage: assignPackage,
-      } as CreateDepositeDto);
-
-      await this.service.update({
-        id: assignPackage.id,
-        deposites: deposite,
-      });
-    }
-
     return assignPackage;
-  }
-
-  @Post("/deposit")
-  @Permissions([
-    {
-      resource: Resource.Deposite,
-      actions: [Permission.CREATE],
-    },
-  ])
-  async createDeposite(@Body() create: { package_id: number }, @Req() req: Request) {
-    return await this.service.update({
-      id: create.package_id,
-      deposites: req["deposite"],
-    });
   }
 
   @Post("/update")

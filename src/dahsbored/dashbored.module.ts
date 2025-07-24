@@ -4,7 +4,6 @@ import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
 import { Deals } from "src/deals/deals.entity";
-import { Deposite } from "src/deposit/deposites.entity";
 import { ExpensePlace } from "src/expenses-place/expense-place.entity";
 import { ExpensePlaceChild } from "src/expenses-place/expenses-place-child/expense-place-child.entity";
 import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
@@ -30,7 +29,6 @@ import { DashboredController } from "./dashbored.controller";
       AssignesMembership,
       AssignGeneralOffer,
       Shared,
-      Deposite,
       Deskarea,
       ReservationRoom,
       RevenueChild,

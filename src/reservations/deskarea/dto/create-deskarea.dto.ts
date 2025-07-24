@@ -11,7 +11,6 @@ import {
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { Company } from "src/companies/company.entity";
-import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { PaymentMethod, ReservationStatus, TimeOfDay } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
@@ -98,7 +97,6 @@ export class CreateDeskAreaDto {
 
   createdBy: User;
   assignGeneralOffer: AssignGeneralOffer;
-  deposites?: Deposite;
   individual: Individual;
   assignessMemebership: AssignesMembership;
   company: Company;

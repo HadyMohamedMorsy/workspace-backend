@@ -2,7 +2,6 @@ import { Type } from "class-transformer";
 import { IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
-import { Deposite } from "src/deposit/deposites.entity";
 import { GeneralOffer } from "src/general-offer/generalOffer.entity";
 import { Individual } from "src/individual/individual.entity";
 import { Room } from "src/rooms/room.entity";
@@ -75,9 +74,6 @@ export class CreateDealsDto {
   @Type(() => Number)
   @IsNotEmpty()
   customer_id: number;
-
-  @IsOptional()
-  deposites?: Deposite;
 
   @IsEnum(ReservationStatus)
   @IsOptional()

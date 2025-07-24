@@ -3,16 +3,13 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-general-offer.module";
 import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
 import { CompanyModule } from "src/companies/company.module";
-import { DepositesModule } from "src/deposit/deposites.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
 import { IndividualModule } from "src/individual/individual.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
 import { AssignesMembershipMiddleware } from "src/shared/middleware/assigness/assignes-membership.middleware";
-import { SharedMiddleware } from "src/shared/middleware/co-working-space-reservations/shared.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DateFormatMiddleware } from "src/shared/middleware/date-format.middleware";
-import { DepositMiddleware } from "src/shared/middleware/deposit.middleware";
 import { UpdateMembershipUsageMiddleware } from "src/shared/middleware/remaining/update-membership-usage.middleware";
 import { ValidateOfferRangeMiddleware } from "src/shared/middleware/validate-offer-range.middleware";
 import { ValidateOfferMiddleware } from "src/shared/middleware/validate-offer.middleware";
@@ -33,7 +30,6 @@ import { SharedService } from "./shared.service";
     GeneralOfferModule,
     GeneralSettingsModule,
     AssignesMembershipModule,
-    DepositesModule,
     UsersModule,
   ],
   controllers: [SharedController],
@@ -53,10 +49,7 @@ export class SharedModule implements NestModule {
         AssignesMembershipMiddleware,
         UpdateMembershipUsageMiddleware,
       )
-      .forRoutes("shared/store")
-      .apply(SharedMiddleware, DepositMiddleware)
-      .forRoutes("shared/deposit");
-
+      .forRoutes("shared/store");
     consumer
       .apply(AssignesMembershipMiddleware, UpdateMembershipUsageMiddleware)
       .forRoutes("shared/change-status");

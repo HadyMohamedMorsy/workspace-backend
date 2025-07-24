@@ -1,6 +1,5 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
-import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { OfferPackages } from "src/offer-packages/offer-package.entity";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
@@ -8,15 +7,7 @@ import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class AssignesPackages extends BaseMemberEntity {
@@ -71,10 +62,6 @@ export class AssignesPackages extends BaseMemberEntity {
 
   @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
-
-  @OneToOne(() => Deposite, deposite => deposite.assignesPackages, { onDelete: "SET NULL" })
-  @JoinColumn()
-  deposites: Deposite;
 
   @Column({
     nullable: true,

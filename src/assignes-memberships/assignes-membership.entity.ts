@@ -1,6 +1,5 @@
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { Company } from "src/companies/company.entity";
-import { Deposite } from "src/deposit/deposites.entity";
 import { Individual } from "src/individual/individual.entity";
 import { CoWorkingSpace } from "src/offer-co-working-space/offer-co-working-space.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
@@ -9,15 +8,7 @@ import { BaseMemberEntity } from "src/shared/entities/base.entity";
 import { PaymentMethod, ReservationStatus } from "src/shared/enum/global-enum";
 import { StudentActivity } from "src/student-activity/StudentActivity.entity";
 import { User } from "src/users/user.entity";
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class AssignesMembership extends BaseMemberEntity {
@@ -79,10 +70,6 @@ export class AssignesMembership extends BaseMemberEntity {
 
   @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
-
-  @OneToOne(() => Deposite, deposite => deposite.assignessMemebership, { onDelete: "SET NULL" })
-  @JoinColumn()
-  deposites: Deposite;
 
   @Column({
     nullable: true,
