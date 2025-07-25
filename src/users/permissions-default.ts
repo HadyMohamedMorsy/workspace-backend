@@ -3,10 +3,6 @@ import { PermissionsUser } from "./user.entity";
 
 export const TECHNICALSUPPORT: PermissionsUser[] = [
   {
-    resource: Resource.Deposite,
-    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
-  },
-  {
     resource: Resource.Revenue,
     actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
@@ -253,10 +249,6 @@ export const TECHNICALSUPPORT: PermissionsUser[] = [
 ];
 
 export const GENERALMANGER: PermissionsUser[] = [
-  {
-    resource: Resource.Deposite,
-    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
-  },
   {
     resource: Resource.Lookup,
     actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
@@ -505,10 +497,6 @@ export const GENERALMANGER: PermissionsUser[] = [
 
 export const OPERATIONMANGER: PermissionsUser[] = [
   {
-    resource: Resource.Deposite,
-    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
-  },
-  {
     resource: Resource.Lookup,
     actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
   },
@@ -559,10 +547,6 @@ export const OPERATIONMANGER: PermissionsUser[] = [
 ];
 
 export const COMMUNITY_OFFICER: PermissionsUser[] = [
-  {
-    resource: Resource.Deposite,
-    actions: [Permission.CREATE, Permission.DELETE, Permission.UPDATE, Permission.INDEX],
-  },
   {
     resource: Resource.Individual,
     actions: [

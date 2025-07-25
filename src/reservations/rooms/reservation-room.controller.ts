@@ -58,8 +58,10 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       total_time: true,
       note: true,
       payment_method: true,
+      deposites: true,
       created_at: true,
       updated_at: true,
+      is_paid: true,
     };
   }
 
@@ -92,10 +94,6 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
       },
       assignGeneralOffer: {
         id: true,
-      },
-      deposites: {
-        id: true,
-        total_price: true,
       },
       createdBy: {
         id: true,
@@ -197,6 +195,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
         end_hour: createDto.end_hour,
         end_minute: createDto.end_minute,
         end_time: createDto.end_time,
+        deposites: createDto.deposites,
         createdBy: req["createdBy"],
       } as CreateReservationRoomDto,
       this.selectOptions(),
@@ -233,6 +232,7 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
         end_minute: updateDto.end_minute,
         start_time: updateDto.start_time,
         end_time: updateDto.end_time,
+        deposites: updateDto.deposites,
         createdBy: req["createdBy"],
       },
       this.selectOptions(),
@@ -343,5 +343,44 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     const { customer_type, id } = filterQueryDto;
 
     return this.queryService.findPendingReservationsByCustomer(customer_type, id);
+  }
+
+  @Patch("/change-deposits")
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public async changeDeposits(@Body() update: { id: number; deposites: number }) {
+    const existingRecord = await this.service.findOne(update.id, {
+      id: true,
+      deposites: true,
+    });
+
+    return this.service.update(
+      {
+        id: update.id,
+        deposites: (+existingRecord.deposites || 0) + +update.deposites,
+      },
+      {
+        id: true,
+        deposites: true,
+      },
+    );
+  }
+
+  @Patch("/change-is-paid")
+  @Permissions([
+    {
+      resource: Resource.ReservationRoom,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeIsPaid(@Body() update: { id: number; is_paid: boolean }) {
+    return this.service.changeStatus(update.id, update.is_paid, "is_paid", {
+      id: true,
+      is_paid: true,
+    });
   }
 }

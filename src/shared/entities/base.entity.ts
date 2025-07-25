@@ -4,7 +4,11 @@ export abstract class BaseMemberEntity {
   @CreateDateColumn({ default: () => "CURRENT_TIMESTAMP" })
   created_at: Date;
 
-  @UpdateDateColumn({ default: () => "CURRENT_TIMESTAMP" })
+  @UpdateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    name: "updated_at",
+  })
   updated_at: Date;
 
   @DeleteDateColumn({ nullable: true })

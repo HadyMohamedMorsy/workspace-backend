@@ -89,9 +89,13 @@ export class DahboredService {
   async getAllRevenueToday(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -106,9 +110,20 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
-          status: ReservationStatus.COMPLETE,
+          is_paid: true,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -129,13 +144,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -144,8 +182,20 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -200,9 +250,13 @@ export class DahboredService {
     // Calculate net revenue with proper null handling
     const totalRevenue =
       (+dealsNet?.net || 0) +
+      (+dealsDeposites?.net || 0) +
       (+reservationRoomNet?.net || 0) +
+      (+reservationRoomDeposites?.net || 0) +
       (+packagesNet?.net || 0) +
+      (+packagesDeposites?.net || 0) +
       (+membershipNet?.net || 0) +
+      (+membershipDeposites?.net || 0) +
       (+sharedRevenue || 0) +
       (+deskAreaRevenue || 0) +
       (+orderPaid || 0) +
@@ -216,9 +270,13 @@ export class DahboredService {
       total: totalRevenue,
       details: {
         dealsRevenue: +dealsNet?.net || 0,
+        dealsDeposites: +dealsDeposites?.net || 0,
         reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        reservationRoomDeposites: +reservationRoomDeposites?.net || 0,
         packagesRevenue: +packagesNet?.net || 0,
+        packagesDeposites: +packagesDeposites?.net || 0,
         membershipRevenue: +membershipNet?.net || 0,
+        membershipDeposites: +membershipDeposites?.net || 0,
         sharedRevenue,
         deskAreaRevenue,
         orderPaid,
@@ -234,9 +292,13 @@ export class DahboredService {
   async getAllRevenueTodayVisa(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -249,8 +311,19 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -271,13 +344,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -286,8 +382,20 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -332,9 +440,13 @@ export class DahboredService {
     // Calculate net revenue with proper null handling
     const totalRevenue =
       (+dealsNet?.net || 0) +
+      (+dealsDeposites?.net || 0) +
       (+reservationRoomNet?.net || 0) +
+      (+reservationRoomDeposites?.net || 0) +
       (+packagesNet?.net || 0) +
+      (+packagesDeposites?.net || 0) +
       (+membershipNet?.net || 0) +
+      (+membershipDeposites?.net || 0) +
       (sharedRevenue || 0) +
       (deskAreaRevenue || 0) +
       (orderPaid || 0) +
@@ -345,9 +457,13 @@ export class DahboredService {
       total: totalRevenue,
       details: {
         dealsRevenue: +dealsNet?.net || 0,
+        dealsDeposites: +dealsDeposites?.net || 0,
         reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        reservationRoomDeposites: +reservationRoomDeposites?.net || 0,
         packagesRevenue: +packagesNet?.net || 0,
+        packagesDeposites: +packagesDeposites?.net || 0,
         membershipRevenue: +membershipNet?.net || 0,
+        membershipDeposites: +membershipDeposites?.net || 0,
         sharedRevenue,
         deskAreaRevenue,
         orderPaid,
@@ -361,9 +477,13 @@ export class DahboredService {
   async getAllRevenueTodayVodafoneCash(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -376,8 +496,20 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -398,13 +530,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -413,12 +568,23 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
-      // Rest of the queries (Shared, Desk Area, Deposites, Orders, etc.)
+      // Membership deposits
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.VodafoneCach,
@@ -459,9 +625,13 @@ export class DahboredService {
     // Calculate net revenue with proper null handling
     const totalRevenue =
       (+dealsNet?.net || 0) +
+      (+dealsDeposites?.net || 0) +
       (+reservationRoomNet?.net || 0) +
+      (+reservationRoomDeposites?.net || 0) +
       (+packagesNet?.net || 0) +
+      (+packagesDeposites?.net || 0) +
       (+membershipNet?.net || 0) +
+      (+membershipDeposites?.net || 0) +
       (sharedRevenue || 0) +
       (deskAreaRevenue || 0) +
       (orderPaid || 0) +
@@ -473,9 +643,13 @@ export class DahboredService {
       total: totalRevenue,
       details: {
         dealsRevenue: +dealsNet?.net || 0,
+        dealsDeposites: +dealsDeposites?.net || 0,
         reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        reservationRoomDeposites: +reservationRoomDeposites?.net || 0,
         packagesRevenue: +packagesNet?.net || 0,
+        packagesDeposites: +packagesDeposites?.net || 0,
         membershipRevenue: +membershipNet?.net || 0,
+        membershipDeposites: +membershipDeposites?.net || 0,
         sharedRevenue,
         deskAreaRevenue,
         orderPaid,
@@ -489,9 +663,13 @@ export class DahboredService {
   async getAllRevenueTodayInstapay(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -504,8 +682,20 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -526,13 +716,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -541,8 +754,20 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -587,9 +812,13 @@ export class DahboredService {
     // Calculate net revenue with proper null handling
     const totalRevenue =
       (+dealsNet?.net || 0) +
+      (+dealsDeposites?.net || 0) +
       (+reservationRoomNet?.net || 0) +
+      (+reservationRoomDeposites?.net || 0) +
       (+packagesNet?.net || 0) +
+      (+packagesDeposites?.net || 0) +
       (+membershipNet?.net || 0) +
+      (+membershipDeposites?.net || 0) +
       (sharedRevenue || 0) +
       (deskAreaRevenue || 0) +
       (orderPaid || 0) +
@@ -600,9 +829,13 @@ export class DahboredService {
       total: totalRevenue,
       details: {
         dealsRevenue: +dealsNet?.net || 0,
+        dealsDeposites: +dealsDeposites?.net || 0,
         reservationRoomRevenue: +reservationRoomNet?.net || 0,
+        reservationRoomDeposites: +reservationRoomDeposites?.net || 0,
         packagesRevenue: +packagesNet?.net || 0,
+        packagesDeposites: +packagesDeposites?.net || 0,
         membershipRevenue: +membershipNet?.net || 0,
+        membershipDeposites: +membershipDeposites?.net || 0,
         sharedRevenue,
         deskAreaRevenue,
         orderPaid,
@@ -1680,9 +1913,13 @@ export class DahboredService {
   async getAllRevenueTodayAllPaymentMethods(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -1697,7 +1934,18 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
-          created_at: Between(filter.start_date, filter.end_date),
+          is_paid: true,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits - all payment methods
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -1717,12 +1965,33 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits - all payment methods
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at - all payment methods
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
-          created_at: Between(filter.start_date, filter.end_date),
+          is_paid: true,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits - all payment methods
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -1731,7 +2000,18 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
-          created_at: Between(filter.start_date, filter.end_date),
+          is_paid: true,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits - all payment methods
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -1781,9 +2061,13 @@ export class DahboredService {
     ]);
 
     const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const dealsDepositesValue = parseFloat(dealsDeposites?.net || "0");
     const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const reservationRoomDepositesValue = parseFloat(reservationRoomDeposites?.net || "0");
     const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const packagesDepositesValue = parseFloat(packagesDeposites?.net || "0");
     const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const membershipDepositesValue = parseFloat(membershipDeposites?.net || "0");
     const sharedRevenueValue = sharedRevenue || 0;
     const deskAreaRevenueValue = deskAreaRevenue || 0;
     const orderPaidValue = orderPaid || 0;
@@ -1795,9 +2079,13 @@ export class DahboredService {
 
     const total =
       dealsRevenue +
+      dealsDepositesValue +
       reservationRoomRevenue +
+      reservationRoomDepositesValue +
       packagesRevenue +
+      packagesDepositesValue +
       membershipRevenue +
+      membershipDepositesValue +
       sharedRevenueValue +
       deskAreaRevenueValue +
       revenueChildSumValue +
@@ -1811,9 +2099,13 @@ export class DahboredService {
       total,
       details: {
         dealsRevenue,
+        dealsDeposites: dealsDepositesValue,
         reservationRoomRevenue,
+        reservationRoomDeposites: reservationRoomDepositesValue,
         packagesRevenue,
+        packagesDeposites: packagesDepositesValue,
         membershipRevenue,
+        membershipDeposites: membershipDepositesValue,
         sharedRevenue: sharedRevenueValue,
         deskAreaRevenue: deskAreaRevenueValue,
         orderPaid: orderPaidValue,
@@ -1829,9 +2121,13 @@ export class DahboredService {
   async getAllRevenueTodayAllPaymentMethodsCash(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -1846,8 +2142,20 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits - Cash payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -1868,13 +2176,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits - Cash payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at - Cash payment method
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits - Cash payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -1883,8 +2214,20 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits - Cash payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Cach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -1940,9 +2283,13 @@ export class DahboredService {
     ]);
 
     const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const dealsDepositesValue = parseFloat(dealsDeposites?.net || "0");
     const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const reservationRoomDepositesValue = parseFloat(reservationRoomDeposites?.net || "0");
     const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const packagesDepositesValue = parseFloat(packagesDeposites?.net || "0");
     const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const membershipDepositesValue = parseFloat(membershipDeposites?.net || "0");
     const sharedRevenueValue = sharedRevenue || 0;
     const deskAreaRevenueValue = deskAreaRevenue || 0;
     const orderPaidValue = orderPaid || 0;
@@ -1954,9 +2301,13 @@ export class DahboredService {
 
     const total =
       dealsRevenue +
+      dealsDepositesValue +
       reservationRoomRevenue +
+      reservationRoomDepositesValue +
       packagesRevenue +
+      packagesDepositesValue +
       membershipRevenue +
+      membershipDepositesValue +
       sharedRevenueValue +
       deskAreaRevenueValue +
       revenueChildSumValue +
@@ -1970,9 +2321,13 @@ export class DahboredService {
       total,
       details: {
         dealsRevenue,
+        dealsDeposites: dealsDepositesValue,
         reservationRoomRevenue,
+        reservationRoomDeposites: reservationRoomDepositesValue,
         packagesRevenue,
+        packagesDeposites: packagesDepositesValue,
         membershipRevenue,
+        membershipDeposites: membershipDepositesValue,
         sharedRevenue: sharedRevenueValue,
         deskAreaRevenue: deskAreaRevenueValue,
         orderPaid: orderPaidValue,
@@ -1988,9 +2343,13 @@ export class DahboredService {
   async getAllRevenueTodayAllPaymentMethodsInstapay(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -2005,8 +2364,20 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits - Instapay payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2027,13 +2398,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits - Instapay payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at - Instapay payment method
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits - Instapay payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2042,8 +2436,20 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits - Instapay payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Instapay,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2099,9 +2505,13 @@ export class DahboredService {
     ]);
 
     const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const dealsDepositesValue = parseFloat(dealsDeposites?.net || "0");
     const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const reservationRoomDepositesValue = parseFloat(reservationRoomDeposites?.net || "0");
     const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const packagesDepositesValue = parseFloat(packagesDeposites?.net || "0");
     const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const membershipDepositesValue = parseFloat(membershipDeposites?.net || "0");
     const sharedRevenueValue = sharedRevenue || 0;
     const deskAreaRevenueValue = deskAreaRevenue || 0;
     const orderPaidValue = orderPaid || 0;
@@ -2113,9 +2523,13 @@ export class DahboredService {
 
     const total =
       dealsRevenue +
+      dealsDepositesValue +
       reservationRoomRevenue +
+      reservationRoomDepositesValue +
       packagesRevenue +
+      packagesDepositesValue +
       membershipRevenue +
+      membershipDepositesValue +
       sharedRevenueValue +
       deskAreaRevenueValue +
       revenueChildSumValue +
@@ -2129,9 +2543,13 @@ export class DahboredService {
       total,
       details: {
         dealsRevenue,
+        dealsDeposites: dealsDepositesValue,
         reservationRoomRevenue,
+        reservationRoomDeposites: reservationRoomDepositesValue,
         packagesRevenue,
+        packagesDeposites: packagesDepositesValue,
         membershipRevenue,
+        membershipDeposites: membershipDepositesValue,
         sharedRevenue: sharedRevenueValue,
         deskAreaRevenue: deskAreaRevenueValue,
         orderPaid: orderPaidValue,
@@ -2147,9 +2565,13 @@ export class DahboredService {
   async getAllRevenueTodayAllPaymentMethodsVodafoneCash(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -2164,8 +2586,20 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits - Vodafone Cash payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2186,13 +2620,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits - Vodafone Cash payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at - Vodafone Cash payment method
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits - Vodafone Cash payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2201,8 +2658,20 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits - Vodafone Cash payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.VodafoneCach,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2258,9 +2727,13 @@ export class DahboredService {
     ]);
 
     const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const dealsDepositesValue = parseFloat(dealsDeposites?.net || "0");
     const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const reservationRoomDepositesValue = parseFloat(reservationRoomDeposites?.net || "0");
     const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const packagesDepositesValue = parseFloat(packagesDeposites?.net || "0");
     const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const membershipDepositesValue = parseFloat(membershipDeposites?.net || "0");
     const sharedRevenueValue = sharedRevenue || 0;
     const deskAreaRevenueValue = deskAreaRevenue || 0;
     const orderPaidValue = orderPaid || 0;
@@ -2272,9 +2745,13 @@ export class DahboredService {
 
     const total =
       dealsRevenue +
+      dealsDepositesValue +
       reservationRoomRevenue +
+      reservationRoomDepositesValue +
       packagesRevenue +
+      packagesDepositesValue +
       membershipRevenue +
+      membershipDepositesValue +
       sharedRevenueValue +
       deskAreaRevenueValue +
       revenueChildSumValue +
@@ -2288,9 +2765,13 @@ export class DahboredService {
       total,
       details: {
         dealsRevenue,
+        dealsDeposites: dealsDepositesValue,
         reservationRoomRevenue,
+        reservationRoomDeposites: reservationRoomDepositesValue,
         packagesRevenue,
+        packagesDeposites: packagesDepositesValue,
         membershipRevenue,
+        membershipDeposites: membershipDepositesValue,
         sharedRevenue: sharedRevenueValue,
         deskAreaRevenue: deskAreaRevenueValue,
         orderPaid: orderPaidValue,
@@ -2306,9 +2787,13 @@ export class DahboredService {
   async getAllRevenueTodayAllPaymentMethodsVisa(filter: FiltersDashboredDto) {
     const [
       dealsNet,
+      dealsDeposites,
       reservationRoomNet,
+      reservationRoomDeposites,
       packagesNet,
+      packagesDeposites,
       membershipNet,
+      membershipDeposites,
       sharedRevenue,
       deskAreaRevenue,
       orderPaid,
@@ -2323,8 +2808,20 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(deal.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Deals deposits - Visa payment method
+      this.dealsRepository
+        .createQueryBuilder("deal")
+        .select(`SUM(deal.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2345,13 +2842,36 @@ export class DahboredService {
         )
         .getRawOne(),
 
+      // Reservation Room deposits - Visa payment method
+      this.reservationRoomRepository
+        .createQueryBuilder("reservation")
+        .select(`SUM(reservation.deposites)`, "net")
+        .where({
+          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
       // Packages with deposit subtraction using updated_at - Visa payment method
       this.packagesRepository
         .createQueryBuilder("package")
         .select(`SUM(package.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Packages deposits - Visa payment method
+      this.packagesRepository
+        .createQueryBuilder("package")
+        .select(`SUM(package.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2360,8 +2880,20 @@ export class DahboredService {
         .createQueryBuilder("membership")
         .select(`SUM(membership.total_price)`, "net")
         .where({
+          is_paid: true,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(filter.start_date, filter.end_date),
+        })
+        .getRawOne(),
+
+      // Membership deposits - Visa payment method
+      this.membershipRepository
+        .createQueryBuilder("membership")
+        .select(`SUM(membership.deposites)`, "net")
+        .where({
+          is_paid: false,
+          payment_method: PaymentMethod.Visa,
+          updated_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
 
@@ -2417,9 +2949,13 @@ export class DahboredService {
     ]);
 
     const dealsRevenue = parseFloat(dealsNet?.net || "0");
+    const dealsDepositesValue = parseFloat(dealsDeposites?.net || "0");
     const reservationRoomRevenue = parseFloat(reservationRoomNet?.net || "0");
+    const reservationRoomDepositesValue = parseFloat(reservationRoomDeposites?.net || "0");
     const packagesRevenue = parseFloat(packagesNet?.net || "0");
+    const packagesDepositesValue = parseFloat(packagesDeposites?.net || "0");
     const membershipRevenue = parseFloat(membershipNet?.net || "0");
+    const membershipDepositesValue = parseFloat(membershipDeposites?.net || "0");
     const sharedRevenueValue = sharedRevenue || 0;
     const deskAreaRevenueValue = deskAreaRevenue || 0;
     const orderPaidValue = orderPaid || 0;
@@ -2431,9 +2967,13 @@ export class DahboredService {
 
     const total =
       dealsRevenue +
+      dealsDepositesValue +
       reservationRoomRevenue +
+      reservationRoomDepositesValue +
       packagesRevenue +
+      packagesDepositesValue +
       membershipRevenue +
+      membershipDepositesValue +
       sharedRevenueValue +
       deskAreaRevenueValue +
       revenueChildSumValue +
@@ -2447,9 +2987,13 @@ export class DahboredService {
       total,
       details: {
         dealsRevenue,
+        dealsDeposites: dealsDepositesValue,
         reservationRoomRevenue,
+        reservationRoomDeposites: reservationRoomDepositesValue,
         packagesRevenue,
+        packagesDeposites: packagesDepositesValue,
         membershipRevenue,
+        membershipDeposites: membershipDepositesValue,
         sharedRevenue: sharedRevenueValue,
         deskAreaRevenue: deskAreaRevenueValue,
         orderPaid: orderPaidValue,

@@ -54,6 +54,12 @@ export class Deals extends BaseMemberEntity {
   })
   payment_method: PaymentMethod;
 
+  @Column({ default: false, nullable: true })
+  is_paid: boolean;
+
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
+  deposites: number;
+
   @ManyToOne(() => Individual, individual => individual.deals, {
     onDelete: "CASCADE",
   })

@@ -42,7 +42,7 @@ export class CreateAssignesMembershipDto {
   @IsInt()
   @Type(() => Number)
   @IsOptional()
-  start_deposite?: number;
+  deposites: number;
 
   @IsOptional()
   @Type(() => Number)

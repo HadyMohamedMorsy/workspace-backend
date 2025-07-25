@@ -30,8 +30,6 @@ export class ReservationRoomQueryService {
       .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
         [relationConfig.filterField]: filterData[relationConfig.filterField],
       })
-      .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"])
       .leftJoin("e.room", "esroom")
       .addSelect(["esroom.id", "esroom.name", "esroom.price"]);
 
@@ -146,8 +144,6 @@ export class ReservationRoomQueryService {
     queryBuilder
       .leftJoin("reservation.room", "room")
       .addSelect(["room.id", "room.name", "room.price"])
-      .leftJoin("reservation.deposites", "deposites")
-      .addSelect(["deposites.id", "deposites.total_price", "deposites.status"])
       .leftJoin("reservation.createdBy", "createdBy")
       .addSelect(["createdBy.id", "createdBy.firstName", "createdBy.lastName"]);
 

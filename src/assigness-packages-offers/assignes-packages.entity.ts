@@ -37,6 +37,9 @@ export class AssignesPackages extends BaseMemberEntity {
   })
   packages: OfferPackages;
 
+  @Column({ default: false, nullable: true })
+  is_paid: boolean;
+
   @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages)
   reservationRooms: ReservationRoom;
 
@@ -70,6 +73,9 @@ export class AssignesPackages extends BaseMemberEntity {
     default: PaymentMethod.Cach,
   })
   payment_method: PaymentMethod;
+
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
+  deposites: number;
 
   @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;

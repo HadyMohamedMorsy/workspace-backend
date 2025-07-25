@@ -53,7 +53,7 @@ export class CreateAssignesPackageDto {
 
   @IsOptional()
   @Type(() => Number)
-  start_deposite?: number;
+  deposites?: number;
 
   @IsInt()
   @Type(() => Number)

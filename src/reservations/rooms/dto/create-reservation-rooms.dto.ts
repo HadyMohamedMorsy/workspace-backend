@@ -68,7 +68,7 @@ export class CreateReservationRoomDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  start_deposite: number;
+  deposites?: number;
 
   @IsOptional()
   @IsNumber()

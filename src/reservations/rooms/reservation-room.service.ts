@@ -34,8 +34,6 @@ export class ReservationRoomService
       .addSelect(["es.id", "es.name", "es.unviresty"])
       .leftJoin("e.room", "er")
       .addSelect(["er.id", "er.name", "er.price"])
-      .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id", "esdep.status", "esdep.total_price"])
       .leftJoin("e.assignGeneralOffer", "ego")
       .addSelect(["ego.id"])
       .leftJoin("ego.generalOffer", "egog")

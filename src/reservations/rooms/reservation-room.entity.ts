@@ -95,6 +95,9 @@ export class ReservationRoom extends BaseMemberEntity {
   @ManyToOne(() => Room, room => room.reservationRoom)
   room: Room;
 
+  @Column({ default: false, nullable: true })
+  is_paid: boolean;
+
   @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
 
@@ -111,6 +114,9 @@ export class ReservationRoom extends BaseMemberEntity {
     default: PaymentMethod.Cach,
   })
   payment_method: PaymentMethod;
+
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
+  deposites: number;
 
   @ManyToOne(() => User, { onDelete: "CASCADE" })
   createdBy: User;

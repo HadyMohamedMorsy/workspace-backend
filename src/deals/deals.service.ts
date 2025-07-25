@@ -30,8 +30,6 @@ export class DealsService
       .addSelect(["ess.id"])
       .leftJoin("ess.generalOffer", "eg")
       .addSelect(["eg.id", "eg.type_discount", "eg.discount"])
-      .leftJoin("e.deposites", "esdep")
-      .addSelect(["esdep.id", "esdep.total_price", "esdep.status"])
       .leftJoin("e.individual", "ei")
       .addSelect(["ei.id", "ei.name", "ei.whatsApp", "ei.number"])
       .leftJoin("e.company", "eco")

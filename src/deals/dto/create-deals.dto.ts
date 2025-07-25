@@ -46,7 +46,7 @@ export class CreateDealsDto {
 
   @IsOptional()
   @Type(() => Number)
-  start_deposite?: number;
+  deposites?: number;
 
   @IsNumber()
   @Type(() => Number)

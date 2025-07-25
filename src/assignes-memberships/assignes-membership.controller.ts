@@ -30,8 +30,10 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
       used: true,
       remaining: true,
       total_used: true,
+      deposites: true,
       payment_method: true,
       status: true,
+      is_paid: true,
     };
   }
 
@@ -47,10 +49,6 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
       },
       memeberShip: {
         id: true,
-      },
-      deposites: {
-        id: true,
-        total_price: true,
       },
       shared: {
         id: true,
@@ -138,6 +136,7 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
         memeberShip: req["memberShip"],
         total_price: req["totalPrice"],
         payment_method: create.payment_method,
+        deposites: create.deposites,
         used: 0,
         individual: req["individual"],
         company: req["company"],
@@ -168,6 +167,7 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
         createdBy: req["createdBy"],
         assignGeneralOffer: req["assignGeneralOffer"],
         memeberShip: req["memberShip"],
+        deposites: update.deposites,
         total_price: req["totalPrice"],
         payment_method: update.payment_method,
         individual: req["individual"],
@@ -215,6 +215,45 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
     return this.service.changeStatus(update.id, update.payment_method, "payment_method", {
       id: true,
       payment_method: true,
+    });
+  }
+
+  @Patch("/change-deposits")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public async changeDeposits(@Body() update: { id: number; deposites: number }) {
+    const existingRecord = await this.service.findOne(update.id, {
+      id: true,
+      deposites: true,
+    });
+
+    return this.service.update(
+      {
+        id: update.id,
+        deposites: (+existingRecord.deposites || 0) + +update.deposites,
+      },
+      {
+        id: true,
+        deposites: true,
+      },
+    );
+  }
+
+  @Patch("/change-is-paid")
+  @Permissions([
+    {
+      resource: Resource.AssignesMembership,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeIsPaid(@Body() update: { id: number; is_paid: boolean }) {
+    return this.service.changeStatus(update.id, update.is_paid, "is_paid", {
+      id: true,
+      is_paid: true,
     });
   }
 }

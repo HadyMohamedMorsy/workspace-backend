@@ -31,7 +31,6 @@ export enum Resource {
   OfferWorkingSpace = "offer-memeber-ship",
   OfferPackages = "offer-packages",
   Deals = "deals",
-  Deposite = "deposite",
   Task = "tasks",
   Deskarea = "deskarea",
   Shared = "shared",
@@ -122,12 +121,6 @@ export enum ReservationStatus {
   ACTIVE = "active",
   PENDING = "pending",
   CANCELLED = "cancelled",
-  COMPLETE = "complete",
-}
-
-export enum DepositeStatus {
-  CANCELLED = "cancelled",
-  ACTIVE = "active",
   COMPLETE = "complete",
 }
 

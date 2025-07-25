@@ -23,6 +23,8 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
       status: true,
       total_used: true,
       used: true,
+      deposites: true,
+      is_paid: true,
     };
   }
 
@@ -41,10 +43,6 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
         name: true,
         price: true,
         hours: true,
-      },
-      deposites: {
-        id: true,
-        total_price: true,
       },
       reservationRooms: {
         id: true,
@@ -134,6 +132,7 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
         total_used: +req["package"].hours,
         start_date: create.start_date,
         end_date: create.end_date,
+        deposites: create.deposites,
       } as CreateAssignesPackageDto,
       this.selectOptions(),
       this.getRelationOptions(),
@@ -162,6 +161,7 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
         company: req["company"],
         studentActivity: req["studentActivity"],
         total_price: req["totalPrice"],
+        deposites: update.deposites,
       },
       this.selectOptions(),
       this.getRelationOptions(),
@@ -205,5 +205,44 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
   ])
   async delete(@Body() id: number) {
     return this.service.delete(id);
+  }
+
+  @Patch("/change-deposits")
+  @Permissions([
+    {
+      resource: Resource.AssignesPackage,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public async changeDeposits(@Body() update: { id: number; deposites: number }) {
+    const existingRecord = await this.service.findOne(update.id, {
+      id: true,
+      deposites: true,
+    });
+
+    return this.service.update(
+      {
+        id: update.id,
+        deposites: (+existingRecord.deposites || 0) + +update.deposites,
+      },
+      {
+        id: true,
+        deposites: true,
+      },
+    );
+  }
+
+  @Patch("/change-is-paid")
+  @Permissions([
+    {
+      resource: Resource.AssignesPackage,
+      actions: [Permission.UPDATE],
+    },
+  ])
+  public changeIsPaid(@Body() update: { id: number; is_paid: boolean }) {
+    return this.service.changeStatus(update.id, update.is_paid, "is_paid", {
+      id: true,
+      is_paid: true,
+    });
   }
 }

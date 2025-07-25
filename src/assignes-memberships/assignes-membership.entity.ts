@@ -38,6 +38,9 @@ export class AssignesMembership extends BaseMemberEntity {
   })
   memeberShip: CoWorkingSpace;
 
+  @Column({ default: false, nullable: true })
+  is_paid: boolean;
+
   @OneToMany(() => Deskarea, deskarea => deskarea.assignessMemebership)
   deskarea: Deskarea[];
 
@@ -70,6 +73,9 @@ export class AssignesMembership extends BaseMemberEntity {
 
   @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
   total_price: number;
+
+  @Column({ nullable: true, type: "decimal", precision: 10, scale: 2 })
+  deposites: number;
 
   @Column({
     nullable: true,
