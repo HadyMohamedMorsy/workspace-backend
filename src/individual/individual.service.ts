@@ -412,7 +412,12 @@ export class IndividualService
         data: {
           shared: (shared || []).map(item =>
             formatItem(
-              { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
+              {
+                ...item,
+                lastTimeMembership,
+                assign_membership_id: assign_memberships?.[0]?.id,
+                has_setting_special: activeCustomSettings && activeCustomSettings.is_active,
+              },
               "shared",
               activeCustomSettings && activeCustomSettings.is_active
                 ? activeCustomSettings
@@ -423,7 +428,12 @@ export class IndividualService
           ),
           deskarea: (deskarea || []).map(item =>
             formatItem(
-              { ...item, lastTimeMembership, assign_membership_id: assign_memberships?.[0]?.id },
+              {
+                ...item,
+                lastTimeMembership,
+                assign_membership_id: assign_memberships?.[0]?.id,
+                had_: activeCustomSettings && activeCustomSettings.is_active,
+              },
               "deskarea",
               activeCustomSettings && activeCustomSettings.is_active
                 ? activeCustomSettings
@@ -439,6 +449,7 @@ export class IndividualService
               return formatRoom(
                 {
                   ...room,
+                  has_setting_special: activeCustomSettings && activeCustomSettings.is_active,
                   price: customRoomPrice?.value || room.room.price || 0,
                   lastTimeDeal,
                   lastTimePackage,

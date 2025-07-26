@@ -108,7 +108,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
@@ -130,7 +133,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Cach,
@@ -149,7 +155,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -158,7 +163,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
@@ -180,7 +188,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
@@ -309,7 +320,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
@@ -330,7 +344,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Visa,
@@ -349,7 +366,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -358,7 +374,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
@@ -380,7 +399,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
@@ -494,7 +516,10 @@ export class DahboredService {
       // Deals with deposit subtraction
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
@@ -516,7 +541,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.VodafoneCach,
@@ -535,7 +563,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -544,7 +571,10 @@ export class DahboredService {
       // Packages with deposit subtraction
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
@@ -566,7 +596,10 @@ export class DahboredService {
       // Membership with deposit subtraction
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
@@ -680,7 +713,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
@@ -702,7 +738,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Instapay,
@@ -721,7 +760,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -730,7 +768,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
@@ -752,7 +793,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
@@ -1932,7 +1976,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at - all payment methods
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           updated_at: Between(filter.start_date, filter.end_date),
@@ -1952,7 +1999,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at - all payment methods
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
         })
@@ -1970,7 +2020,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           created_at: Between(filter.start_date, filter.end_date),
         })
         .getRawOne(),
@@ -1978,7 +2027,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at - all payment methods
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           updated_at: Between(filter.start_date, filter.end_date),
@@ -1998,7 +2050,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at - all payment methods
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           updated_at: Between(filter.start_date, filter.end_date),
@@ -2140,7 +2195,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at - Cash payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
@@ -2162,7 +2220,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at - Cash payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Cach,
@@ -2181,7 +2242,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -2190,7 +2250,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at - Cash payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
@@ -2212,7 +2275,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at - Cash payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
@@ -2362,7 +2428,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at - Instapay payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
@@ -2384,7 +2453,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at - Instapay payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Instapay,
@@ -2403,7 +2475,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -2412,7 +2483,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at - Instapay payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
@@ -2434,7 +2508,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at - Instapay payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
@@ -2584,7 +2661,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at - Vodafone Cash payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
@@ -2606,7 +2686,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at - Vodafone Cash payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.VodafoneCach,
@@ -2625,7 +2708,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -2634,7 +2716,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at - Vodafone Cash payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
@@ -2656,7 +2741,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at - Vodafone Cash payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
@@ -2806,7 +2894,10 @@ export class DahboredService {
       // Deals with deposit subtraction using updated_at - Visa payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.total_price - deal.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
@@ -2828,7 +2919,10 @@ export class DahboredService {
       // Reservation Room with deposit subtraction using updated_at - Visa payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.total_price - reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          "net",
+        )
         .where({
           status: ReservationStatus.COMPLETE,
           payment_method: PaymentMethod.Visa,
@@ -2847,7 +2941,6 @@ export class DahboredService {
         .createQueryBuilder("reservation")
         .select(`SUM(reservation.deposites)`, "net")
         .where({
-          status: In([ReservationStatus.PENDING, ReservationStatus.ACTIVE]),
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -2856,7 +2949,10 @@ export class DahboredService {
       // Packages with deposit subtraction using updated_at - Visa payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.total_price - package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
@@ -2878,7 +2974,10 @@ export class DahboredService {
       // Membership with deposit subtraction using updated_at - Visa payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.total_price - membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          "net",
+        )
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,

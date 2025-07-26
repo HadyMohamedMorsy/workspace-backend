@@ -41,31 +41,35 @@ export class InvoiceService {
   private async processOfferIfExists(
     offer_id: number | undefined,
     customerInfo?: { customer_id: number; customer_type: string; customer: any; createdBy: any },
+    reservationEntity?: { type: "shared" | "deskarea" | "reservationRooms"; entity: any },
   ) {
-    if (!offer_id || !customerInfo) return;
+    if (!offer_id || !customerInfo) return null;
 
-    // Find the general offer
     const generalOffer = await this.generalOfferService.findOne(offer_id);
     if (generalOffer) {
-      // Determine customer type and create AssignGeneralOffer
       const assignGeneralOfferData: any = {
         generalOffer: generalOffer,
         createdBy: customerInfo.createdBy,
       };
 
-      // Add the appropriate customer based on customer_type
       assignGeneralOfferData[customerInfo.customer_type] = customerInfo.customer;
+      assignGeneralOfferData[reservationEntity.type] = reservationEntity.entity;
 
-      // Create AssignGeneralOffer
-      await this.assignGeneralOfferService.create(assignGeneralOfferData);
+      return await this.assignGeneralOfferService.create(assignGeneralOfferData);
     }
   }
 
   async sendInvoice(
     invoice: Invoice,
-    customerInfo?: { customer_id: number; customer_type: string; customer: any; createdBy: any },
+    customerInfo?: {
+      customer_id: number;
+      customer_type: string;
+      customer: any;
+      createdBy: any;
+      hasSettingSpecial: boolean;
+    },
+    settings?: any,
   ) {
-    const settings = await this.generalSettingsService.findAll({});
     // Handle orders
     if (invoice.order?.length) {
       await Promise.all(
@@ -84,7 +88,14 @@ export class InvoiceService {
       await Promise.all(
         invoice.shared.map(async shared => {
           // Process offer if exists
-          await this.processOfferIfExists(shared.offer_id, customerInfo);
+          const assignGeneralOffer = await this.processOfferIfExists(
+            shared.offer_id,
+            customerInfo,
+            {
+              type: "shared",
+              entity: shared,
+            },
+          );
 
           if (shared.last_time_membership) {
             await this.assignesMembershipService.update({
@@ -125,6 +136,7 @@ export class InvoiceService {
             total_time: shared.total_time,
             end_hour: shared.end_hour,
             end_minute: shared.end_minute,
+            assignGeneralOffer: assignGeneralOffer,
             total_price:
               shared.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
             is_full_day: shared.is_full_day || shared.total_time > +settings.full_day_hours,
@@ -139,7 +151,14 @@ export class InvoiceService {
       await Promise.all(
         invoice.deskarea.map(async deskarea => {
           // Process offer if exists
-          await this.processOfferIfExists(deskarea.offer_id, customerInfo);
+          const assignGeneralOffer = await this.processOfferIfExists(
+            deskarea.offer_id,
+            customerInfo,
+            {
+              type: "deskarea",
+              entity: deskarea,
+            },
+          );
 
           if (deskarea.last_time_membership) {
             await this.assignesMembershipService.update({
@@ -179,6 +198,7 @@ export class InvoiceService {
             total_time: deskarea.total_time,
             end_hour: deskarea.end_hour,
             end_minute: deskarea.end_minute,
+            assignGeneralOffer: assignGeneralOffer,
             payment_method: deskarea.payment_method as PaymentMethod,
             total_price:
               deskarea.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
@@ -193,7 +213,10 @@ export class InvoiceService {
       await Promise.all(
         invoice.room.map(async room => {
           // Process offer if exists
-          await this.processOfferIfExists(room.offer_id, customerInfo);
+          const assignGeneralOffer = await this.processOfferIfExists(room.offer_id, customerInfo, {
+            type: "reservationRooms",
+            entity: room,
+          });
 
           if (room.last_time_package) {
             await this.assignesPackagesService.update({
@@ -231,6 +254,7 @@ export class InvoiceService {
             reservation_end_hour: room.end_hour,
             reservation_end_minute: room.end_minute,
             reservation_end_time: room.end_time as TimeOfDay,
+            assignGeneralOffer: assignGeneralOffer,
             total_price:
               room.status === ReservationStatus.CANCELLED ? 0 : finalPrice < 0 ? 0 : finalPrice,
           });

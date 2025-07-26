@@ -12,6 +12,7 @@ export interface Invoice {
   customer_id?: number;
   customer_type?: string;
   total_price?: number;
+  hasSettingSpecial?: boolean;
 }
 
 export interface Deskarea {

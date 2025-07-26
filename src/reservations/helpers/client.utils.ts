@@ -175,6 +175,7 @@ export function formatItem(
 
   return {
     ...data,
+    has_setting_special: item.has_setting_special || false,
     total_price: isMembership
       ? 0
       : getPriceCoWorkingSpace(
@@ -200,6 +201,8 @@ export function formatRoom(room: any, hasPackage: boolean, hasDeal: boolean) {
   const data = formatRoomData({ ...room, type: "room", offer: formatOfferData(room) }, +room.price);
   return {
     ...data,
+    has_setting_special: room.has_setting_special || false,
+    deposites: +room.deposites,
     last_time_package: data.lastTimePackage,
     last_time_deal: data.lastTimeDeal,
     total_price: hasPackage || hasDeal ? 0 : +data.total_price,
@@ -271,6 +274,7 @@ export const selectingInvoice = [
   "r.total_price",
   "r.total_time",
   "r.selected_day",
+  "r.deposites",
   "room.id",
   "room.name",
   "room.price",
@@ -283,16 +287,19 @@ export const selectingInvoice = [
   "am.used",
   "am.total_used",
   "am.status",
+  "am.deposites",
   "ms.id",
   "ms.type",
   "assignesPackages.id",
   "assignesPackages.used",
   "assignesPackages.total_used",
   "assignesPackages.status",
+  "assignesPackages.deposites",
   "deals.id",
   "deals.used",
   "deals.total_used",
   "deals.status",
+  "deals.deposites",
   "cs.id",
   "cs.price_shared",
   "cs.price_deskarea",

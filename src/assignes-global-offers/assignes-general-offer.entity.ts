@@ -43,7 +43,7 @@ export class AssignGeneralOffer extends BaseMemberEntity {
   @OneToMany(() => Deskarea, deskarea => deskarea.assignGeneralOffer)
   deskarea: Deskarea;
 
-  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignesPackages)
+  @OneToMany(() => ReservationRoom, reservationRoom => reservationRoom.assignGeneralOffer)
   reservationRooms: ReservationRoom;
 
   @OneToMany(() => Deals, deal => deal.assignGeneralOffer)

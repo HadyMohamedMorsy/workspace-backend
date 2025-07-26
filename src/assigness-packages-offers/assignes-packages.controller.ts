@@ -215,15 +215,10 @@ export class AssignesPackageController implements SelectOptions, RelationOptions
     },
   ])
   public async changeDeposits(@Body() update: { id: number; deposites: number }) {
-    const existingRecord = await this.service.findOne(update.id, {
-      id: true,
-      deposites: true,
-    });
-
     return this.service.update(
       {
         id: update.id,
-        deposites: (+existingRecord.deposites || 0) + +update.deposites,
+        deposites: +update.deposites,
       },
       {
         id: true,

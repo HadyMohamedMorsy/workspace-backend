@@ -3,6 +3,7 @@ import { AssignGeneralOfferModule } from "src/assignes-global-offers/assignes-ge
 import { AssignesMembershipModule } from "src/assignes-memberships/assignes-membership.module";
 import { AssignesPackagesModule } from "src/assigness-packages-offers/assignes-packages.module";
 import { CompanyModule } from "src/companies/company.module";
+import { CustomSettingsModule } from "src/custom-settings/custom-settings.module";
 import { DealsModule } from "src/deals/deals.module";
 import { GeneralOfferModule } from "src/general-offer/generalOffer.module";
 import { GeneralSettingsModule } from "src/general-settings/settings.module";
@@ -28,6 +29,7 @@ import { InvoiceService } from "./invoice.service";
     DeskareaModule,
     ReservationRoomModule,
     GeneralSettingsModule,
+    CustomSettingsModule,
     AssignGeneralOfferModule,
     AssignesPackagesModule,
     DealsModule,
