@@ -109,7 +109,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -134,7 +134,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -167,7 +167,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -195,7 +195,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -330,7 +330,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -354,7 +354,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -387,7 +387,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -415,7 +415,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -535,7 +535,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -560,7 +560,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -593,7 +593,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -621,7 +621,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -741,7 +741,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -766,7 +766,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -799,7 +799,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -827,7 +827,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2013,7 +2013,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2036,7 +2036,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2067,7 +2067,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2093,7 +2093,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2241,7 +2241,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2266,7 +2266,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2299,7 +2299,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2327,7 +2327,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2483,7 +2483,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2508,7 +2508,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2541,7 +2541,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2569,7 +2569,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2725,7 +2725,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2750,7 +2750,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2783,7 +2783,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2811,7 +2811,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2967,7 +2967,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN ABS(deal.total_price - deal.deposites) ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2992,7 +2992,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN ABS(reservation.total_price - reservation.deposites) ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -3025,7 +3025,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN ABS(package.total_price - package.deposites) ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -3053,7 +3053,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN ABS(membership.total_price - membership.deposites) ELSE membership.total_price END)`,
           "net",
         )
         .where({
