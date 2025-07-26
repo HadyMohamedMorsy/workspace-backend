@@ -109,7 +109,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -122,7 +122,7 @@ export class DahboredService {
       // Deals deposits
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Cach,
@@ -134,7 +134,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -153,7 +153,10 @@ export class DahboredService {
       // Reservation Room deposits
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
@@ -164,7 +167,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -177,7 +180,10 @@ export class DahboredService {
       // Packages deposits
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Cach,
@@ -189,7 +195,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -202,7 +208,10 @@ export class DahboredService {
       // Membership deposits
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Cach,
@@ -321,7 +330,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -333,7 +342,7 @@ export class DahboredService {
 
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Visa,
@@ -345,7 +354,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -364,7 +373,10 @@ export class DahboredService {
       // Reservation Room deposits
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
@@ -375,7 +387,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -388,7 +400,10 @@ export class DahboredService {
       // Packages deposits
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Visa,
@@ -400,7 +415,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -413,7 +428,10 @@ export class DahboredService {
       // Membership deposits
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Visa,
@@ -517,7 +535,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -530,7 +548,7 @@ export class DahboredService {
       // Deals deposits
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
@@ -542,7 +560,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -561,7 +579,10 @@ export class DahboredService {
       // Reservation Room deposits
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
@@ -572,7 +593,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -585,7 +606,10 @@ export class DahboredService {
       // Packages deposits
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
@@ -597,7 +621,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -610,7 +634,10 @@ export class DahboredService {
       // Membership deposits
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
@@ -714,7 +741,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -727,7 +754,7 @@ export class DahboredService {
       // Deals deposits
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Instapay,
@@ -739,7 +766,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -758,7 +785,10 @@ export class DahboredService {
       // Reservation Room deposits
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
@@ -769,7 +799,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -782,7 +812,10 @@ export class DahboredService {
       // Packages deposits
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Instapay,
@@ -794,7 +827,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -807,7 +840,10 @@ export class DahboredService {
       // Membership deposits
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Instapay,
@@ -1977,7 +2013,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -1989,7 +2025,7 @@ export class DahboredService {
       // Deals deposits - all payment methods
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           created_at: Between(filter.start_date, filter.end_date),
@@ -2000,7 +2036,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2018,7 +2054,10 @@ export class DahboredService {
       // Reservation Room deposits - all payment methods
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           created_at: Between(filter.start_date, filter.end_date),
         })
@@ -2028,7 +2067,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2040,7 +2079,10 @@ export class DahboredService {
       // Packages deposits - all payment methods
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           created_at: Between(filter.start_date, filter.end_date),
@@ -2051,7 +2093,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2063,7 +2105,10 @@ export class DahboredService {
       // Membership deposits - all payment methods
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           created_at: Between(filter.start_date, filter.end_date),
@@ -2196,7 +2241,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2209,7 +2254,7 @@ export class DahboredService {
       // Deals deposits - Cash payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Cach,
@@ -2221,7 +2266,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2240,7 +2285,10 @@ export class DahboredService {
       // Reservation Room deposits - Cash payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.Cach,
           created_at: Between(filter.start_date, filter.end_date),
@@ -2251,7 +2299,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2264,7 +2312,10 @@ export class DahboredService {
       // Packages deposits - Cash payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Cach,
@@ -2276,7 +2327,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2289,7 +2340,10 @@ export class DahboredService {
       // Membership deposits - Cash payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Cach,
@@ -2429,7 +2483,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2442,7 +2496,7 @@ export class DahboredService {
       // Deals deposits - Instapay payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Instapay,
@@ -2454,7 +2508,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2473,7 +2527,10 @@ export class DahboredService {
       // Reservation Room deposits - Instapay payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.Instapay,
           created_at: Between(filter.start_date, filter.end_date),
@@ -2484,7 +2541,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2497,7 +2554,10 @@ export class DahboredService {
       // Packages deposits - Instapay payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Instapay,
@@ -2509,7 +2569,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2522,7 +2582,10 @@ export class DahboredService {
       // Membership deposits - Instapay payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Instapay,
@@ -2662,7 +2725,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2675,7 +2738,7 @@ export class DahboredService {
       // Deals deposits - Vodafone Cash payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
@@ -2687,7 +2750,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2706,7 +2769,10 @@ export class DahboredService {
       // Reservation Room deposits - Vodafone Cash payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.VodafoneCach,
           created_at: Between(filter.start_date, filter.end_date),
@@ -2717,7 +2783,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2730,7 +2796,10 @@ export class DahboredService {
       // Packages deposits - Vodafone Cash payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
@@ -2742,7 +2811,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2755,7 +2824,10 @@ export class DahboredService {
       // Membership deposits - Vodafone Cash payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
@@ -2895,7 +2967,7 @@ export class DahboredService {
       this.dealsRepository
         .createQueryBuilder("deal")
         .select(
-          `SUM(CASE WHEN deal.deposites > 0 THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
+          `SUM(CASE WHEN deal.deposites > 0 AND deal.status != 'cancelled' THEN deal.total_price - deal.deposites ELSE deal.total_price END)`,
           "net",
         )
         .where({
@@ -2908,7 +2980,7 @@ export class DahboredService {
       // Deals deposits - Visa payment method
       this.dealsRepository
         .createQueryBuilder("deal")
-        .select(`SUM(deal.deposites)`, "net")
+        .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Visa,
@@ -2920,7 +2992,7 @@ export class DahboredService {
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
         .select(
-          `SUM(CASE WHEN reservation.deposites > 0 THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
+          `SUM(CASE WHEN reservation.deposites > 0 AND reservation.status != 'cancelled' THEN reservation.total_price - reservation.deposites ELSE reservation.total_price END)`,
           "net",
         )
         .where({
@@ -2939,7 +3011,10 @@ export class DahboredService {
       // Reservation Room deposits - Visa payment method
       this.reservationRoomRepository
         .createQueryBuilder("reservation")
-        .select(`SUM(reservation.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN reservation.status = 'cancelled' THEN 0 ELSE reservation.deposites END)`,
+          "net",
+        )
         .where({
           payment_method: PaymentMethod.Visa,
           created_at: Between(filter.start_date, filter.end_date),
@@ -2950,7 +3025,7 @@ export class DahboredService {
       this.packagesRepository
         .createQueryBuilder("package")
         .select(
-          `SUM(CASE WHEN package.deposites > 0 THEN package.total_price - package.deposites ELSE package.total_price END)`,
+          `SUM(CASE WHEN package.deposites > 0 AND package.status != 'cancelled' THEN package.total_price - package.deposites ELSE package.total_price END)`,
           "net",
         )
         .where({
@@ -2963,7 +3038,10 @@ export class DahboredService {
       // Packages deposits - Visa payment method
       this.packagesRepository
         .createQueryBuilder("package")
-        .select(`SUM(package.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN package.status = 'cancelled' THEN 0 ELSE package.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Visa,
@@ -2975,7 +3053,7 @@ export class DahboredService {
       this.membershipRepository
         .createQueryBuilder("membership")
         .select(
-          `SUM(CASE WHEN membership.deposites > 0 THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
+          `SUM(CASE WHEN membership.deposites > 0 AND membership.status != 'cancelled' THEN membership.total_price - membership.deposites ELSE membership.total_price END)`,
           "net",
         )
         .where({
@@ -2988,7 +3066,10 @@ export class DahboredService {
       // Membership deposits - Visa payment method
       this.membershipRepository
         .createQueryBuilder("membership")
-        .select(`SUM(membership.deposites)`, "net")
+        .select(
+          `SUM(CASE WHEN membership.status = 'cancelled' THEN 0 ELSE membership.deposites END)`,
+          "net",
+        )
         .where({
           is_paid: false,
           payment_method: PaymentMethod.Visa,
