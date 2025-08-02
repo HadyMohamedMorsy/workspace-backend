@@ -193,6 +193,12 @@ export class StudentActivityController implements SelectOptions, RelationOptions
     return this.service.findByUserAll(filterQueryDto);
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllStudentActivity(@Body() filterQueryDto: any) {
+    return this.service.findStudentActivityAll(filterQueryDto);
+  }
+
   @Post("/store")
   @Permissions([
     {

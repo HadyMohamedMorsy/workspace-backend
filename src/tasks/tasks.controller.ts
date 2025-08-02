@@ -60,6 +60,12 @@ export class TaskController implements SelectOptions, RelationOptions {
     return this.service.findAll(filterQueryDto);
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllTasks(@Body() filterQueryDto: any) {
+    return this.service.findTasksAll(filterQueryDto);
+  }
+
   @Post("/user")
   @HttpCode(200)
   @Permissions([

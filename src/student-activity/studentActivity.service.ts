@@ -326,6 +326,12 @@ export class StudentActivityService
     return this.response(filteredRecord, totalRecords);
   }
 
+  async findStudentActivityAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async checkInvoice(id: string) {
     try {
       const queryBuilder = this.repository.createQueryBuilder("e");

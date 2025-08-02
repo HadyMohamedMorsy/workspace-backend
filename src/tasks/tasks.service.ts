@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as moment from "moment-timezone";
 import { BaseService } from "src/shared/base/base";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { ICrudService } from "src/shared/interface/crud-service.interface";
@@ -37,8 +38,21 @@ export class TaskService
     return this.response(filteredRecord, totalRecords);
   }
 
+  async findTasksAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder.leftJoin("e.user", "eu").addSelect(["eu.id", "eu.firstName", "eu.lastName"]);
+
+    if (filteredRecord?.start_date && filteredRecord?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: moment(filteredRecord.start_date).format("YYYY-MM-DD"),
+        end_date: moment(filteredRecord.end_date).format("YYYY-MM-DD"),
+      });
+    }
   }
 }
