@@ -1,3 +1,4 @@
+import { getSingleDayDateRange } from "src/reservations/helpers/utitlties";
 import { SelectQueryBuilder } from "typeorm";
 
 export abstract class BaseQueryUtils<T> {
@@ -81,5 +82,12 @@ export abstract class BaseQueryUtils<T> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected queryRelationIndex(queryBuilder?: SelectQueryBuilder<T>, filteredRecord?: any) {
     queryBuilder.leftJoin("e.createdBy", "ec").addSelect(["ec.id", "ec.firstName", "ec.lastName"]);
+
+    if (filteredRecord?.start_date && filteredRecord?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: getSingleDayDateRange(filteredRecord).start,
+        end_date: getSingleDayDateRange(filteredRecord).end,
+      });
+    }
   }
 }

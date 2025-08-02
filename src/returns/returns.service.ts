@@ -44,12 +44,5 @@ export class ReturnsService
       queryBuilder.leftJoin("e.product", "ep");
       queryBuilder.addSelect(["ep.id", "ep.name"]);
     }
-
-    if (filteredRecord?.start_date && filteredRecord?.end_date) {
-      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filteredRecord.start_date,
-        end_date: filteredRecord.end_date,
-      });
-    }
   }
 }

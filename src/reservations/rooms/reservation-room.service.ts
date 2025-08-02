@@ -49,13 +49,6 @@ export class ReservationRoomService
         }),
       );
     }
-
-    if (filteredRecord?.start_date && filteredRecord?.end_date) {
-      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filteredRecord.start_date,
-        end_date: filteredRecord.end_date,
-      });
-    }
   }
 
   protected override response(data: ReservationRoom[], totalRecords: number = 0) {

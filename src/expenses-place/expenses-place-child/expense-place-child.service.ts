@@ -41,13 +41,6 @@ export class ExpensesPlaceChildService
         .addSelect(["ep.id"]);
     }
 
-    if (filteredRecord?.start_date && filteredRecord?.end_date) {
-      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filteredRecord.start_date,
-        end_date: filteredRecord.end_date,
-      });
-    }
-
     // Add search functionality for expensePlace.name
     if (filteredRecord?.search?.value) {
       queryBuilder.orWhere("LOWER(expensePlaceChild.name) LIKE LOWER(:search)", {

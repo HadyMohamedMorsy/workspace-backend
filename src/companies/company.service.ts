@@ -313,7 +313,9 @@ export class CompanyService
           reservationRooms?.filter(room => room.status === ReservationStatus.PENDING).length > 1,
         is_active_room:
           reservationRooms?.some(room => room.status === ReservationStatus.ACTIVE) || false,
-        reservation_room_id: reservationRooms?.[0]?.id || null,
+        reservation_room_id:
+          reservationRooms?.filter(room => room.status === ReservationStatus.PENDING)?.[0]?.id ||
+          null,
       };
     });
 

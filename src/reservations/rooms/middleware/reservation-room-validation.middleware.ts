@@ -110,7 +110,7 @@ export class ReservationRoomValidationMiddleware implements NestMiddleware {
       .where("room.id = :roomId", { roomId })
       .andWhere("reservation.selected_day = :day", { day })
       .andWhere("reservation.status IN (:...statuses)", {
-        statuses: [ReservationStatus.ACTIVE],
+        statuses: [ReservationStatus.ACTIVE, ReservationStatus.PENDING],
       })
       .getMany();
   }

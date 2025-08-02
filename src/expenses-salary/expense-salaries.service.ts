@@ -49,12 +49,5 @@ export class ExpensesSalariesService
     queryBuilder
       .leftJoin("e.user", "ep")
       .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"]);
-
-    if (filteredRecord?.start_date && filteredRecord?.end_date) {
-      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
-        start_date: filteredRecord.start_date,
-        end_date: filteredRecord.end_date,
-      });
-    }
   }
 }
