@@ -52,13 +52,13 @@ export class DeskareaService
   }
 
   async findDeskareaAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }
 
   async findDeskareaByIndividualAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
       selectFields: ["id", "name"],
@@ -67,7 +67,7 @@ export class DeskareaService
   }
 
   async findDeskareaByCompanyAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "company",
       alias: "company",
       selectFields: ["id", "name"],
@@ -76,7 +76,7 @@ export class DeskareaService
   }
 
   async findDeskareaByStudentActivityAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "studentActivity",
       alias: "studentActivity",
       selectFields: ["id", "name"],
@@ -85,7 +85,7 @@ export class DeskareaService
   }
 
   async findDeskareaByUserAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "createdBy",
       alias: "user",
       selectFields: ["id", "firstName", "lastName"],
@@ -94,7 +94,7 @@ export class DeskareaService
   }
 
   async findDeskareaByMembershipAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "assignessMemebership",
       alias: "assignessMemebership",
       selectFields: ["id", "status"],

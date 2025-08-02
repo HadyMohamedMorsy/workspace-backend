@@ -77,13 +77,13 @@ export class OrdersService
   }
 
   async findOrdersAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }
 
   async findOrderByUserAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "createdBy",
       alias: "user",
       selectFields: ["id", "firstName", "lastName"],
@@ -92,7 +92,7 @@ export class OrdersService
   }
 
   async findOrderByIndividualAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
       selectFields: ["id", "name", "whatsApp"],
@@ -101,7 +101,7 @@ export class OrdersService
   }
 
   async findOrderByComapnyAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "company",
       alias: "company",
       selectFields: ["id", "name", "phone"],
@@ -110,7 +110,7 @@ export class OrdersService
   }
 
   async findOrderByStudentActivityAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "studentActivity",
       alias: "studentActivity",
       selectFields: ["id", "name", "unviresty"],

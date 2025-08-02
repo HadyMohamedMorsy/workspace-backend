@@ -43,7 +43,7 @@ export class ExpensesSalariesService
   }
 
   async findExpensesSalariesAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }

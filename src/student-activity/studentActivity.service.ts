@@ -327,7 +327,7 @@ export class StudentActivityService
   }
 
   async findStudentActivityAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }

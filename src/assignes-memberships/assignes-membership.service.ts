@@ -132,13 +132,13 @@ export class AssignesMembershipService
   }
 
   async findAssignesAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }
 
   async findAssignesByUser(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "createdBy",
       alias: "user",
       selectFields: ["id", "firstName", "lastName"],
@@ -147,7 +147,7 @@ export class AssignesMembershipService
   }
 
   async findAssignesByIndividual(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
       selectFields: ["id", "name"],
@@ -156,7 +156,7 @@ export class AssignesMembershipService
   }
 
   async findAssignesByCompany(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "company",
       alias: "company",
       selectFields: ["id", "name"],
@@ -165,7 +165,7 @@ export class AssignesMembershipService
   }
 
   async findAssignesByStudentActivity(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "studentActivity",
       alias: "studentActivity",
       selectFields: ["id", "name"],

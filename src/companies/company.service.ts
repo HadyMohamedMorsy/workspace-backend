@@ -323,7 +323,7 @@ export class CompanyService
   }
 
   async findCompanyAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }

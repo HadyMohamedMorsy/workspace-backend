@@ -121,7 +121,7 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
       .setRepository(this.repository.target)
       .buildQuery(filterData);
 
-    if (filterData[relationConfig.filterField] !== "all") {
+    if (relationConfig.filterField !== "all") {
       queryBuilder
         .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
         .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
@@ -130,7 +130,7 @@ export abstract class BaseService<T, CreateDto, UpdateDto>
         });
     }
 
-    this.queryRelationIndex(queryBuilder);
+    this.queryRelationIndex(queryBuilder, filterData);
 
     const filteredRecord = await queryBuilder.getMany();
     const totalRecords = await queryBuilder.getCount();

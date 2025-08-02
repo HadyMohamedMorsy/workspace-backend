@@ -74,13 +74,13 @@ export class DealsService
   }
 
   async findDealsAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }
 
   async findDealsByIndividualAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
       selectFields: ["id", "name"],
@@ -89,7 +89,7 @@ export class DealsService
   }
 
   async findDealsByComapnyAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "company",
       alias: "company",
       selectFields: ["id", "name"],
@@ -98,7 +98,7 @@ export class DealsService
   }
 
   async findDealsByStudentActivityAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "studentActivity",
       alias: "studentActivity",
       selectFields: ["id", "name"],
@@ -107,7 +107,7 @@ export class DealsService
   }
 
   async findDealsByUserAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "createdBy",
       alias: "user",
       selectFields: ["id", "firstName", "lastName"],

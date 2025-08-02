@@ -44,13 +44,13 @@ export class AssignGeneralOfferservice
       .addSelect(["er.id"]);
   }
   async findAssignesAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }
 
   async findAssignesByUser(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "createdBy",
       alias: "user",
       selectFields: ["id", "firstName", "lastName"],
@@ -59,7 +59,7 @@ export class AssignGeneralOfferservice
   }
 
   async findAssignesByIndividual(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
       selectFields: ["id", "name"],
@@ -68,7 +68,7 @@ export class AssignGeneralOfferservice
   }
 
   async findAssignesByCompany(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "company",
       alias: "company",
       selectFields: ["id", "name"],
@@ -77,7 +77,7 @@ export class AssignGeneralOfferservice
   }
 
   async findAssignesByStudentActivity(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "studentActivity",
       alias: "studentActivity",
       selectFields: ["id", "name"],

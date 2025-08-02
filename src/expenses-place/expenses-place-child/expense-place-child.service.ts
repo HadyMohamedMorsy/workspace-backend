@@ -24,7 +24,7 @@ export class ExpensesPlaceChildService
   }
 
   async findExpensesPlaceChildAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }

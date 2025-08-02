@@ -4,7 +4,6 @@ import * as moment from "moment";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
-import { getSingleDayDateRange } from "../helpers/utitlties";
 import { ReservationRoom } from "./reservation-room.entity";
 
 @Injectable()
@@ -25,7 +24,7 @@ export class ReservationRoomQueryService {
     },
   ) {
     const queryBuilder = this.buildBaseQueryBuilder(filterData);
-    if (filterData[relationConfig.filterField] !== "all") {
+    if (relationConfig.filterField !== "all") {
       queryBuilder
         .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
         .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
@@ -38,8 +37,8 @@ export class ReservationRoomQueryService {
 
     if (filterData.start_date && filterData.end_date) {
       queryBuilder.andWhere("e.selected_day BETWEEN :start_date AND :end_date", {
-        start_date: moment(getSingleDayDateRange(filterData).start).format("YYYY-MM-DD"),
-        end_date: moment(getSingleDayDateRange(filterData).end).format("YYYY-MM-DD"),
+        start_date: moment(filterData.start_date).format("DD/MM/YYYY"),
+        end_date: moment(filterData.end_date).format("DD/MM/YYYY"),
       });
     }
 
@@ -60,13 +59,13 @@ export class ReservationRoomQueryService {
   }
 
   async findRoomsAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       filterField: "all",
     });
   }
 
   async findRoomsByIndividualAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "individual",
       alias: "individual",
       selectFields: ["id", "name"],
@@ -75,7 +74,7 @@ export class ReservationRoomQueryService {
   }
 
   async findRoomsByCompanyAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "company",
       alias: "company",
       selectFields: ["id", "name", "phone"],
@@ -84,7 +83,7 @@ export class ReservationRoomQueryService {
   }
 
   async findRoomsByStudentActivityAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "studentActivity",
       alias: "studentActivity",
       selectFields: ["id", "name", "unviresty"],
@@ -93,7 +92,7 @@ export class ReservationRoomQueryService {
   }
 
   async findRoomsByUserAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "createdBy",
       alias: "user",
       selectFields: ["id", "firstName", "lastName"],
@@ -102,7 +101,7 @@ export class ReservationRoomQueryService {
   }
 
   async findByPackageRoomAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "assignesPackages",
       alias: "assignesPackages",
       selectFields: ["id", "status"],
@@ -111,7 +110,7 @@ export class ReservationRoomQueryService {
   }
 
   async findByDealRoomAll(filterData: any) {
-    return this.findRelatedEntities(filterData, {
+    return await this.findRelatedEntities(filterData, {
       relationPath: "deals",
       alias: "deals",
       selectFields: ["id", "status"],
