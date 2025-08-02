@@ -12,7 +12,23 @@ export interface calulateHour {
   end_time: string;
 }
 
+export interface DateRange {
+  start: Date;
+  end: Date;
+}
+
+import { FiltersDashboredDto } from "src/dahsbored/dto/filter-dashbored.dto";
 import { TypeOrder } from "src/shared/enum/global-enum";
+
+export function getSingleDayDateRange(filter: FiltersDashboredDto): DateRange {
+  const startDate = moment(filter.start_date);
+  const endDate = moment(filter.end_date);
+
+  return {
+    start: startDate.startOf("day").toDate(),
+    end: endDate.endOf("day").toDate(),
+  };
+}
 
 export const getOrderItemTotalPrice = (item: any, key: string): number => {
   let quantity = 0;

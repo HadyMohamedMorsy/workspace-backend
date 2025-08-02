@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import * as moment from "moment";
 import { AssignGeneralOffer } from "src/assignes-global-offers/assignes-general-offer.entity";
 import { AssignesMembership } from "src/assignes-memberships/assignes-membership.entity";
 import { AssignesPackages } from "src/assigness-packages-offers/assignes-packages.entity";
@@ -10,6 +11,7 @@ import { ExpenseSalaries } from "src/expenses-salary/expense-salaries.entity";
 import { Order } from "src/orders/order.entity";
 import { Purchase } from "src/purchase/purchase.entity";
 import { Deskarea } from "src/reservations/deskarea/deskarea.entity";
+import { getSingleDayDateRange } from "src/reservations/helpers/utitlties";
 import { ReservationRoom } from "src/reservations/rooms/reservation-room.entity";
 import { Shared } from "src/reservations/shared/shared.entity";
 import { Returns } from "src/returns/returns.entity";
@@ -115,7 +117,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -124,9 +129,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -144,8 +151,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -159,7 +166,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -173,7 +183,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -185,9 +198,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -201,7 +216,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -213,9 +231,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -223,47 +243,47 @@ export class DahboredService {
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders (keep original PAID/COST handling)
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Other financials (keep original)
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Purchases - all payment methods
       this.purchasesRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Returns - all payment methods
       this.returnsRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -336,7 +356,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -344,9 +367,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -364,8 +389,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -379,7 +404,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -393,7 +421,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -405,9 +436,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -421,7 +454,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -433,9 +469,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -443,37 +481,37 @@ export class DahboredService {
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders (keep original PAID/COST handling)
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Other financials
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -541,7 +579,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -550,9 +591,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -570,8 +613,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -585,7 +628,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -599,7 +645,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -611,9 +660,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -627,7 +678,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -639,46 +693,48 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders (keep original PAID/COST handling)
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Other financials
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -747,7 +803,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -756,9 +815,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -776,8 +837,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -791,7 +852,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -805,7 +869,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -817,9 +884,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -833,7 +902,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -845,9 +917,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -855,37 +929,37 @@ export class DahboredService {
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders (keep original PAID/COST handling)
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Other financials
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -931,21 +1005,30 @@ export class DahboredService {
       this.sharedRepository.count({
         where: {
           status: ReservationStatus.ACTIVE,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         },
       }),
 
       this.deskAreaRepository.count({
         where: {
           status: ReservationStatus.ACTIVE,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         },
       }),
 
       this.reservationRoomRepository.count({
         where: {
           status: ReservationStatus.ACTIVE,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         },
       }),
     ]);
@@ -959,7 +1042,7 @@ export class DahboredService {
     const roomsActive = await this.reservationRoomRepository.count({
       where: {
         status: In([ReservationStatus.ACTIVE, ReservationStatus.PENDING]),
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -972,7 +1055,7 @@ export class DahboredService {
     const deskareaActive = await this.deskAreaRepository.count({
       where: {
         status: ReservationStatus.ACTIVE,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -985,7 +1068,7 @@ export class DahboredService {
     const sharedActive = await this.sharedRepository.count({
       where: {
         status: ReservationStatus.ACTIVE,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -998,7 +1081,7 @@ export class DahboredService {
     const roomsActive = await this.reservationRoomRepository.count({
       where: {
         status: ReservationStatus.COMPLETE,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -1011,7 +1094,7 @@ export class DahboredService {
     const deskareaActive = await this.deskAreaRepository.count({
       where: {
         status: ReservationStatus.COMPLETE,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -1024,7 +1107,7 @@ export class DahboredService {
     const sharedActive = await this.sharedRepository.count({
       where: {
         status: ReservationStatus.COMPLETE,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -1037,7 +1120,7 @@ export class DahboredService {
     const roomsActive = await this.reservationRoomRepository.count({
       where: {
         status: ReservationStatus.CANCELLED,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -1050,7 +1133,7 @@ export class DahboredService {
     const deskareaActive = await this.deskAreaRepository.count({
       where: {
         status: ReservationStatus.CANCELLED,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -1063,7 +1146,7 @@ export class DahboredService {
     const sharedActive = await this.sharedRepository.count({
       where: {
         status: ReservationStatus.CANCELLED,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });
 
@@ -2018,7 +2101,10 @@ export class DahboredService {
         )
         .where({
           is_paid: true,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2027,8 +2113,10 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2045,8 +2133,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -2059,7 +2147,10 @@ export class DahboredService {
           "net",
         )
         .where({
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2072,7 +2163,10 @@ export class DahboredService {
         )
         .where({
           is_paid: true,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2084,8 +2178,10 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2098,7 +2194,10 @@ export class DahboredService {
         )
         .where({
           is_paid: true,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2110,53 +2209,55 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
       // Shared - all payment methods
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Desk Area - all payment methods
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders PAID - all payment methods
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders COST - all payment methods
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Revenue Child - all payment methods
       this.revenueChildRepository.sum("amount", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Expense Place Child - all payment methods
       this.expensePlaceChildRepository.sum("cost", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Purchases - all payment methods
       this.purchasesRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Returns - all payment methods
       this.returnsRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -2247,7 +2348,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2256,9 +2360,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2276,8 +2382,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -2291,7 +2397,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2305,7 +2414,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2317,9 +2429,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2333,7 +2447,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Cach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2345,9 +2462,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Cach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2355,50 +2474,50 @@ export class DahboredService {
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Desk Area - Cash payment method
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders PAID - Cash payment method
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders COST - Cash payment method
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Revenue Child - Cash payment method
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Expense Place Child - Cash payment method
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.Cach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Purchases - all payment methods
       this.purchasesRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Returns - all payment methods
       this.returnsRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -2489,7 +2608,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2498,9 +2620,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2518,8 +2642,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -2533,7 +2657,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2547,7 +2674,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2559,9 +2689,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2575,7 +2707,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Instapay,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2587,9 +2722,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Instapay,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2597,50 +2734,50 @@ export class DahboredService {
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Desk Area - Instapay payment method
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders PAID - Instapay payment method
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders COST - Instapay payment method
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Revenue Child - Instapay payment method
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Expense Place Child - Instapay payment method
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.Instapay,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Purchases - all payment methods
       this.purchasesRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Returns - all payment methods
       this.returnsRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -2731,7 +2868,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2740,9 +2880,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2760,8 +2902,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -2775,7 +2917,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2789,7 +2934,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2801,9 +2949,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2817,7 +2967,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.VodafoneCach,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2829,9 +2982,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.VodafoneCach,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2839,50 +2994,50 @@ export class DahboredService {
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Desk Area - Vodafone Cash payment method
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders PAID - Vodafone Cash payment method
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders COST - Vodafone Cash payment method
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Revenue Child - Vodafone Cash payment method
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Expense Place Child - Vodafone Cash payment method
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.VodafoneCach,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Purchases - all payment methods
       this.purchasesRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Returns - all payment methods
       this.returnsRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 
@@ -2973,7 +3128,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -2982,9 +3140,11 @@ export class DahboredService {
         .createQueryBuilder("deal")
         .select(`SUM(CASE WHEN deal.status = 'cancelled' THEN 0 ELSE deal.deposites END)`, "net")
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -3002,8 +3162,8 @@ export class DahboredService {
         .andWhere(
           "TO_DATE(reservation.selected_day, 'DD/MM/YYYY') BETWEEN :start_date::date AND :end_date::date",
           {
-            start_date: filter.start_date,
-            end_date: filter.end_date,
+            start_date: moment(filter.start_date).format("YYYY-MM-DD"),
+            end_date: moment(filter.start_date).format("YYYY-MM-DD"),
           },
         )
         .getRawOne(),
@@ -3017,7 +3177,10 @@ export class DahboredService {
         )
         .where({
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -3031,7 +3194,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -3043,9 +3209,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -3059,7 +3227,10 @@ export class DahboredService {
         .where({
           is_paid: true,
           payment_method: PaymentMethod.Visa,
-          updated_at: Between(filter.start_date, filter.end_date),
+          updated_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -3071,9 +3242,11 @@ export class DahboredService {
           "net",
         )
         .where({
-          is_paid: false,
           payment_method: PaymentMethod.Visa,
-          created_at: Between(filter.start_date, filter.end_date),
+          created_at: Between(
+            getSingleDayDateRange(filter).start,
+            getSingleDayDateRange(filter).end,
+          ),
         })
         .getRawOne(),
 
@@ -3081,50 +3254,50 @@ export class DahboredService {
       this.sharedRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Desk Area - Visa payment method
       this.deskAreaRepository.sum("total_price", {
         status: ReservationStatus.COMPLETE,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders PAID - Visa payment method
       this.orderRepository.sum("total_order", {
         type_order: TypeOrder.PAID,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Orders COST - Visa payment method
       this.orderRepository.sum("order_price", {
         type_order: TypeOrder.COST,
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Revenue Child - Visa payment method
       this.revenueChildRepository.sum("amount", {
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Expense Place Child - Visa payment method
       this.expensePlaceChildRepository.sum("cost", {
         payment_method: PaymentMethod.Visa,
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Purchases - all payment methods
       this.purchasesRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
 
       // Returns - all payment methods
       this.returnsRepository.sum("total", {
-        created_at: Between(filter.start_date, filter.end_date),
+        created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       }),
     ]);
 

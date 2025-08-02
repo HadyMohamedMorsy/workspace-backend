@@ -11,7 +11,6 @@ import { RoomsModule } from "src/rooms/rooms.module";
 import { AssignGeneralOfferMiddleware } from "src/shared/middleware/assign-general-offer.middleware";
 import { AssignesPackageMiddleware } from "src/shared/middleware/assigness/assignes-package.middleware";
 import { DealsMiddleware } from "src/shared/middleware/assigness/deals.middleware";
-import { ReservationRoomMiddleware } from "src/shared/middleware/co-working-space-reservations/reservation-room.middleware";
 import { CustomerMiddleware } from "src/shared/middleware/customer.middleware";
 import { DateFormatMiddleware } from "src/shared/middleware/date-format.middleware";
 import { UpdateDealUsageMiddleware } from "src/shared/middleware/remaining/update-deal-usage.middleware";
@@ -65,6 +64,10 @@ export class ReservationRoomModule implements NestModule {
         PriceCalculationMiddleware,
       )
       .forRoutes("reservation-room/store");
+
+    consumer
+      .apply(ValidateRoomMiddleware, PriceCalculationMiddleware)
+      .forRoutes("reservation-room/update");
 
     consumer
       .apply(
