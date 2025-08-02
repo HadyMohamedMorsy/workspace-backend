@@ -322,6 +322,12 @@ export class CompanyService
     return this.response(data, totalRecords);
   }
 
+  async findCompanyAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async findByUserAll(filterData) {
     const queryBuilder = this.apiFeaturesService.setRepository(Company).buildQuery(filterData);
 

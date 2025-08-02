@@ -60,6 +60,12 @@ export class SharedService
     }
   }
 
+  async findSharedAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async findSharedByIndividualAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",

@@ -7,6 +7,7 @@ import { Repository, SelectQueryBuilder } from "typeorm";
 import { CreateExpenseSalariesDto } from "./dto/create-expense-salaries.dto";
 import { UpdateExpenseSalariesDto } from "./dto/update-expense-salaries.dto";
 import { ExpenseSalaries } from "./expense-salaries.entity";
+import * as moment from "moment-timezone";
 
 @Injectable()
 export class ExpensesSalariesService
@@ -41,6 +42,12 @@ export class ExpensesSalariesService
     return this.response(filteredRecord, totalRecords);
   }
 
+  async findExpensesSalariesAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   override queryRelationIndex(
     queryBuilder?: SelectQueryBuilder<ExpenseSalaries>,
     filteredRecord?: any,
@@ -49,5 +56,12 @@ export class ExpensesSalariesService
     queryBuilder
       .leftJoin("e.user", "ep")
       .addSelect(["ep.id", "ep.firstName", "ep.lastName", "ep.phone"]);
+
+    if (filteredRecord?.start_date && filteredRecord?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: moment(filteredRecord.start_date).format("YYYY-MM-DD"),
+        end_date: moment(filteredRecord.end_date).format("YYYY-MM-DD"),
+      });
+    }
   }
 }

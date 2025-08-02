@@ -60,6 +60,12 @@ export class ExpensesPlaceChildController implements SelectOptions, RelationOpti
     return this.service.findAll(filterQueryDto);
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllExpensesPlaceChild(@Body() filterQueryDto: any) {
+    return this.service.findExpensesPlaceChildAll(filterQueryDto);
+  }
+
   @Post("/store")
   @Permissions([
     {

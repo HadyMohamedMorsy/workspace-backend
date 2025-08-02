@@ -1041,7 +1041,7 @@ export class DahboredService {
   async getAllClientsRoomsActive(filter: FiltersDashboredDto) {
     const roomsActive = await this.reservationRoomRepository.count({
       where: {
-        status: In([ReservationStatus.ACTIVE, ReservationStatus.PENDING]),
+        status: In([ReservationStatus.ACTIVE]),
         created_at: Between(getSingleDayDateRange(filter).start, getSingleDayDateRange(filter).end),
       },
     });

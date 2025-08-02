@@ -67,6 +67,12 @@ export class DeskareaController implements SelectOptions, RelationOptions {
       actions: [Permission.INDEX],
     },
   ])
+  @Post("/all")
+  @HttpCode(200)
+  async findAllDeskarea(@Body() filterQueryDto: any) {
+    return this.service.findDeskareaAll(filterQueryDto);
+  }
+
   async findAll(@Body() filterQueryDto: any) {
     return this.service.findAll(filterQueryDto);
   }

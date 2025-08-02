@@ -331,6 +331,12 @@ export class IndividualService
     return this.response(filteredRecord, totalRecords);
   }
 
+  async findIndividualAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async checkInvoice(id: string) {
     try {
       const queryBuilder = this.repository.createQueryBuilder("e");

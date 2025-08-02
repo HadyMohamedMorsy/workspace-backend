@@ -73,6 +73,12 @@ export class DealsService
     }
   }
 
+  async findDealsAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async findDealsByIndividualAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",

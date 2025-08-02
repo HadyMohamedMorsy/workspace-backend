@@ -7,6 +7,7 @@ import { ICrudService } from "../../shared/interface/crud-service.interface";
 import { CreateRevenueChildDto } from "./dto/create-revenue-child.dto";
 import { UpdateRevenueChildDto } from "./dto/update-revenue-child.dto";
 import { RevenueChild } from "./revenue-child.entity";
+import * as moment from "moment-timezone";
 
 @Injectable()
 export class RevenueChildService
@@ -32,6 +33,12 @@ export class RevenueChildService
     };
   }
 
+  async findRevenueChildAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   override queryRelationIndex(queryBuilder?: SelectQueryBuilder<any>, filteredRecord?: any) {
     super.queryRelationIndex(queryBuilder, filteredRecord);
     queryBuilder
@@ -45,6 +52,13 @@ export class RevenueChildService
           revenueChild_id: filteredRecord.revenueChild_id,
         })
         .addSelect(["er.id"]);
+    }
+
+    if (filteredRecord?.start_date && filteredRecord?.end_date) {
+      queryBuilder.andWhere("e.created_at BETWEEN :start_date AND :end_date", {
+        start_date: moment(filteredRecord.start_date).format("YYYY-MM-DD"),
+        end_date: moment(filteredRecord.end_date).format("YYYY-MM-DD"),
+      });
     }
 
     // Add search functionality for expensePlace.name

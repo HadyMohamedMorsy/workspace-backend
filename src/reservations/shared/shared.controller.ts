@@ -60,6 +60,12 @@ export class SharedController implements SelectOptions, RelationOptions {
     };
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllShared(@Body() filterQueryDto: any) {
+    return this.service.findSharedAll(filterQueryDto);
+  }
+
   @Post("/index")
   @HttpCode(200)
   @Permissions([

@@ -76,6 +76,12 @@ export class OrdersService
     return order;
   }
 
+  async findOrdersAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async findOrderByUserAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
       relationPath: "createdBy",

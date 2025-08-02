@@ -44,6 +44,12 @@ export class ExpensesSalariesController implements SelectOptions, RelationOption
     };
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllExpensesSalaries(@Body() filterQueryDto: any) {
+    return this.service.findExpensesSalariesAll(filterQueryDto);
+  }
+
   @Post("/user")
   @Permissions([
     {

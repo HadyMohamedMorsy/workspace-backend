@@ -81,6 +81,12 @@ export class DealsController implements SelectOptions, RelationOptions {
     return this.service.findAll(filterQueryDto);
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllDeals(@Body() filterQueryDto: any) {
+    return this.service.findDealsAll(filterQueryDto);
+  }
+
   @Post("/individual")
   @HttpCode(200)
   @Permissions([

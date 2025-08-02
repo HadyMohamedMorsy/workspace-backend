@@ -131,6 +131,12 @@ export class AssignesMembershipService
     }
   }
 
+  async findAssignesAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async findAssignesByUser(filterData: any) {
     return this.findRelatedEntities(filterData, {
       relationPath: "createdBy",

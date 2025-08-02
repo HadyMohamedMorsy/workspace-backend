@@ -71,6 +71,12 @@ export class AssignesMembershipController implements SelectOptions, RelationOpti
     return this.service.findAll(filterQueryDto);
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllAssignes(@Body() filterQueryDto: any) {
+    return this.service.findAssignesAll(filterQueryDto);
+  }
+
   @Post("/individual")
   @HttpCode(200)
   @Permissions([

@@ -103,6 +103,12 @@ export class ReservationRoomController implements SelectOptions, RelationOptions
     };
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllRooms(@Body() filterQueryDto: any) {
+    return this.queryService.findRoomsAll(filterQueryDto);
+  }
+
   @Post("/all-rooms")
   @HttpCode(200)
   async findRoomAll(@Body() filterQueryDto: any) {

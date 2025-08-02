@@ -23,6 +23,12 @@ export class ExpensesPlaceChildService
     super(repository, apiFeaturesService);
   }
 
+  async findExpensesPlaceChildAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   override queryRelationIndex(
     queryBuilder?: SelectQueryBuilder<ExpensePlaceChild>,
     filteredRecord?: any,

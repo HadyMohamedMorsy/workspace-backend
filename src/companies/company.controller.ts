@@ -98,6 +98,12 @@ export class CompanyController implements SelectOptions, RelationOptions {
     return this.service.findAll(filterQueryDto);
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllCompanies(@Body() filterQueryDto: any) {
+    return this.service.findCompanyAll(filterQueryDto);
+  }
+
   @Post("/show")
   @HttpCode(200)
   async findOne(@Body() filterQueryDto: any) {

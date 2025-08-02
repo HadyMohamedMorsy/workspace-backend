@@ -51,6 +51,12 @@ export class DeskareaService
     }
   }
 
+  async findDeskareaAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
+  }
+
   async findDeskareaByIndividualAll(filterData: any) {
     return this.findRelatedEntities(filterData, {
       relationPath: "individual",

@@ -104,6 +104,12 @@ export class IndividualController implements SelectOptions, RelationOptions {
     return this.service.findByUserAll(filterQueryDto);
   }
 
+  @Post("/all")
+  @HttpCode(200)
+  async findAllIndividual(@Body() filterQueryDto: any) {
+    return this.service.findIndividualAll(filterQueryDto);
+  }
+
   @Get("/assignes-membership/:id")
   async assignesMembershipById(@Param("id") id: number) {
     return this.service.findOne(

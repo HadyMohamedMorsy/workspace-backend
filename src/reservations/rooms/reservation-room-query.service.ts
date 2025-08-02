@@ -4,6 +4,7 @@ import * as moment from "moment";
 import { ReservationStatus } from "src/shared/enum/global-enum";
 import { APIFeaturesService } from "src/shared/filters/filter.service";
 import { Repository } from "typeorm";
+import { getSingleDayDateRange } from "../helpers/utitlties";
 import { ReservationRoom } from "./reservation-room.entity";
 
 @Injectable()
@@ -17,21 +18,30 @@ export class ReservationRoomQueryService {
   async findRelatedEntities(
     filterData: any,
     relationConfig: {
-      relationPath: string;
-      alias: string;
+      relationPath?: string;
+      alias?: string;
       selectFields?: string[];
       filterField: string;
     },
   ) {
     const queryBuilder = this.buildBaseQueryBuilder(filterData);
-    queryBuilder
-      .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
-      .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
-      .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
-        [relationConfig.filterField]: filterData[relationConfig.filterField],
-      })
-      .leftJoin("e.room", "esroom")
-      .addSelect(["esroom.id", "esroom.name", "esroom.price"]);
+    if (filterData[relationConfig.filterField] !== "all") {
+      queryBuilder
+        .leftJoin(`e.${relationConfig.relationPath}`, relationConfig.alias)
+        .addSelect(relationConfig.selectFields.map(field => `${relationConfig.alias}.${field}`))
+        .andWhere(`${relationConfig.alias}.id = :${relationConfig.filterField}`, {
+          [relationConfig.filterField]: filterData[relationConfig.filterField],
+        })
+        .leftJoin("e.room", "esroom")
+        .addSelect(["esroom.id", "esroom.name", "esroom.price"]);
+    }
+
+    if (filterData.start_date && filterData.end_date) {
+      queryBuilder.andWhere("e.selected_day BETWEEN :start_date AND :end_date", {
+        start_date: moment(getSingleDayDateRange(filterData).start).format("YYYY-MM-DD"),
+        end_date: moment(getSingleDayDateRange(filterData).end).format("YYYY-MM-DD"),
+      });
+    }
 
     const [filteredRecord, totalRecords] = await Promise.all([
       queryBuilder.getMany(),
@@ -47,6 +57,12 @@ export class ReservationRoomQueryService {
 
   private buildBaseQueryBuilder(filterData: any) {
     return this.apiFeaturesService.setRepository(ReservationRoom).buildQuery(filterData);
+  }
+
+  async findRoomsAll(filterData: any) {
+    return this.findRelatedEntities(filterData, {
+      filterField: "all",
+    });
   }
 
   async findRoomsByIndividualAll(filterData: any) {
