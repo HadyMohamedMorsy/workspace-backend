@@ -18,7 +18,6 @@ import { AssignesPackageController } from "./assignes-packages.controller";
 import { AssignesPackages } from "./assignes-packages.entity";
 import { AssignesPackagesService } from "./assignes-packages.service";
 import { CalculatePackagesPriceMiddleware } from "./middleware/calculate-total-price-packages.middleware";
-import { CheckActiveAssignessPackagesMiddleware } from "./middleware/check-active-assigness-packages.middleware";
 
 @Module({
   imports: [
@@ -44,7 +43,6 @@ export class AssignesPackagesModule {
         ValidateDateRangeMiddleware,
         CustomerMiddleware,
         ValidatePackageMiddleware,
-        CheckActiveAssignessPackagesMiddleware,
         ValidateOfferMiddleware,
         ValidateOfferRangeMiddleware,
         AssignGeneralOfferMiddleware,
@@ -58,7 +56,6 @@ export class AssignesPackagesModule {
         ValidateDateRangeMiddleware,
         CustomerMiddleware,
         ValidatePackageMiddleware,
-        CheckActiveAssignessPackagesMiddleware,
         ValidateOfferMiddleware,
         ValidateOfferRangeMiddleware,
         AssignGeneralOfferMiddleware,

@@ -70,7 +70,11 @@ export class AssignesMembershipService
       queryBuilder.andWhere(
         new Brackets(qb => {
           qb.where("ei.name LIKE :search", { search: searchTerm })
+            .orWhere("ei.number LIKE :search", { search: searchTerm })
+            .orWhere("ei.whatsApp LIKE :search", { search: searchTerm })
             .orWhere("eco.name LIKE :search", { search: searchTerm })
+            .orWhere("eco.phone LIKE :search", { search: searchTerm })
+            .orWhere("eco.whatsApp LIKE :search", { search: searchTerm })
             .orWhere("esa.name LIKE :search", { search: searchTerm })
             .orWhere("CONCAT(ec.firstName, ' ', ec.lastName) LIKE :search", {
               search: searchTerm,
